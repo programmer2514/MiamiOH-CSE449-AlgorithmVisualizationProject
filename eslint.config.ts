@@ -1,0 +1,74 @@
+import js from '@eslint/js';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+import pluginReact from 'eslint-plugin-react';
+import stylistic from '@stylistic/eslint-plugin';
+import { defineConfig } from 'eslint/config';
+
+export default defineConfig([
+  {
+    ignores: [
+      '.react-router/*',
+      'build/*',
+      'coverage/*',
+    ],
+  },
+  {
+    files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    plugins: { js },
+    extends: ['js/recommended'],
+  },
+  {
+    files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+  },
+  // @ts-expect-error typescript-eslint config types are broken (see https://github.com/typescript-eslint/typescript-eslint/issues/10899)
+  tseslint.configs.recommended,
+  pluginReact.configs.flat.recommended,
+  pluginReact.configs.flat['jsx-runtime'],
+  stylistic.configs['recommended'],
+  {
+    rules: {
+      'no-empty-pattern': ['error', {
+        allowObjectPatternsAsParameters: true,
+      }],
+    },
+  },
+  {
+    plugins: {
+      '@stylistic': stylistic,
+    },
+    rules: {
+      '@stylistic/semi': ['error', 'always'],
+      '@stylistic/indent': ['error', 2],
+      '@stylistic/operator-linebreak': ['error', 'after'],
+      '@stylistic/brace-style': ['error', '1tbs'],
+      '@stylistic/space-unary-ops': ['error', {
+        words: true,
+        nonwords: false,
+      }],
+      '@stylistic/max-len': ['warn', {
+        code: 80,
+        ignoreUrls: true,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+        ignoreRegExpLiterals: true,
+      }],
+      '@stylistic/spaced-comment': ['error', 'always', {
+        block: {
+          exceptions: ['*'],
+        },
+      }],
+    },
+  },
+]);
