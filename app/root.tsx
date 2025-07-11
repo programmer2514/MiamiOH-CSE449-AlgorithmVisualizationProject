@@ -10,6 +10,11 @@ import {
 import type { Route } from './+types/root';
 import './app.css';
 
+import { IconButton } from '@material-tailwind/react';
+import { SunLight, HalfMoon } from 'iconoir-react';
+
+import { useDarkMode } from './hooks/useDarkMode';
+
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
   {
@@ -24,6 +29,8 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const [isDark, setIsDark] = useDarkMode();
+
   return (
     <html lang="en">
       <head>
@@ -34,6 +41,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+
+        <div className="absolute bottom-2 left-2 opacity-50 hover:opacity-100 active:opacity-100 transition-opacity">
+          <IconButton variant="ghost" onClick={() => setIsDark(!isDark)} className="cursor-pointer">
+            {isDark ? <HalfMoon className="h-4 w-4 stroke-2" /> : <SunLight className="h-4 w-4 stroke-2" />}
+          </IconButton>
+        </div>
+
         <ScrollRestoration />
         <Scripts />
       </body>
