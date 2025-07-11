@@ -3,15 +3,15 @@
  * https://jestjs.io/docs/configuration
  */
 
-import type { Config } from 'jest';
+import { createDefaultEsmPreset } from 'ts-jest';
 
-const config: Config = {
-  moduleNameMapper: { '\\.(css|svg)$': '<rootDir>/tests/mock.jest.ts' },
-  preset: 'ts-jest/presets/default-esm',
+const tsJestPreset = createDefaultEsmPreset();
+
+export default {
+  ...tsJestPreset,
+  moduleNameMapper: { '\\.(css|svg)$': '<rootDir>/tests/setup/mock.jest.ts' },
   setupFilesAfterEnv: [
-    './tests/setup.jest.ts',
+    './tests/setup/setup.jest.ts',
   ],
   testEnvironment: 'jsdom',
 };
-
-export default config;
