@@ -5,5 +5,5 @@
 /.react-router/
 /build/
 
-# Jest
-/coverage/
+# Vitest
+/screenshots/

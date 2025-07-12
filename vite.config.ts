@@ -5,8 +5,39 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   plugins: [
+    !process.env.VITEST && reactRouter(),
     tailwindcss(),
-    reactRouter(),
     tsconfigPaths(),
   ],
+  test: {
+    projects: [
+      {
+        test: {
+          name: 'node',
+          include: [
+            '**/*.node.test.{ts,tsx}',
+          ],
+        },
+      },
+      {
+        test: {
+          name: 'browser',
+          include: [
+            '**/*.render.test.{ts,tsx}',
+          ],
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: 'playwright',
+            screenshotDirectory: 'screenshots',
+            instances: [
+              { browser: 'chromium' },
+              { browser: 'firefox' },
+              { browser: 'webkit' },
+            ],
+          },
+        },
+      },
+    ],
+  },
 });

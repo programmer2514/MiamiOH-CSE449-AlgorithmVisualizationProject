@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function useDarkMode() {
+export default function useDarkMode() {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return (
@@ -16,12 +16,11 @@ export function useDarkMode() {
   });
 
   useEffect(() => {
-    const html = document.documentElement;
     if (isDark) {
-      html.classList.add('dark');
+      document.body.classList.add('dark');
       localStorage.setItem('theme', 'dark');
     } else {
-      html.classList.remove('dark');
+      document.body.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
   }, [isDark]);
