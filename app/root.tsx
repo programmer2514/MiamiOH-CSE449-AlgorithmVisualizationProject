@@ -39,7 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="body-preload">
         {children}
 
         <div className="absolute bottom-2 left-2 opacity-50 hover:opacity-100 active:opacity-100 transition-opacity">
