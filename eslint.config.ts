@@ -32,7 +32,6 @@ export default defineConfig([
       },
     },
   },
-  // @ts-expect-error typescript-eslint config types are broken (see https://github.com/typescript-eslint/typescript-eslint/issues/10899)
   tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat['jsx-runtime'],
