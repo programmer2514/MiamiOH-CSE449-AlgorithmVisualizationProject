@@ -1,0 +1,58 @@
+{
+  "name": "algorithm-visualization-project",
+  "version": "1.0.0",
+  "description": "An educational tool that helps users understand the logic and behavior of classic algorithms through step-by-step visualizations, pseudocode synchronization, and a \"Test Yourself\" interactive mode. The platform is designed to promote active learning, reinforce key algorithmic concepts, and allow for user interaction at each stage.",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.csi.miamioh.edu/2026-senior-design-projects/algorithm-visualization-project/algorithm-visualization-project.git"
+  },
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "clean": "rimraf build screenshots",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc",
+    "test": "vitest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@material-tailwind/react": "^3.0.0-beta.24",
+    "@react-router/node": "^7.9.1",
+    "@react-router/serve": "^7.9.1",
+    "iconoir-react": "^7.11.0",
+    "isbot": "^5.1.31",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router": "^7.9.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@playwright/test": "^1.55.1",
+    "@react-router/dev": "^7.9.1",
+    "@stylistic/eslint-plugin": "^5.4.0",
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/eslint": "^9.6.1",
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitest/browser": "^3.2.4",
+    "eslint": "^9.36.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.4.0",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1",
+    "vite": "^7.1.7",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4",
+    "vitest-browser-react": "^1.0.1"
+  },
+  "overrides": {
+    "@tanstack/react-ranger": {
+      "react": "$react"
+    }
+  }
+}

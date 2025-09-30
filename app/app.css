@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+body {
+  @apply min-h-screen;
+  @apply bg-white dark:bg-gray-950;
+  @apply transition-colors duration-200 [&_*]:duration-200;
+}
+
+/* Prevent dark mode flicker when initializing localStorage object */
+@media (prefers-color-scheme: dark) {
+  .body-preload {
+    @apply bg-gray-950;
+  }
+}
