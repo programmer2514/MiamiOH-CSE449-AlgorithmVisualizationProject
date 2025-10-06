@@ -10,7 +10,7 @@ export default defineConfig([
     ignores: [
       '.react-router/*',
       'build/*',
-      'coverage/*',
+      'node_modules/*',
     ],
   },
   {
