@@ -1,4 +1,4 @@
-import WelcomePage from '../components/pages/WelcomePage/WelcomePage';
+import WelcomePage from '../components/WelcomePage/WelcomePage';
 
 export default function Index() {
   return (
