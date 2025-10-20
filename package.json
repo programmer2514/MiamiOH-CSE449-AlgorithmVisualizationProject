@@ -15,7 +15,9 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "test": "vitest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "update-deps": "npm-check-updates -u && npm install",
+    "force-update-deps": "npm-check-updates -u && rimraf node_modules .react-router package-lock.json && npm install"
   },
   "dependencies": {
     "@material-tailwind/react": "^3.0.0-beta.24",
@@ -41,6 +43,7 @@
     "eslint": "^9.38.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.4.0",
+    "npm-check-updates": "^19.1.1",
     "rimraf": "^6.0.1",
     "tailwindcss": "^4.1.14",
     "typescript": "^5.9.3",
