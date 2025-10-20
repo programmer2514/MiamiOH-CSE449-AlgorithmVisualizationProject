@@ -3,7 +3,7 @@ import { expect, test, describe } from 'vitest';
 
 import Hello from '../../app/routes/hello';
 
-describe('Test component: hello-world', async () => {
+describe('Test route: hello', async () => {
   test('Check for \'Hello World\' text', async () => {
     const screen = render(<Hello />);
 

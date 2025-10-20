@@ -6,6 +6,7 @@ export default {
     return [
       '/',
       '/hello',
+      '/run',
     ];
   },
 } satisfies Config;

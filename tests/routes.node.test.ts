@@ -1,7 +1,5 @@
 import { expect, test, describe, assertType } from 'vitest';
-
 import { type RouteConfig } from '@react-router/dev/routes';
-
 import Routes from '../app/routes';
 
 describe('Test route config', async () => {
