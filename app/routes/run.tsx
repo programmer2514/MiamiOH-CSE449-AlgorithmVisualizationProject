@@ -1,13 +1,12 @@
-import type { Route } from '../+types/root';
-import Welcome from '../components/pages/Welcome/Welcome';
-
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: 'New React Router App' },
-    { name: 'description', content: 'Welcome to React Router!' },
-  ];
-}
+import WelcomePage from '../components/pages/WelcomePage/WelcomePage';
 
 export default function Run() {
-  return <Welcome />;
+  return (
+    <>
+      <title>New React Router App</title>
+      <meta name="description" content="Welcome to React Router!" />
+
+      <WelcomePage />
+    </>
+  );
 }

@@ -1,13 +1,12 @@
-import type { Route } from '../+types/root';
-import HelloWorld from '../components/pages/HelloWorld/HelloWorld';
-
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: 'Hello World' },
-    { name: 'description', content: 'Hello World!' },
-  ];
-}
+import HelloWorldPage from '../components/pages/HelloWorldPage/HelloWorldPage';
 
 export default function Hello() {
-  return <HelloWorld />;
+  return (
+    <>
+      <title>Hello World</title>
+      <meta name="description" content="Hello World!" />
+
+      <HelloWorldPage />
+    </>
+  );
 }
