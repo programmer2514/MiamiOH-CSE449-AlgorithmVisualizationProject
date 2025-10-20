@@ -1,0 +1,291 @@
+[
+  {
+    "line": 1,
+    "actions": [
+      {
+        "cmd": "var_add",
+        "params": {
+          "name": "a1",
+          "value": [1, 10, 5, 6, 4, 7, 19]
+        }
+      }
+    ]
+  }, {
+    "line": 2,
+    "actions": [
+      {
+        "cmd": "var_add",
+        "params": {
+          "name": "key",
+          "value": 4
+        }
+      }
+    ]
+  }, {
+    "line": [4, 12],
+    "actions": [
+      {
+        "cmd": "var_add",
+        "params": {
+          "name": "Linear_Search(a, k)",
+          "value": "<function>"
+        }
+      }
+    ]
+  }, {
+    "line": 14,
+    "actions": [
+      {
+        "cmd": "var_add",
+        "params": {
+          "name": "a",
+          "value": [1, 10, 5, 6, 4, 7, 19]
+        }
+      }, {
+        "cmd": "var_add",
+        "params": {
+          "name": "k",
+          "value": 4
+        }
+      }, {
+        "cmd": "var_greyout",
+        "params": {
+          "name": "a1"
+        }
+      }, {
+        "cmd": "var_greyout",
+        "params": {
+          "name": "key"
+        }
+      }, {
+        "cmd": "vis_init",
+        "params": {
+          "data": [1, 10, 5, 6, 4, 7, 19],
+          "type": "table"
+        }
+      }
+    ]
+  }, {
+    "line": 5,
+    "actions": [
+      {
+        "cmd": "var_add",
+        "params": {
+          "name": "n",
+          "value": 1
+        }
+      }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 0,
+          "type": "outline",
+          "color": "yellow"
+        }
+      }
+    ]
+  }, {
+    "line": 6,
+    "actions": [
+      {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 0,
+          "type": "text",
+          "color": "fg",
+          "value": "1 == 4?"
+        }
+      }
+    ]
+  }, {
+    "line": 5,
+    "actions": [
+      {
+        "cmd": "vis_unmark",
+        "params": {
+          "index": 0,
+          "type": "all"
+        }
+      }, {
+        "cmd": "var_add",
+        "params": {
+          "name": "n",
+          "value": 10
+        }
+      }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 1,
+          "type": "outline",
+          "color": "yellow"
+        }
+      }
+    ]
+  }, {
+    "line": 6,
+    "actions": [
+      {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 1,
+          "type": "text",
+          "color": "fg",
+          "value": "10 == 4?"
+        }
+      }
+    ]
+  }, {
+    "line": 5,
+    "actions": [
+      {
+        "cmd": "vis_unmark",
+        "params": {
+          "index": 1,
+          "type": "all"
+        }
+      }, {
+        "cmd": "var_add",
+        "params": {
+          "name": "n",
+          "value": 5
+        }
+      }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 2,
+          "type": "outline",
+          "color": "yellow"
+        }
+      }
+    ]
+  }, {
+    "line": 6,
+    "actions": [
+      {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 2,
+          "type": "text",
+          "color": "fg",
+          "value": "5 == 4?"
+        }
+      }
+    ]
+  }, {
+    "line": 5,
+    "actions": [
+      {
+        "cmd": "vis_unmark",
+        "params": {
+          "index": 2,
+          "type": "all"
+        }
+      }, {
+        "cmd": "var_add",
+        "params": {
+          "name": "n",
+          "value": 6
+        }
+      }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 3,
+          "type": "outline",
+          "color": "yellow"
+        }
+      }
+    ]
+  }, {
+    "line": 6,
+    "actions": [
+      {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 3,
+          "type": "text",
+          "color": "fg",
+          "value": "6 == 4?"
+        }
+      }
+    ]
+  }, {
+    "line": 5,
+    "actions": [
+      {
+        "cmd": "vis_unmark",
+        "params": {
+          "index": 3,
+          "type": "all"
+        }
+      }, {
+        "cmd": "var_add",
+        "params": {
+          "name": "n",
+          "value": 4
+        }
+      }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 4,
+          "type": "outline",
+          "color": "yellow"
+        }
+      }
+    ]
+  }, {
+    "line": 6,
+    "actions": [
+      {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 4,
+          "type": "text",
+          "color": "fg",
+          "value": "4 == 4?"
+        }
+      }
+    ]
+  }, {
+    "line": 7,
+    "actions": [
+      {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 4,
+          "type": "outline",
+          "color": "green"
+        }
+      }
+    ]
+  }, {
+    "line": 14,
+    "actions": [
+      {
+        "cmd": "var_delete",
+        "params": {
+          "name": "a"
+        }
+      }, {
+        "cmd": "var_delete",
+        "params": {
+          "name": "k"
+        }
+      }, {
+        "cmd": "var_normal",
+        "params": {
+          "name": "a1"
+        }
+      }, {
+        "cmd": "var_normal",
+        "params": {
+          "name": "key"
+        }
+      }, {
+        "cmd": "var_add",
+        "params": {
+          "name": "result",
+          "value": 4
+        }
+      }
+    ]
+  }
+]
