@@ -9,23 +9,27 @@ describe('Test route config', async () => {
   });
 
   test('Ensure at least one route is specified', async () => {
-    expect(Routes.length).toBeGreaterThan(0);
+    await expect(Routes.length).toBeGreaterThan(0);
   });
 
   test('Ensure the index route is unique', async () => {
     let indexRouteCount = 0;
 
-    Routes.forEach(route => indexRouteCount += (route.index) ? 1 : 0);
-    expect(indexRouteCount).toBe(1);
+    Routes.forEach(async route => indexRouteCount += (route.index) ? 1 : 0);
+    await expect(indexRouteCount).toBe(1);
   });
 
   test('Ensure each route path matches its filename', async () => {
-    Routes.forEach((route) => {
-      if (route.index) {
-        expect(route.file).toBe('routes/index.tsx');
-      } else {
-        expect(route.file).toBe(`routes/${route.path}.tsx`);
-      }
+    Routes.forEach(async (route) => {
+      await expect(route.file).toBe(`routes/${route.index ? 'index' : route.path}.tsx`);
+    });
+  });
+
+  test('Ensure each route actually exists', async () => {
+    Routes.forEach(async (route) => {
+      await expect(
+        import(`../app/routes/${route.index ? 'index' : route.path}.tsx`),
+      ).resolves.toBeDefined();
     });
   });
 });

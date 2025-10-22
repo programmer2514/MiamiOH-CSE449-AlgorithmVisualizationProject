@@ -4,9 +4,9 @@ import { expect, test, describe } from 'vitest';
 import Wiki from '../../app/routes/wiki';
 
 describe('Test route: wiki', async () => {
-  test('Check for \'What\'s next\' text', async () => {
+  test('Check that page is empty', async () => {
     const screen = render(<Wiki />);
 
-    await expect.element(screen.getByText(/What's next\?/i)).toBeInTheDocument();
+    await expect.element(screen.getByText(/\w+/i)).not.toBeInTheDocument();
   });
 });

@@ -1,12 +1,7 @@
-import WelcomePage from '../components/WelcomePage/WelcomePage';
-
+// TODO
 export default function Run() {
   return (
     <>
-      <title>New React Router App</title>
-      <meta name="description" content="Welcome to React Router!" />
-
-      <WelcomePage />
     </>
   );
 }

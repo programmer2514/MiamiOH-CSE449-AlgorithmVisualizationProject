@@ -1,12 +1,14 @@
-import WelcomePage from '../components/WelcomePage/WelcomePage';
+import PageMeta from '../components/PageMeta';
+import GettingStarted from '../components/pages/GettingStarted';
 
 export default function Index() {
   return (
     <>
-      <title>New React Router App</title>
-      <meta name="description" content="Welcome to React Router!" />
-
-      <WelcomePage />
+      <PageMeta
+        title="Home"
+        description="Select an algorithm or create your own to begin learning."
+      />
+      <GettingStarted />
     </>
   );
 }
