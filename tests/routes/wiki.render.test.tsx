@@ -5,8 +5,8 @@ import Wiki from '../../app/routes/wiki';
 
 describe('Test route: wiki', async () => {
   test('Check that page is empty', async () => {
-    const screen = render(<Wiki />);
+    const screen = await render(<Wiki />);
 
-    await expect.element(screen.getByText(/\w+/i)).not.toBeInTheDocument();
+    await expect(screen.getByText(/\w+/i)).not.toBeInTheDocument();
   });
 });

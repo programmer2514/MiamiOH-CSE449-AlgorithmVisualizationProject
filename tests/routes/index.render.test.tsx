@@ -5,8 +5,8 @@ import Index from '../../app/routes/index';
 
 describe('Test route: index', async () => {
   test('Check that placeholder text is present', async () => {
-    const screen = render(<Index />);
+    const screen = await render(<Index />);
 
-    await expect.element(screen.getByText(/Getting Started Page/i)).toBeInTheDocument();
+    await expect(screen.getByText(/Getting Started Page/i)).toBeInTheDocument();
   });
 });

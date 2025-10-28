@@ -1,7 +1,8 @@
 import { reactRouter } from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { playwright } from '@vitest/browser-playwright';
 
 export default defineConfig({
   plugins: [
@@ -28,7 +29,7 @@ export default defineConfig({
           browser: {
             enabled: true,
             headless: true,
-            provider: 'playwright',
+            provider: playwright(),
             screenshotDirectory: 'screenshots',
             instances: [
               { browser: 'chromium' },

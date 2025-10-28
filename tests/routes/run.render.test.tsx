@@ -5,8 +5,8 @@ import Run from '../../app/routes/run';
 
 describe('Test route: run', async () => {
   test('Check that page is empty', async () => {
-    const screen = render(<Run />);
+    const screen = await render(<Run />);
 
-    await expect.element(screen.getByText(/\w+/i)).not.toBeInTheDocument();
+    await expect(screen.getByText(/\w+/i)).not.toBeInTheDocument();
   });
 });
