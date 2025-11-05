@@ -4,7 +4,7 @@ import {
 } from 'react';
 
 /**
- * Provides a hook to toggle and read dark mode.
+ * Provides a hook to read and edit search state.
  */
 export default function useSearch() {
   const [favs, setFavs] = useState(

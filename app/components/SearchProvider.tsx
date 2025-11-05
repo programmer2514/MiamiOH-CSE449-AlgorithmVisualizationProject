@@ -15,6 +15,16 @@ import SearchCard from './SearchCard';
 
 import useSearch from '../hooks/useSearch';
 
+/**
+ * Renders a list of algorithm cards inside a dynamically filtered search frame.
+ *
+ * @param {Object} props
+ *        React props
+ * @param {Array} props.cards
+ *        The list of algorithms to display
+ *
+ * @returns {JSX.Element} The rendered search provider element
+ */
 export default function SearchProvider(
   {
     cards,

@@ -9,6 +9,18 @@ import { Iconoir } from 'iconoir-react';
 import Globals from '../globals';
 import FlexSpacer from './FlexSpacer';
 
+/**
+ * Renders the main menu sidebar panel.
+ *
+ * @param {Object} props
+ *        React props
+ * @param {React.RefObject} props.triggerRef
+ *        An element reference that opens the main menu on click
+ * @param {React.RefObject} props.panelRef
+ *        An element reference that contains the main menu panel
+ * @param {object[]} props.links
+ *        The links to display in the main menu
+ */
 export default function MainMenu(
   {
     triggerRef,

@@ -16,6 +16,29 @@ import {
 
 import DarkModeContext from '../contexts/DarkModeContext';
 
+/**
+ * Renders a dynamic algorithm card to be displayed inside of a
+ * `SearchProvider` element.
+ *
+ * @param {Object} props
+ *        React props
+ * @param {string} props.img
+ *        The image URL to display
+ * @param {string} props.title
+ *        The title to display
+ * @param {string[]} props.tags
+ *        The tags to display
+ * @param {string} props.href
+ *        The URL to navigate to when the card is clicked
+ * @param {string[]} props.favs
+ *        The list of currently favorited algorithms
+ * @param {function} props.toggleFav
+ *        A function to toggle the favorite state of an algorithm
+ * @param {string[]} props.activeTags
+ *        The currently active tags
+ * @param {function} props.toggleTag
+ *        A function to toggle the active state of a tag
+ */
 export default function SearchCard(
   {
     img,
