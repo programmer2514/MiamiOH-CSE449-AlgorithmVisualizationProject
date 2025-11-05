@@ -9,6 +9,9 @@ import {
 
 import Globals from '../../globals';
 import AppFrame from '../AppFrame';
+import SearchProvider from '../SearchProvider';
+
+import PlaceholderImg from '../../resources/img/placeholder.png';
 
 /**
  * Renders the "Getting Started" page.
@@ -59,7 +62,81 @@ export default function GettingStarted() {
         ]
       }
     >
-      Getting Started Page
+      <SearchProvider
+        cards={
+          [
+            {
+              img: PlaceholderImg,
+              title: 'Algo #5',
+              tags: [
+                'Algorithm',
+                'Numbered',
+                'Example Tag #1',
+              ],
+              href: '/run',
+            },
+            {
+              img: PlaceholderImg,
+              title: 'Algo #2',
+              tags: [
+                'Numbered',
+                'Algorithm',
+                'Example Tag #2',
+              ],
+              href: '/run',
+            },
+            {
+              img: PlaceholderImg,
+              title: 'Something',
+              tags: [
+                'Just Text',
+                'Other Example Tag',
+              ],
+              href: '/run',
+            },
+            {
+              img: PlaceholderImg,
+              title: 'Something Else',
+              tags: [
+                'Just Text',
+                'Other Example Tag',
+              ],
+              href: '/run',
+            },
+            {
+              img: PlaceholderImg,
+              title: 'Title',
+              tags: [
+                'Oooo Tags',
+                'Fancy Information',
+                'Example Tag #1',
+              ],
+              href: '/run',
+            },
+            {
+              img: PlaceholderImg,
+              title: 'Title 2',
+              tags: [
+                'Oooo Tags',
+                'Fancy Information',
+                'Example Tag #2',
+                'Numbered',
+              ],
+              href: '/run',
+            },
+            {
+              img: PlaceholderImg,
+              title: 'ABCDE',
+              tags: [
+                'Just Text',
+                'Fancy Information',
+                'Algorithm',
+              ],
+              href: '/run',
+            },
+          ]
+        }
+      />
     </AppFrame>
   );
 }

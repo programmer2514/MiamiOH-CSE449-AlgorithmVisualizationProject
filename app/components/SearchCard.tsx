@@ -1,0 +1,109 @@
+import {
+  useContext,
+} from 'react';
+
+import {
+  Button,
+  Card,
+  IconButton,
+  Typography,
+} from '@material-tailwind/react';
+
+import {
+  Star,
+  StarSolid,
+} from 'iconoir-react';
+
+import DarkModeContext from '../contexts/DarkModeContext';
+
+export default function SearchCard(
+  {
+    img,
+    title,
+    tags,
+    href,
+    favs,
+    toggleFav,
+    activeTags,
+    toggleTag,
+  }:
+  {
+    img: string
+    title: string
+    tags: string[]
+    href: string
+    favs: string[]
+    toggleFav: (key: string) => void
+    activeTags: string[]
+    toggleTag: (tag: string) => void
+  },
+) {
+  const isDark = useContext(DarkModeContext);
+
+  return (
+    <Card
+      as="a"
+      href={href}
+      className="w-76 p-4 border-transparent shadow-none overflow-visible transition-all duration-300 bg-transparent hover:bg-primary/5 hover:border-secondary"
+    >
+      <Card.Header
+        as="img"
+        src={img}
+        alt={`${title} - Preview Image`}
+        className="m-0 w-full"
+      />
+      <Card.Body className="flex justify-between items-center p-0 my-2">
+        <Typography
+          type="h2"
+          className="text-lg! font-medium"
+        >
+          {title}
+        </Typography>
+        <IconButton
+          variant="ghost"
+          aria-label={favs.includes(title) ? 'Remove from favorites' : 'Add to favorites'}
+          onClick={
+            (e) => {
+              toggleFav(title);
+              e.preventDefault();
+            }
+          }
+          className="translate-x-2 border-0 hover:bg-transparent"
+        >
+          {
+            favs.includes(title) ?
+              (
+                <StarSolid
+                  color={isDark ? 'yellow' : 'dodgerblue'}
+                  className="stroke-2 w-5 h-5"
+                />
+              ) :
+              <Star className="stroke-2 w-5 h-5" />
+          }
+        </IconButton>
+      </Card.Body>
+      <Card.Footer className="flex flex-wrap gap-1 p-0">
+        {
+          tags.map(
+            tag => (
+              <Button
+                key={tag}
+                size="xs"
+                variant="outline"
+                onClick={
+                  (e) => {
+                    toggleTag(tag);
+                    e.preventDefault();
+                  }
+                }
+                className={`text-xs shadow-none ${activeTags.includes(tag) && 'bg-primary text-primary-foreground'}`}
+              >
+                {tag}
+              </Button>
+            ),
+          ).sort((a, b) => a.props.children.localeCompare(b.props.children))
+        }
+      </Card.Footer>
+    </Card>
+  );
+}

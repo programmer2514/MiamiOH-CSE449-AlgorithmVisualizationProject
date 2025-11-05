@@ -6,6 +6,10 @@ import TopBar from './TopBar';
 import MainMenu from './MainMenu';
 import DarkModeToggle from './DarkModeToggle';
 
+import useDarkMode from '../hooks/useDarkMode';
+
+import DarkModeContext from '../contexts/DarkModeContext';
+
 /**
  * Renders the main app frame around the passed children elements.
  *
@@ -55,6 +59,8 @@ export default function AppFrame(
     children: React.ReactNode
   },
 ) {
+  const [isDark, setIsDark] = useDarkMode();
+
   const drawerTrigger = useRef<HTMLElement>(
     { click: () => {} } as HTMLElement,
   );
@@ -63,7 +69,7 @@ export default function AppFrame(
   );
 
   return (
-    <>
+    <DarkModeContext value={isDark}>
       <header>
         <TopBar
           title={title}
@@ -82,13 +88,17 @@ export default function AppFrame(
         links={menuLinks}
       />
 
-      <main className="p-4">
+      <main className="h-[calc(100%-3.5rem+1px)]">
         {children}
       </main>
 
       <footer>
-        <DarkModeToggle floating={!mutable} />
+        <DarkModeToggle
+          floating={!mutable}
+          isDark={isDark}
+          setIsDark={setIsDark}
+        />
       </footer>
-    </>
+    </DarkModeContext>
   );
 }

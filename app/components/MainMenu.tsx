@@ -56,19 +56,23 @@ export default function MainMenu(
 
           <nav>
             <List className="text-lg -mt-1 mb-1 gap-0">
-              {links.map((
-                { icon: Icon, text, href, onClick, separateNext },
-              ) => (
-                <a key={text} href={href} onClick={onClick}>
-                  <List.Item className="p-2 text-primary">
-                    <List.ItemStart>
-                      <Icon className="h-6 w-6 stroke-2" />
-                    </List.ItemStart>
-                    {text}
-                  </List.Item>
-                  {separateNext && <div role="presentation" className="border-b border-secondary my-1" />}
-                </a>
-              ))}
+              {
+                links.map(
+                  (
+                    { icon: Icon, text, href, onClick, separateNext },
+                  ) => (
+                    <a key={text} href={href} onClick={onClick}>
+                      <List.Item className="p-2 text-primary">
+                        <List.ItemStart>
+                          <Icon className="h-6 w-6 stroke-2" />
+                        </List.ItemStart>
+                        {text}
+                      </List.Item>
+                      {separateNext && <div role="presentation" className="border-b border-secondary my-1" />}
+                    </a>
+                  ),
+                )
+              }
             </List>
           </nav>
 

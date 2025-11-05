@@ -14,7 +14,6 @@ import {
 
 import { ArrowLeft } from 'iconoir-react';
 
-import DarkModeToggle from './components/DarkModeToggle';
 import PageMeta from './components/PageMeta';
 
 import type { Route } from './+types/root';
@@ -51,7 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
       </head>
 
-      <body>
+      <body className="h-screen overflow-hidden">
         {children}
 
         <ScrollRestoration />
@@ -127,8 +126,6 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
           )
         }
       </div>
-
-      <DarkModeToggle floating />
     </Layout>
   );
 }

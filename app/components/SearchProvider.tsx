@@ -1,0 +1,206 @@
+import {
+  Button,
+  Input,
+  Select,
+  Typography,
+} from '@material-tailwind/react';
+
+import {
+  Search,
+  Xmark,
+} from 'iconoir-react';
+
+import FlexSpacer from './FlexSpacer';
+import SearchCard from './SearchCard';
+
+import useSearch from '../hooks/useSearch';
+
+export default function SearchProvider(
+  {
+    cards,
+  }:
+  {
+    cards: {
+      img: string
+      title: string
+      tags: string[]
+      href: string
+    }[]
+  },
+) {
+  const [
+    favs,
+    activeTags,
+    sort,
+    search,
+    setFavs,
+    setActiveTags,
+    setSort,
+    setSearch,
+  ] = useSearch();
+
+  function toggleFav(key: string) {
+    if (favs.includes(key)) {
+      setFavs(favs.filter((k: string) => k !== key));
+    } else {
+      setFavs([...favs, key]);
+    }
+  }
+
+  function toggleTag(tag: string) {
+    if (activeTags.includes(tag)) {
+      setActiveTags(activeTags.filter((t: string) => t !== tag));
+    } else {
+      setActiveTags([...activeTags, tag]);
+    }
+  }
+
+  return (
+    <section className="h-full overflow-y-scroll">
+      <form
+        role="search"
+        aria-label="Sort and search results"
+        className="flex items-center py-3 px-4 sticky z-50 top-0 bg-background border-b border-secondary"
+      >
+        <div className="w-96">
+          <Input
+            type="search"
+            name="q"
+            placeholder="Find an algorithm..."
+            aria-label="Find an algorithm"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="shadow-none"
+          >
+            <Input.Icon
+              as="button"
+              placement="end"
+              onClick={
+                (e) => {
+                  setSearch('');
+                  e.preventDefault();
+                }
+              }
+              className="pointer-events-auto cursor-pointer hover:text-primary focus-visible:text-primary"
+            >
+              {
+                search ?
+                  <Xmark className="h-full w-full stroke-2" /> :
+                  <Search className="h-full w-full stroke-2" />
+              }
+            </Input.Icon>
+          </Input>
+        </div>
+
+        <div className="flex flex-wrap gap-1 p-0 ml-4">
+          {
+            activeTags.map(
+              (tag: string) => (
+                <Button
+                  key={tag}
+                  size="sm"
+                  variant="outline"
+                  onClick={
+                    (e) => {
+                      toggleTag(tag);
+                      e.preventDefault();
+                    }
+                  }
+                  className="text-sm shadow-none"
+                >
+                  <Typography>{tag}</Typography>
+                  <Xmark className="h-4 w-4 stroke-2 translate-x-2" />
+                </Button>
+              ),
+            )
+          }
+        </div>
+
+        <FlexSpacer />
+
+        <Typography
+          as="label"
+          htmlFor="sort-options"
+          className="pr-2 text-foreground/70 hover:text-foreground"
+        >
+          Sort&nbsp;by:
+        </Typography>
+
+        <Select value={sort} onValueChange={setSort}>
+          <Select.Trigger
+            id="sort-options"
+            name="sort"
+            placeholder="Select..."
+            className="w-44 shadow-none"
+          />
+          <Select.List>
+            <Select.Option value="favorites">Sort: Favorites</Select.Option>
+            <Select.Option value="name-desc">Sort: Name (Desc)</Select.Option>
+            <Select.Option value="name-asc">Sort: Name (Asc)</Select.Option>
+          </Select.List>
+        </Select>
+      </form>
+
+      <div className="flex flex-wrap justify-center gap-4 py-6 px-4">
+        {
+          cards
+            .map(
+              (
+                { img, title, tags, href },
+              ) => (
+                <SearchCard
+                  key={title}
+                  img={img}
+                  title={title}
+                  tags={tags}
+                  href={href}
+                  favs={favs}
+                  toggleFav={toggleFav}
+                  activeTags={activeTags}
+                  toggleTag={toggleTag}
+                />
+              ),
+            )
+            .filter( // Filter by selected tags
+              (card) => {
+                return !activeTags.length ||
+                  activeTags
+                    .every((tag: string) => card.props.tags.includes(tag));
+              },
+            )
+            .filter( // Filter by search query
+              (card) => {
+                return !search ||
+                  card.props.title.toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                    card.props.tags.some((tag: string) => tag.toLowerCase()
+                      .includes(search.toLowerCase()));
+              },
+            )
+            .sort( // Sort by selected sort option
+              (a, b) => {
+                switch (sort) {
+                  case 'favorites':
+                  case 'name-desc':
+                    return b.props.title < a.props.title ? 1 : -1;
+                  case 'name-asc':
+                    return a.props.title < b.props.title ? 1 : -1;
+                  default:
+                    return 0;
+                }
+              },
+            )
+            .sort( // Sort by favorite status
+              (a, b) => {
+                if (sort !== 'favorites') return 0;
+
+                if (favs.includes(a.props.title)) return -1;
+                if (favs.includes(b.props.title)) return 1;
+                return 0;
+              },
+            )
+        }
+      </div>
+    </section>
+  );
+}
