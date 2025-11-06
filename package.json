@@ -17,7 +17,8 @@
     "test": "vitest",
     "lint": "eslint .",
     "update-deps": "npm-check-updates -u && npm install",
-    "force-update-deps": "npm-check-updates -u && rimraf node_modules .react-router package-lock.json && npm install"
+    "force-update-deps": "npm-check-updates -u && rimraf node_modules .react-router package-lock.json && npm install",
+    "update-nvmrc": "node --version > .nvmrc"
   },
   "dependencies": {
     "@material-tailwind/react": "^3.0.0-beta.24",
@@ -48,7 +49,7 @@
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3",
-    "vite": "^7.1.12",
+    "vite": "^7.2.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.0.7",
     "vitest-browser-react": "^2.0.2"
