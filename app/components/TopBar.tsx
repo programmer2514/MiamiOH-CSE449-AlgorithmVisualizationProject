@@ -78,7 +78,7 @@ export default function TopBar(
       let sameCount = 0;
 
       const interval = setInterval(() => {
-        if (span.current.offsetWidth == prevWidth) {
+        if (span.current?.offsetWidth ?? 0 == prevWidth) {
           sameCount++;
           if (sameCount == 10) {
             clearInterval(interval);
@@ -87,8 +87,8 @@ export default function TopBar(
           return;
         }
 
-        setWidth(span.current.offsetWidth);
-        prevWidth = span.current.offsetWidth;
+        setWidth(span.current?.offsetWidth ?? 0);
+        prevWidth = span.current?.offsetWidth ?? 0;
       }, 100);
     }, []);
 
@@ -100,7 +100,7 @@ export default function TopBar(
         input.current.value = '<unnamed>';
       }
 
-      setWidth(span.current.offsetWidth);
+      setWidth(span.current?.offsetWidth ?? 0);
     }, [title]);
   }
 
@@ -130,11 +130,13 @@ export default function TopBar(
                 <pre ref={span} className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none">{title}</pre>
                 <Input
                   ref={input}
+                  type="text"
                   size="lg"
                   defaultValue={title}
                   className="text-lg! font-medium ml-1 border-0 shadow-none p-1 transition-none"
                   style={{ width }}
                   onChange={event => setTitle(event.target.value)}
+                  aria-label="Algorithm name"
                 />
               </>
             ) :

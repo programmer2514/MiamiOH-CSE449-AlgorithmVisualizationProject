@@ -75,7 +75,6 @@ export default function SearchProvider(
         <div className="w-96">
           <Input
             type="search"
-            name="q"
             placeholder="Find an algorithm..."
             aria-label="Find an algorithm"
             value={search}
@@ -139,7 +138,6 @@ export default function SearchProvider(
         <Select value={sort} onValueChange={setSort}>
           <Select.Trigger
             id="sort-options"
-            name="sort"
             placeholder="Select..."
             className="w-44 shadow-none"
           />

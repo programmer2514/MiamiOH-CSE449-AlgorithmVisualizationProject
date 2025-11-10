@@ -119,6 +119,7 @@ export default function SearchCard(
                     e.preventDefault();
                   }
                 }
+                aria-label={`Toggle "${tag}" tag`}
                 className={`text-xs shadow-none ${activeTags.includes(tag) && 'bg-primary text-primary-foreground'}`}
               >
                 {tag}

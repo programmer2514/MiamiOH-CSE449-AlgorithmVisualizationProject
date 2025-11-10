@@ -1,7 +1,7 @@
 import { expect, test, describe, assertType } from 'vitest';
 import { type RouteConfig } from '@react-router/dev/routes';
 
-import Routes from '../app/routes';
+import Routes from '../../app/routes';
 
 describe('Test route config', async () => {
   test('Ensure return is a valid RouteConfig object', async () => {
@@ -28,7 +28,7 @@ describe('Test route config', async () => {
   test('Ensure each route actually exists', async () => {
     Routes.forEach(async (route) => {
       await expect(
-        import(`../app/routes/${route.index ? 'index' : route.path}.tsx`),
+        import(`../../app/routes/${route.index ? 'index' : route.path}.tsx`),
       ).resolves.toBeDefined();
     });
   });
