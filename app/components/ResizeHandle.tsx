@@ -86,7 +86,7 @@ export default function ResizeHandle(
     <div
       onMouseDown={mouseDown}
       onMouseUp={mouseUpRight}
-      className={`absolute z-50 ${position === 'top' && 'w-full h-4 -translate-y-2 cursor-ns-resize'} ${position === 'left' && 'w-4 h-full -translate-x-2 cursor-ew-resize'} bg-fuchsia-500/50`}
+      className={`absolute z-50 ${position === 'top' && 'w-full h-4 -translate-y-2 cursor-ns-resize'} ${position === 'left' && 'w-4 h-full -translate-x-2 cursor-ew-resize'}`}
     />
   );
 }
