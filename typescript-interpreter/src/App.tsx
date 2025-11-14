@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import { CharStreams, CommonTokenStream } from 'antlr4ts';
+import { PseudocodeLexer } from './generated/PseudocodeLexer';
+import { PseudocodeParser } from './generated/PseudocodeParser';
+import TsTranspilerVisitor from './TsInterpreterVisitor';
 
-// Import ANTLR and our generated/custom files
-import antlr4 from 'antlr4';
-import PseudocodeLexer from './generated/PseudocodeLexer.js';
-import PseudocodeParser from './generated/PseudocodeParser.js';
-import TsTranspilerVisitor from './TsInterpreterVisitor.js';
-
-// The initial code to display in the editor
 const sampleCode = `key = 4
 fun Linear_Search(a1, key):
     for n in a1:
@@ -18,27 +15,21 @@ fun Linear_Search(a1, key):
     return -1
 end fun`;
 
-// A helper function to contain the core transpiler logic
 function transpile(inputText: string): string {
   try {
-    // Create char stream - antlr4 API varies by version
-    const chars = (antlr4 as any).CharStreams 
-      ? (antlr4 as any).CharStreams.fromString(inputText)
-      : new (antlr4 as any).CharStream(inputText);
-    
-    const lexer = new PseudocodeLexer(chars);
-    const tokens = new (antlr4 as any).CommonTokenStream(lexer);
-    const parser = new PseudocodeParser(tokens);
+    const inputStream = CharStreams.fromString(inputText);
+    const lexer = new PseudocodeLexer(inputStream);
+    const tokenStream = new CommonTokenStream(lexer);
+    const parser = new PseudocodeParser(tokenStream);
+
     const tree = parser.program();
 
     const visitor = new TsTranspilerVisitor();
     return visitor.visit(tree);
   } catch (error: any) {
-    // Basic error handling
     return `Error parsing code:\n${error.message}`;
   }
 }
-
 function App() {
   // State for the input pseudocode
   const [pseudocode, setPseudocode] = useState(sampleCode);

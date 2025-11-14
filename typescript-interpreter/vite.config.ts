@@ -10,4 +10,16 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: {
+      util: 'util',
+      assert: 'assert',
+    },
+  },
+  define: {
+    'process.env': {}
+  },
+  optimizeDeps: {
+    force: true
+  }
 })
