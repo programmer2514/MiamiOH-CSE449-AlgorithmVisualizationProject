@@ -11,3 +11,8 @@ body {
   @apply bg-background text-primary;
   @apply transition-colors duration-200 **:duration-200;
 }
+
+:has(> .highlight) {
+  @apply bg-[#f8f800] dark:bg-[#2f2f00];
+  @apply w-full!;
+}

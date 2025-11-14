@@ -21,8 +21,8 @@ export default function DarkModeToggle(
   }:
   {
     floating: boolean
-    isDark: boolean
-    setIsDark: ((value: boolean) => void)
+    isDark: boolean | null
+    setIsDark: ((value: boolean | null) => void)
   },
 ) {
   return (
@@ -30,11 +30,11 @@ export default function DarkModeToggle(
       <IconButton
         variant="ghost"
         aria-label="Toggle Dark Mode"
-        onClick={() => setIsDark(!isDark)}
+        onClick={() => setIsDark(!(isDark || false))}
         className={`${floating ? 'opacity-50' : 'opacity-100'} hover:opacity-100 focus-visible:opacity-100 active:opacity-100 transition-opacity cursor-pointer`}
       >
         {
-          isDark ?
+          (isDark || false) ?
             <HalfMoon className="h-6 w-6 stroke-2" /> :
             <SunLight className="h-6 w-6 stroke-2" />
         }

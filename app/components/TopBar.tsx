@@ -29,13 +29,13 @@ import FlexSpacer from './FlexSpacer';
  *
  * @param {Object} props
  *        React props
- * @param {string} props.title
+ * @param {string | null} props.title
  *        The title to display
  * @param {function | undefined} props.setTitle
  *        A function to update the title
  * @param {boolean} props.mutable
  *        Whether the title is mutable
- * @param {boolean | undefined} props.sidebar
+ * @param {boolean | null | undefined} props.sidebar
  *        Whether the sidebar is toggled
  * @param {function | undefined} props.setSidebar
  *        A function to update the sidebar state
@@ -55,11 +55,11 @@ export default function TopBar(
     menuPanel,
   }:
   {
-    title: string
-    setTitle: ((title: string) => void) | undefined
+    title: string | null
+    setTitle: ((title: string | null) => void) | undefined
     mutable: boolean
-    sidebar: boolean | undefined
-    setSidebar: ((value: boolean) => void) | undefined
+    sidebar: boolean | null | undefined
+    setSidebar: ((value: boolean | null) => void) | undefined
     menuTrigger: React.RefObject<HTMLElement>
     menuPanel: React.RefObject<HTMLElement>
   },
@@ -95,7 +95,7 @@ export default function TopBar(
     // Using a layout effect here to avoid jittery repaints while typing
     useLayoutEffect(() => {
       // If the content is empty, set it to '<unnamed>' to avoid 0-width input
-      if (title.length === 0) {
+      if (((title === null) ? '<unnamed>' : title).length === 0) {
         setTitle('<unnamed>');
         input.current.value = '<unnamed>';
       }
@@ -127,12 +127,12 @@ export default function TopBar(
           mutable && setTitle ?
             (
               <>
-                <pre ref={span} className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none">{title}</pre>
+                <pre ref={span} className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none">{((title === null) ? '<unnamed>' : title)}</pre>
                 <Input
                   ref={input}
                   type="text"
                   size="lg"
-                  defaultValue={title}
+                  defaultValue={((title === null) ? '<unnamed>' : title)}
                   className="text-lg! font-medium ml-1 border-0 shadow-none p-1 transition-none"
                   style={{ width }}
                   onChange={event => setTitle(event.target.value)}
@@ -145,7 +145,7 @@ export default function TopBar(
                 type="h1"
                 className="text-lg! font-medium ml-2"
               >
-                {title}
+                {((title === null) ? '<unnamed>' : title)}
               </Typography>
             )
         }
@@ -160,10 +160,12 @@ export default function TopBar(
                   variant="ghost"
                   aria-label="Toggle Sidebar"
                   className="-scale-x-100"
-                  onClick={() => setSidebar(!sidebar)}
+                  onClick={
+                    () => setSidebar(!((sidebar === null) ? true : sidebar))
+                  }
                 >
                   {
-                    sidebar ?
+                    ((sidebar === null) ? true : sidebar) ?
                       <SidebarCollapse className="stroke-2 w-6 h-6" /> :
                       <SidebarExpand className="stroke-2 w-6 h-6" />
                   }
@@ -178,8 +180,11 @@ export default function TopBar(
         }
 
         <IconButton
+          as="a"
           variant="ghost"
           aria-label="Get Help"
+          href="/wiki"
+          target="_blank"
         >
           <HelpCircle className="stroke-2 w-6 h-6" />
         </IconButton>

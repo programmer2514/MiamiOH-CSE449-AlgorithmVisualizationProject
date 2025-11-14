@@ -18,13 +18,13 @@ import DarkModeContext from '../contexts/DarkModeContext';
  *
  * @param {Object} props
  *        React props
- * @param {string} props.title
+ * @param {string | null} props.title
  *        The title to display in the header
  * @param {function | undefined} props.setTitle
  *        A function to update the header title
  * @param {boolean} props.mutable
  *        Whether the header title should be mutable
- * @param {boolean | undefined} props.sidebar
+ * @param {boolean | null | undefined} props.sidebar
  *        Whether the sidebar is toggled
  * @param {function | undefined} props.setSidebar
  *        A function to update the sidebar state
@@ -44,11 +44,11 @@ export default function AppFrame(
     children,
   }:
   {
-    title: string
-    setTitle: ((title: string) => void) | undefined
+    title: string | null
+    setTitle: ((title: string | null) => void) | undefined
     mutable: boolean
-    sidebar: boolean | undefined
-    setSidebar: ((value: boolean) => void) | undefined
+    sidebar: boolean | null | undefined
+    setSidebar: ((value: boolean | null) => void) | undefined
     menuLinks: {
       icon: typeof Iconoir
       text: string
@@ -69,18 +69,24 @@ export default function AppFrame(
   );
 
   return (
-    <DarkModeContext value={isDark}>
-      <header>
-        <TopBar
-          title={title}
-          setTitle={setTitle}
-          mutable={mutable}
-          sidebar={sidebar}
-          setSidebar={setSidebar}
-          menuTrigger={drawerTrigger}
-          menuPanel={drawerPanel}
-        />
-      </header>
+    <DarkModeContext value={isDark || false}>
+      {
+        ((title === null) ? '<unnamed>' : title) ?
+          (
+            <header>
+              <TopBar
+                title={title}
+                setTitle={setTitle}
+                mutable={mutable}
+                sidebar={sidebar}
+                setSidebar={setSidebar}
+                menuTrigger={drawerTrigger}
+                menuPanel={drawerPanel}
+              />
+            </header>
+          ) :
+          <></>
+      }
 
       <MainMenu
         triggerRef={drawerTrigger}

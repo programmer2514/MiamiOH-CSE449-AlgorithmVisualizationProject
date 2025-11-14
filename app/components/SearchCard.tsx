@@ -55,9 +55,9 @@ export default function SearchCard(
     title: string
     tags: string[]
     href: string
-    favs: string[]
+    favs: string[] | null
     toggleFav: (key: string) => void
-    activeTags: string[]
+    activeTags: string[] | null
     toggleTag: (tag: string) => void
   },
 ) {
@@ -84,7 +84,7 @@ export default function SearchCard(
         </Typography>
         <IconButton
           variant="ghost"
-          aria-label={favs.includes(title) ? 'Remove from favorites' : 'Add to favorites'}
+          aria-label={(favs || []).includes(title) ? 'Remove from favorites' : 'Add to favorites'}
           onClick={
             (e) => {
               toggleFav(title);
@@ -94,10 +94,10 @@ export default function SearchCard(
           className="translate-x-2 border-0 hover:bg-transparent"
         >
           {
-            favs.includes(title) ?
+            (favs || []).includes(title) ?
               (
                 <StarSolid
-                  color={isDark ? 'yellow' : 'dodgerblue'}
+                  color={(isDark || false) ? 'yellow' : 'dodgerblue'}
                   className="stroke-2 w-5 h-5"
                 />
               ) :
@@ -120,7 +120,7 @@ export default function SearchCard(
                   }
                 }
                 aria-label={`Toggle "${tag}" tag`}
-                className={`text-xs shadow-none ${activeTags.includes(tag) && 'bg-primary text-primary-foreground'}`}
+                className={`text-xs shadow-none ${(activeTags || []).includes(tag) && 'bg-primary text-primary-foreground'}`}
               >
                 {tag}
               </Button>

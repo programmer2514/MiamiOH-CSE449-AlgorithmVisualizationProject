@@ -1,0 +1,30 @@
+import { Typography } from '@material-tailwind/react';
+
+/**
+ * Renders a loading overlay to be used by the visualizer while it loads.
+ *
+ * @param {Object} props
+ *        React props
+ * @param {Object} props.ref
+ *        A reference to the loading overlay
+ */
+export default function Visualizer(
+  {
+    ref,
+  }:
+  {
+    ref: React.RefObject<HTMLDivElement>
+  },
+) {
+  return (
+    <div ref={ref} className="flex flex-col justify-center items-center w-screen h-screen opacity-75 absolute top-0 left-0 bg-secondary z-50">
+      <div className="w-16 h-16 rounded-full border-6 border-foreground border-t-transparent animate-spin duration-1000!"></div>
+      <Typography
+        type="h1"
+        className="text-lg! font-medium ml-2 mt-4"
+      >
+        Loading...
+      </Typography>
+    </div>
+  );
+}

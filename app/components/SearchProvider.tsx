@@ -50,18 +50,18 @@ export default function SearchProvider(
   ] = useSearch();
 
   function toggleFav(key: string) {
-    if (favs.includes(key)) {
-      setFavs(favs.filter((k: string) => k !== key));
+    if ((favs || []).includes(key)) {
+      setFavs((favs || []).filter((k: string) => k !== key));
     } else {
-      setFavs([...favs, key]);
+      setFavs([...(favs || []), key]);
     }
   }
 
   function toggleTag(tag: string) {
-    if (activeTags.includes(tag)) {
-      setActiveTags(activeTags.filter((t: string) => t !== tag));
+    if ((activeTags || []).includes(tag)) {
+      setActiveTags((activeTags || []).filter((t: string) => t !== tag));
     } else {
-      setActiveTags([...activeTags, tag]);
+      setActiveTags([...(activeTags || []), tag]);
     }
   }
 
@@ -77,7 +77,7 @@ export default function SearchProvider(
             type="search"
             placeholder="Find an algorithm..."
             aria-label="Find an algorithm"
-            value={search}
+            value={(search || '')}
             onChange={e => setSearch(e.target.value)}
             className="shadow-none"
           >
@@ -93,7 +93,7 @@ export default function SearchProvider(
               className="pointer-events-auto cursor-pointer hover:text-primary focus-visible:text-primary"
             >
               {
-                search ?
+                (search || '') ?
                   <Xmark className="h-full w-full stroke-2" /> :
                   <Search className="h-full w-full stroke-2" />
               }
@@ -103,7 +103,7 @@ export default function SearchProvider(
 
         <div className="flex flex-wrap gap-1 p-0 ml-4">
           {
-            activeTags.map(
+            (activeTags || []).map(
               (tag: string) => (
                 <Button
                   key={tag}
@@ -135,7 +135,7 @@ export default function SearchProvider(
           Sort&nbsp;by:
         </Typography>
 
-        <Select value={sort} onValueChange={setSort}>
+        <Select value={((sort === null) ? 'favorites' : sort)} onValueChange={setSort}>
           <Select.Trigger
             id="sort-options"
             placeholder="Select..."
@@ -171,23 +171,23 @@ export default function SearchProvider(
             )
             .filter( // Filter by selected tags
               (card) => {
-                return !activeTags.length ||
-                  activeTags
+                return !(activeTags || []).length ||
+                  (activeTags || [])
                     .every((tag: string) => card.props.tags.includes(tag));
               },
             )
             .filter( // Filter by search query
               (card) => {
-                return !search ||
+                return !(search || '') ||
                   card.props.title.toLowerCase()
-                    .includes(search.toLowerCase()) ||
+                    .includes((search || '').toLowerCase()) ||
                     card.props.tags.some((tag: string) => tag.toLowerCase()
-                      .includes(search.toLowerCase()));
+                      .includes((search || '').toLowerCase()));
               },
             )
             .sort( // Sort by selected sort option
               (a, b) => {
-                switch (sort) {
+                switch ((sort === null) ? 'favorites' : sort) {
                   case 'favorites':
                   case 'name-desc':
                     return b.props.title < a.props.title ? 1 : -1;
@@ -200,10 +200,10 @@ export default function SearchProvider(
             )
             .sort( // Sort by favorite status
               (a, b) => {
-                if (sort !== 'favorites') return 0;
+                if (((sort === null) ? 'favorites' : sort) !== 'favorites') return 0;
 
-                if (favs.includes(a.props.title)) return -1;
-                if (favs.includes(b.props.title)) return 1;
+                if ((favs || []).includes(a.props.title)) return -1;
+                if ((favs || []).includes(b.props.title)) return 1;
                 return 0;
               },
             )

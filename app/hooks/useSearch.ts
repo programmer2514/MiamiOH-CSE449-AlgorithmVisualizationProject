@@ -7,40 +7,38 @@ import {
  * Provides a hook to read and edit search state.
  */
 export default function useSearch() {
-  const [favs, setFavs] = useState(
-    () => {
-      if (typeof window === 'undefined') return [];
-      return JSON.parse(localStorage?.getItem('favs') || '[]');
-    },
-  );
+  const [favs, setFavs] = useState(null as string[] | null);
+  const [activeTags, setActiveTags] = useState(null as string[] | null);
+  const [sort, setSort] = useState(null as string | null);
 
-  const [activeTags, setActiveTags] = useState(
-    () => {
-      if (typeof window === 'undefined') return [];
-      return JSON.parse(localStorage?.getItem('activeTags') || '[]');
-    },
-  );
-
-  const [sort, setSort] = useState(
-    () => {
-      if (typeof window === 'undefined') return 'favorites';
-      return localStorage?.getItem('sort') || 'favorites';
-    },
-  );
-
-  const [search, setSearch] = useState(
-    () => {
-      if (typeof window === 'undefined') return '';
-      return localStorage?.getItem('search') || '';
-    },
-  );
+  const [search, setSearch] = useState(null as string | null);
 
   useEffect(() => {
+    if (favs === null) return;
     localStorage.setItem('favs', JSON.stringify(favs));
+  }, [favs]);
+
+  useEffect(() => {
+    if (activeTags === null) return;
     localStorage.setItem('activeTags', JSON.stringify(activeTags));
+  }, [activeTags]);
+
+  useEffect(() => {
+    if (sort === null) return;
     localStorage.setItem('sort', sort);
+  }, [sort]);
+
+  useEffect(() => {
+    if (search === null) return;
     localStorage.setItem('search', search);
-  }, [favs, activeTags, sort, search]);
+  }, [search]);
+
+  useEffect(() => {
+    setFavs(JSON.parse(localStorage.getItem('favs') || '[]'));
+    setActiveTags(JSON.parse(localStorage.getItem('activeTags') || '[]'));
+    setSort(localStorage.getItem('sort') || 'favorites');
+    setSearch(localStorage.getItem('search') || '');
+  }, []);
 
   return [
     favs,
