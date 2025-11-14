@@ -10,8 +10,8 @@ import TopBar from '../../app/components/TopBar';
 
 function Test() {
   const [mutable, setMutable] = useState(false);
-  const [title, setTitle] = useState('Title');
-  const [sidebar, setSidebar] = useState(false as boolean | undefined);
+  const [title, setTitle] = useState('Title' as string | null);
+  const [sidebar, setSidebar] = useState(false as boolean | null | undefined);
 
   const menuTrigger = useRef({} as HTMLElement);
   const menuPanel = useRef({} as HTMLElement);
@@ -28,8 +28,8 @@ function Test() {
         menuPanel={menuPanel}
       />
 
-      <p id="title">{title}</p>
-      <p id="sidebar">{sidebar ? 'true' : 'false'}</p>
+      <p id="title">{((title === null) ? '<unnamed>' : title)}</p>
+      <p id="sidebar">{((sidebar === null) ? true : sidebar) ? 'true' : 'false'}</p>
 
       <button id="toggle-mutable" onClick={() => setMutable(!mutable)}>Toggle Mutable</button>
       <button id="new-title" onClick={() => setTitle('New Title')}>New Title</button>

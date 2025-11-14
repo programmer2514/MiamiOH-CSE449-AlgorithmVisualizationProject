@@ -17,10 +17,10 @@ function Test() {
 
   return (
     <>
-      <p id="favs">{JSON.stringify(favs)}</p>
-      <p id="activeTags">{JSON.stringify(activeTags)}</p>
-      <p id="sort">{sort}</p>
-      <p id="search">{search}</p>
+      <p id="favs">{JSON.stringify((favs || []))}</p>
+      <p id="activeTags">{JSON.stringify((activeTags || []))}</p>
+      <p id="sort">{((sort === null) ? 'favorites' : sort)}</p>
+      <p id="search">{(search || '')}</p>
 
       <button onClick={() => setFavs(['hello'])}>Set Favs</button>
       <button onClick={() => setFavs([])}>Clear Favs</button>

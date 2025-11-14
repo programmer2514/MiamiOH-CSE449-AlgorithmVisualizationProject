@@ -6,7 +6,7 @@ import AppFrame from '../../app/components/AppFrame';
 function Test() {
   return (
     <AppFrame
-      title=""
+      title="Test"
       setTitle={undefined}
       mutable={false}
       sidebar={undefined}

@@ -8,7 +8,7 @@ function Test() {
 
   return (
     <>
-      <p>{isDark.toString()}</p>
+      <p>{(isDark || false).toString()}</p>
       <button onClick={() => setIsDark(true)}>Enable</button>
       <button onClick={() => setIsDark(false)}>Disable</button>
     </>
