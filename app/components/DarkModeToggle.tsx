@@ -26,7 +26,7 @@ export default function DarkModeToggle(
   },
 ) {
   return (
-    <div className="absolute bottom-2 right-2">
+    <div className="absolute bottom-2 left-2">
       <IconButton
         variant="ghost"
         aria-label="Toggle Dark Mode"
