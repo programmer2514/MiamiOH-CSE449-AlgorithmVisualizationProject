@@ -82,7 +82,6 @@ export default function CodePane(
         highlight={editing ? null : highlight}
         editing={editing}
         language="avp"
-        lockToState={false}
       />
     </>
   );

@@ -96,15 +96,16 @@ export default function TopBar(
           onClick={() => {
             menuTrigger.current.click();
             const interval = setInterval(() => {
-              if (menuPanel.current?.scrollTop) {
+              if (menuPanel.current.scrollTop) {
                 menuPanel.current.scrollTop = 0;
                 clearInterval(interval);
               }
             }, 10);
           }}
+          aria-haspopup="dialog"
           className="cursor-pointer"
         >
-          <Menu className="stroke-2 w-6 h-6" />
+          <Menu className="stroke-2 w-6 h-6" role="presentation" />
         </IconButton>
 
         {
@@ -114,6 +115,7 @@ export default function TopBar(
                 <span
                   ref={span}
                   className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none"
+                  aria-hidden
                 >
                   {title}
                 </span>
@@ -171,8 +173,8 @@ export default function TopBar(
                 >
                   {
                     ((sidebar === null) ? true : sidebar) ?
-                      <SidebarCollapse className="stroke-2 w-6 h-6" /> :
-                      <SidebarExpand className="stroke-2 w-6 h-6" />
+                      <SidebarCollapse className="stroke-2 w-6 h-6" role="presentation" /> :
+                      <SidebarExpand className="stroke-2 w-6 h-6" role="presentation" />
                   }
                 </IconButton>
                 <div
@@ -192,7 +194,7 @@ export default function TopBar(
           href="/wiki"
           target="_blank"
         >
-          <HelpCircle className="stroke-2 w-6 h-6" />
+          <HelpCircle className="stroke-2 w-6 h-6" role="presentation" />
         </IconButton>
       </Navbar>
     </>

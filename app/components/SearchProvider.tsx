@@ -94,8 +94,8 @@ export default function SearchProvider(
             >
               {
                 (search || '') ?
-                  <Xmark className="h-full w-full stroke-2" /> :
-                  <Search className="h-full w-full stroke-2" />
+                  <Xmark className="h-full w-full stroke-2" role="presentation" /> :
+                  <Search className="h-full w-full stroke-2" role="presentation" />
               }
             </Input.Icon>
           </Input>
@@ -120,7 +120,7 @@ export default function SearchProvider(
                   className="text-sm shadow-none cursor-pointer"
                 >
                   <Typography>{tag}</Typography>
-                  <Xmark className="h-4 w-4 stroke-2 translate-x-2" />
+                  <Xmark className="h-4 w-4 stroke-2 translate-x-2" role="presentation" />
                 </Button>
               ),
             )

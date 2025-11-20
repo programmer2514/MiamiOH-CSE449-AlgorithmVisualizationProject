@@ -36,8 +36,8 @@ export default function DarkModeToggle(
       >
         {
           (isDark || false) ?
-            <HalfMoon className="h-6 w-6 stroke-2" /> :
-            <SunLight className="h-6 w-6 stroke-2" />
+            <HalfMoon className="h-6 w-6 stroke-2" role="presentation" /> :
+            <SunLight className="h-6 w-6 stroke-2" role="presentation" />
         }
       </IconButton>
     </div>

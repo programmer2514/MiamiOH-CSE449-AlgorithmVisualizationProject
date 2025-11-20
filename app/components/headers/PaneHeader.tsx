@@ -84,7 +84,7 @@ export default function PaneHeader(
                   onClick={save}
                   className="cursor-pointer"
                 >
-                  <Check className="stroke-2 w-5 h-5" />
+                  <Check className="stroke-2 w-5 h-5" role="presentation" />
                 </IconButton>
                 <IconButton
                   variant="ghost"
@@ -93,7 +93,7 @@ export default function PaneHeader(
                   onClick={discard}
                   className="cursor-pointer"
                 >
-                  <Xmark className="stroke-2 w-5 h-5" />
+                  <Xmark className="stroke-2 w-5 h-5" role="presentation" />
                 </IconButton>
               </>
             ) :
@@ -105,7 +105,7 @@ export default function PaneHeader(
                 onClick={() => setEditing!(true)}
                 className="cursor-pointer"
               >
-                <EditPencil className="stroke-2 w-5 h-5" />
+                <EditPencil className="stroke-2 w-5 h-5" role="presentation" />
               </IconButton>
             )
         )
@@ -123,8 +123,8 @@ export default function PaneHeader(
       >
         {
           (paneHeight === minPaneHeight) ?
-            <NavArrowUp className="stroke-2 w-5 h-5" /> :
-            <NavArrowDown className="stroke-2 w-5 h-5" />
+            <NavArrowUp className="stroke-2 w-5 h-5" role="presentation" /> :
+            <NavArrowDown className="stroke-2 w-5 h-5" role="presentation" />
         }
       </IconButton>
     </header>

@@ -29,9 +29,6 @@ import ModifiedContext from '../contexts/ModifiedContext';
  *        Whether the editor is in editing mode
  * @param {string} props.language
  *        The language to use (must be either 'avp' or 'vars')
- * @param {boolean} props.lockToState
- *        Whether to lock the editor's value to the value of its src state.
- *        This will break undo/redo if enabled
  */
 export default function Monaco(
   {
@@ -41,7 +38,6 @@ export default function Monaco(
     highlight,
     editing,
     language,
-    lockToState,
   }:
   {
     name: string
@@ -50,7 +46,6 @@ export default function Monaco(
     highlight: number | [number, number] | null
     editing: boolean
     language: string
-    lockToState: boolean
   },
 ) {
   const isDark = useContext(DarkModeContext);
@@ -84,7 +79,7 @@ export default function Monaco(
       lineNumber: oldCursorPos[0],
       column: oldCursorPos[1],
     });
-  }, lockToState ? [isDark, monaco, editing, src] : [isDark, monaco, editing]);
+  }, [isDark, monaco, editing]);
 
   useEffect(() => {
     if (monaco === null || highlight === null) return;
@@ -104,7 +99,7 @@ export default function Monaco(
         ]),
       );
     }
-  }, [highlight, monaco]);
+  }, [highlight, monaco, isDark]);
 
   useEffect(() => {
     if (monaco === null) return;
@@ -119,11 +114,6 @@ export default function Monaco(
         setCursorPos(
           [e.selection.positionLineNumber, e.selection.positionColumn],
         );
-
-        if (!editing) {
-          monaco[0].setSelection(new monaco[1].Range(0, 0, 0, 0));
-          monaco[0].setPosition(new monaco[1].Position(0, 0));
-        }
       }),
     );
   }, [monaco, editing]);
@@ -158,17 +148,12 @@ export default function Monaco(
             }
 
             & .wordHighlightText,
-            & .selected-text,
             & .selectionHighlight {
               background-color: transparent !important;
             }
 
-            & .monaco-editor-overlaymessage .message {
-              padding: 0.25rem 0.5rem !important;
-
-              & p {
-                transform: translateY(-2px) !important;
-              }
+            & .monaco-editor-overlaymessage {
+              display: none !important;
             }
           }
         `}

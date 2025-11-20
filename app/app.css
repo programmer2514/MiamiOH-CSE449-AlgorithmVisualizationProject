@@ -12,7 +12,7 @@ body {
   @apply transition-colors duration-200 **:duration-200;
 }
 
-.monaco-editor *:has(> .avp-highlight) {
-  @apply bg-[#f8f800] dark:bg-[#2f2f00];
+.avp-highlight {
+  @apply bg-[dodgerblue]/15 dark:bg-[yellow]/15;
   @apply w-full!;
 }

@@ -65,6 +65,16 @@ export default function Visualizer(
     setComp,
   ] = useAlgo({ setTitle, loader });
 
+  /*
+  const [
+    numSteps,
+    step,
+    setStep,
+    stepData,
+    vars,
+  ] = useSteps(comp);
+  */
+
   const [
     codePaneHeight,
     setCodePaneHeight,

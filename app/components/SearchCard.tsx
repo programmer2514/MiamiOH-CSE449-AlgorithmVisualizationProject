@@ -100,9 +100,10 @@ export default function SearchCard(
                 <StarSolid
                   color={(isDark || false) ? 'yellow' : 'dodgerblue'}
                   className="stroke-2 w-5 h-5"
+                  role="presentation"
                 />
               ) :
-              <Star className="stroke-2 w-5 h-5" />
+              <Star className="stroke-2 w-5 h-5" role="presentation" />
           }
         </IconButton>
       </Card.Body>

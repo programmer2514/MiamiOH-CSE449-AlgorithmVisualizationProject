@@ -45,6 +45,7 @@ export default function MainMenu(
       <Drawer.Trigger
         ref={triggerRef}
         className="hidden"
+        aria-hidden
       />
       <Drawer.Overlay>
         <Drawer.Panel
@@ -77,7 +78,7 @@ export default function MainMenu(
                     <a key={text} href={href} onClick={onClick}>
                       <List.Item className="p-2 text-primary">
                         <List.ItemStart>
-                          <Icon className="h-6 w-6 stroke-2" />
+                          <Icon className="h-6 w-6 stroke-2" role="presentation" />
                         </List.ItemStart>
                         {text}
                       </List.Item>

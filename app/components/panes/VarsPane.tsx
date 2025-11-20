@@ -1,7 +1,4 @@
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { useState } from 'react';
 
 import PaneHeader from '../headers/PaneHeader';
 
@@ -35,59 +32,22 @@ export default function VarsPane(
     minPaneHeight: number
   },
 ) {
-  const [editing, setEditing] = useState(false);
   const [src, setSrc] = useState(
     `
       a1: [1, 10, 5, 6, 4, 7, 19]
       key: 4
-      Linear_Search: <function>
+      Linear_Search(a, k): <function>
     `.replaceAll(/\n\s+/g, '\n').replaceAll(/^\n+|\n+$/g, ''),
   );
-
-  const [editSrc, setEditSrc] = useState(src);
-
-  function save() {
-    setSrc(editSrc);
-    setEditing(false);
-  }
-
-  function discard() {
-    setEditSrc(src);
-    setEditing(false);
-  }
-
-  const [lastValidSrc, setLastValidSrc] = useState(editSrc);
-
-  useEffect(() => {
-    const varsList = ['a1', 'key', 'Linear_Search'];
-    const typesList = ['var', 'var', 'function'];
-
-    if (editSrc.match(new RegExp(
-      varsList.map(
-        (v, i) => {
-          switch (typesList[i]) {
-            case 'function':
-              return `${v}: <function>`;
-            default:
-              return `${v}: .*`;
-          }
-        },
-      ).join('\\n'),
-    ))) {
-      setLastValidSrc(editSrc);
-    } else {
-      setEditSrc(lastValidSrc);
-    }
-  }, [editSrc]);
 
   return (
     <>
       <PaneHeader
         title="Variables"
-        editing={editing}
-        setEditing={setEditing}
-        save={save}
-        discard={discard}
+        editing={undefined}
+        setEditing={undefined}
+        save={undefined}
+        discard={undefined}
         paneHeight={varsPaneHeight}
         setPaneHeight={setVarsPaneHeight}
         defaultPaneHeight={defaultPaneHeight}
@@ -95,12 +55,11 @@ export default function VarsPane(
       />
       <Monaco
         name="vars"
-        src={editSrc}
-        setSrc={setEditSrc}
+        src={src}
+        setSrc={setSrc}
         highlight={null}
-        editing={editing}
+        editing={false}
         language="vars"
-        lockToState={true}
       />
     </>
   );
