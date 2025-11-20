@@ -14,6 +14,7 @@ export default function useSidebarPanes() {
   const [AIPaneHeight, _setAIPaneHeight] = useState(null as number | null);
   const [defaultPaneHeight, setDefaultPaneHeight] = useState(0);
   const [maxPaneHeight, setMaxPaneHeight] = useState(0);
+
   const minPaneHeight = 42;
 
   // This variable needs a bit of explanation - essentially, it keeps track of
@@ -50,42 +51,31 @@ export default function useSidebarPanes() {
 
     if (height === minPaneHeight && hasRerendered) {
       // We are collapsing the code pane
-      if (AIPaneHeight === minPaneHeight && varsPaneHeight === minPaneHeight) {
-        // Both panes are already collapsed
-        _setVarsPaneHeight(clamp(varsNew));
-        _setCodePaneHeight(height);
-      } else if (varsPaneHeight === minPaneHeight) {
-        // The vars pane is already collapsed
+      if (varsPaneHeight === minPaneHeight && AIPaneHeight !== minPaneHeight) {
         _setAIPaneHeight(clamp(AINew));
         _setCodePaneHeight(height);
       } else {
-        // The vars pane is not collapsed
         _setVarsPaneHeight(clamp(varsNew));
         _setCodePaneHeight(height);
       }
     } else {
       // We are expanding the code pane
       if (varsPaneHeight === minPaneHeight) {
-        // The vars pane is collapsed
         _setAIPaneHeight(clamp(AINew));
         _setCodePaneHeight(height);
       } else if (AIPaneHeight === minPaneHeight) {
-        // The AI pane is collapsed
         _setVarsPaneHeight(clamp(varsNew));
         _setCodePaneHeight(height);
+      } else if (
+        Math.max(AIPaneHeight || 0, varsPaneHeight || 0) === AIPaneHeight
+      ) {
+        _setAIPaneHeight(clamp(AINew));
+        _setVarsPaneHeight((varsPaneHeight || 0) + AIDiff);
+        _setCodePaneHeight(height);
       } else {
-        // Neither pane is collapsed
-        if (Math.max(AIPaneHeight || 0, varsPaneHeight || 0) === AIPaneHeight) {
-          // The AI pane is taller
-          _setAIPaneHeight(clamp(AINew));
-          _setVarsPaneHeight((varsPaneHeight || 0) + AIDiff);
-          _setCodePaneHeight(height);
-        } else {
-          // The vars pane is taller
-          _setVarsPaneHeight(clamp(varsNew));
-          _setVarsPaneHeight((AIPaneHeight || 0) + varsDiff);
-          _setCodePaneHeight(height);
-        }
+        _setVarsPaneHeight(clamp(varsNew));
+        _setAIPaneHeight((AIPaneHeight || 0) + varsDiff);
+        _setCodePaneHeight(height);
       }
     }
     hasRerendered = false;
@@ -102,16 +92,10 @@ export default function useSidebarPanes() {
 
     if (height === minPaneHeight && hasRerendered) {
       // We are collapsing the vars pane
-      if (AIPaneHeight === minPaneHeight && codePaneHeight === minPaneHeight) {
-        // Both panes are collapsed
-        _setAIPaneHeight(clamp(AINew));
-        _setVarsPaneHeight(height);
-      } else if (AIPaneHeight === minPaneHeight) {
-        // The AI pane is collapsed
+      if (AIPaneHeight === minPaneHeight && codePaneHeight !== minPaneHeight) {
         _setCodePaneHeight(clamp(codeNew));
         _setVarsPaneHeight(height);
       } else {
-        // The AI pane is not collapsed
         _setAIPaneHeight(clamp(AINew));
         _setVarsPaneHeight(height);
       }
@@ -121,26 +105,21 @@ export default function useSidebarPanes() {
     ) {
       // We are expanding the vars pane
       if (AIPaneHeight === minPaneHeight) {
-        // The AI pane is collapsed
         _setCodePaneHeight(clamp(codeNew));
         _setVarsPaneHeight(height);
       } else if (codePaneHeight === minPaneHeight) {
-        // The code pane is collapsed
         _setAIPaneHeight(clamp(AINew));
         _setVarsPaneHeight(height);
+      } else if (
+        Math.max(AIPaneHeight || 0, codePaneHeight || 0) === AIPaneHeight
+      ) {
+        _setAIPaneHeight(clamp(AINew));
+        _setCodePaneHeight((codePaneHeight || 0) + AIDiff);
+        _setVarsPaneHeight(height);
       } else {
-        // Neither pane is collapsed
-        if (Math.max(AIPaneHeight || 0, codePaneHeight || 0) === AIPaneHeight) {
-          // The AI pane is taller
-          _setAIPaneHeight(clamp(AINew));
-          _setCodePaneHeight((codePaneHeight || 0) + AIDiff);
-          _setVarsPaneHeight(height);
-        } else {
-          // The code pane is taller
-          _setCodePaneHeight(clamp(codeNew));
-          _setCodePaneHeight((AIPaneHeight || 0) + codeDiff);
-          _setVarsPaneHeight(height);
-        }
+        _setCodePaneHeight(clamp(codeNew));
+        _setAIPaneHeight((AIPaneHeight || 0) + codeDiff);
+        _setVarsPaneHeight(height);
       }
     } else {
       // We are resizing the vars pane
@@ -162,11 +141,9 @@ export default function useSidebarPanes() {
     if (height === minPaneHeight && hasRerendered) {
       // We are collapsing the AI pane
       if (varsPaneHeight === minPaneHeight) {
-        // The vars pane is collapsed
         _setCodePaneHeight(clamp(codeNew));
         _setAIPaneHeight(height);
       } else {
-        // The vars pane is not collapsed
         _setVarsPaneHeight(clamp(varsNew));
         _setAIPaneHeight(height);
       }
@@ -176,59 +153,29 @@ export default function useSidebarPanes() {
     ) {
       // We are expanding the AI pane
       if (varsPaneHeight === minPaneHeight) {
-        // The vars pane is collapsed
         _setCodePaneHeight(clamp(codeNew));
         _setAIPaneHeight(height);
       } else if (codePaneHeight === minPaneHeight) {
-        // The code pane is collapsed
         _setVarsPaneHeight(clamp(varsNew));
         _setAIPaneHeight(height);
+      } else if (
+        Math.max(varsPaneHeight || 0, codePaneHeight || 0) === varsPaneHeight
+      ) {
+        _setVarsPaneHeight(clamp(varsNew));
+        _setCodePaneHeight((codePaneHeight || 0) + varsDiff);
+        _setAIPaneHeight(height);
       } else {
-        // Neither pane is collapsed
-        if (
-          Math.max(varsPaneHeight || 0, codePaneHeight || 0) === varsPaneHeight
-        ) {
-          // The vars pane is taller
-          _setVarsPaneHeight(clamp(varsNew));
-          _setCodePaneHeight((codePaneHeight || 0) + varsDiff);
-          _setAIPaneHeight(height);
-        } else {
-          // The code pane is taller
-          _setCodePaneHeight(clamp(codeNew));
-          _setCodePaneHeight((varsPaneHeight || 0) + codeDiff);
-          _setAIPaneHeight(height);
-        }
+        _setCodePaneHeight(clamp(codeNew));
+        _setVarsPaneHeight((varsPaneHeight || 0) + codeDiff);
+        _setAIPaneHeight(height);
       }
     } else {
-      // The vars pane is not collapsed
+      // We are resizing the AI pane
       _setVarsPaneHeight(clamp(varsNew));
       _setAIPaneHeight(height + varsDiff);
     }
-
     hasRerendered = false;
   }
-
-  useEffect(() => {
-    if (codePaneHeight === null) return;
-    localStorage.setItem('codePaneHeight', codePaneHeight.toString());
-  }, [codePaneHeight]);
-
-  useEffect(() => {
-    if (varsPaneHeight === null) return;
-
-    localStorage.setItem('varsPaneHeight', varsPaneHeight.toString());
-  }, [varsPaneHeight]);
-
-  useEffect(() => {
-    if (AIPaneHeight === null) return;
-
-    localStorage.setItem('AIPaneHeight', AIPaneHeight.toString());
-  }, [AIPaneHeight]);
-
-  useEffect(() => {
-    window.addEventListener('resize', updateDefaults);
-    updateDefaults();
-  }, []);
 
   useEffect(() => {
     if (defaultPaneHeight === 0) return;
@@ -257,6 +204,28 @@ export default function useSidebarPanes() {
       ),
     );
   }, [defaultPaneHeight, maxPaneHeight]);
+
+  useEffect(() => {
+    if (codePaneHeight === null) return;
+    localStorage.setItem('codePaneHeight', codePaneHeight.toString());
+  }, [codePaneHeight]);
+
+  useEffect(() => {
+    if (varsPaneHeight === null) return;
+
+    localStorage.setItem('varsPaneHeight', varsPaneHeight.toString());
+  }, [varsPaneHeight]);
+
+  useEffect(() => {
+    if (AIPaneHeight === null) return;
+
+    localStorage.setItem('AIPaneHeight', AIPaneHeight.toString());
+  }, [AIPaneHeight]);
+
+  useEffect(() => {
+    window.addEventListener('resize', updateDefaults);
+    updateDefaults();
+  }, []);
 
   return [
     codePaneHeight,
