@@ -1,7 +1,7 @@
 import { render } from 'vitest-browser-react';
 import { expect, test, describe } from 'vitest';
 
-import AppFrame from '../../app/components/AppFrame';
+import AppFrame from '../../app/components/frames/AppFrame';
 
 function Test() {
   return (
@@ -40,7 +40,7 @@ describe('Test component: <AppFrame />', async () => {
   test('Ensure DarkModeToggle is rendered', async () => {
     const screen = await render(<Test />);
 
-    await expect(screen.baseElement.querySelector('footer button[aria-label="Toggle Dark Mode"]')).toBeInTheDocument();
+    await expect(screen.baseElement.querySelector('footer button[aria-label$="Dark Mode"]')).toBeInTheDocument();
   });
 
   test('Ensure TopBar can open and close MainMenu', async () => {

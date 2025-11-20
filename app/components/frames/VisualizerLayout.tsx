@@ -1,6 +1,4 @@
-import ResizeHandle from './ResizeHandle';
-
-import useSidebarPanes from '../hooks/useSidebarPanes';
+import ResizeHandle from '../ResizeHandle';
 
 /**
  * Renders a visualizer complete with collapsible sidebar. Includes animation,
@@ -8,6 +6,34 @@ import useSidebarPanes from '../hooks/useSidebarPanes';
  *
  * @param {Object} props
  *        React props
+ * @param {boolean | null} props.sidebar
+ *        Whether the sidebar is toggled
+ * @param {number} props.sidebarDefaultWidth
+ *        The default width in px of the sidebar
+ * @param {number} props.sidebarMinWidth
+ *        The minimum width in px of the sidebar
+ * @param {number} props.sidebarMaxWidth
+ *        The maximum width in px of the sidebar
+ * @param {number | null} props.sidebarWidth
+ *        The current width in px of the sidebar
+ * @param {function} props.setSidebarWidth
+ *        A function to update the width of the sidebar
+ * @param {number | null} props.codePaneHeight
+ *        The height in px of the code pane
+ * @param {number | null} props.varsPaneHeight
+ *        The height in px of the variables pane
+ * @param {function} props.setVarsPaneHeight
+ *        A function to update the height of the variables pane
+ * @param {number | null} props.AIPaneHeight
+ *        The height in px of the AI pane
+ * @param {function} props.setAIPaneHeight
+ *        A function to update the height of the AI pane
+ * @param {number} props.defaultPaneHeight
+ *        The default height in px of a pane
+ * @param {number} props.minPaneHeight
+ *        The minimum height in px of a pane
+ * @param {number} props.maxPaneHeight
+ *        The maximum height in px of a pane
  */
 export default function VisualizerLayout(
   {
@@ -17,6 +43,14 @@ export default function VisualizerLayout(
     sidebarMaxWidth,
     sidebarWidth,
     setSidebarWidth,
+    codePaneHeight,
+    varsPaneHeight,
+    setVarsPaneHeight,
+    AIPaneHeight,
+    setAIPaneHeight,
+    defaultPaneHeight,
+    minPaneHeight,
+    maxPaneHeight,
     children,
   }:
   {
@@ -26,20 +60,17 @@ export default function VisualizerLayout(
     sidebarMaxWidth: number
     sidebarWidth: number | null
     setSidebarWidth: (width: number | null) => void
+    codePaneHeight: number | null
+    varsPaneHeight: number | null
+    setVarsPaneHeight: (height: number) => void
+    AIPaneHeight: number | null
+    setAIPaneHeight: (height: number) => void
+    defaultPaneHeight: number
+    minPaneHeight: number
+    maxPaneHeight: number
     children: React.ReactNode[]
   },
 ) {
-  const [
-    codePaneHeight,
-    varsPaneHeight,
-    setVarsPaneHeight,
-    AIPaneHeight,
-    setAIPaneHeight,
-    defaultPaneHeight,
-    minPaneHeight,
-    maxPaneHeight,
-  ] = useSidebarPanes();
-
   return (
     <>
       <div className="flex w-full h-full">
@@ -55,6 +86,7 @@ export default function VisualizerLayout(
               <ResizeHandle
                 position="left"
                 size={sidebarWidth}
+                otherSize={sidebarMaxWidth}
                 setSize={setSidebarWidth}
                 defaultSize={sidebarDefaultWidth}
                 minSize={sidebarMinWidth}
@@ -73,6 +105,7 @@ export default function VisualizerLayout(
                 <ResizeHandle
                   position="top"
                   size={varsPaneHeight}
+                  otherSize={codePaneHeight}
                   setSize={setVarsPaneHeight}
                   defaultSize={defaultPaneHeight}
                   minSize={minPaneHeight}
@@ -87,6 +120,7 @@ export default function VisualizerLayout(
                 <ResizeHandle
                   position="top"
                   size={AIPaneHeight}
+                  otherSize={varsPaneHeight}
                   setSize={setAIPaneHeight}
                   defaultSize={defaultPaneHeight}
                   minSize={minPaneHeight}

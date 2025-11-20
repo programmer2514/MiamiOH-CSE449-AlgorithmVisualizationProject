@@ -85,13 +85,14 @@ export default function SearchCard(
         <IconButton
           variant="ghost"
           aria-label={(favs || []).includes(title) ? 'Remove from favorites' : 'Add to favorites'}
+          title={(favs || []).includes(title) ? 'Remove from favorites' : 'Add to favorites'}
           onClick={
             (e) => {
               toggleFav(title);
               e.preventDefault();
             }
           }
-          className="translate-x-2 border-0 hover:bg-transparent"
+          className="translate-x-2 border-0 hover:bg-transparent cursor-pointer"
         >
           {
             (favs || []).includes(title) ?
@@ -119,8 +120,9 @@ export default function SearchCard(
                     e.preventDefault();
                   }
                 }
-                aria-label={`Toggle "${tag}" tag`}
-                className={`text-xs shadow-none ${(activeTags || []).includes(tag) && 'bg-primary text-primary-foreground'}`}
+                aria-label={`Toggle "${tag}" tag filter`}
+                title={`Toggle "${tag}" tag filter`}
+                className={`text-xs shadow-none ${(activeTags || []).includes(tag) && 'bg-primary text-primary-foreground'} cursor-pointer`}
               >
                 {tag}
               </Button>

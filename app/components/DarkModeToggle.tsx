@@ -29,7 +29,8 @@ export default function DarkModeToggle(
     <div className="absolute bottom-2 left-2">
       <IconButton
         variant="ghost"
-        aria-label="Toggle Dark Mode"
+        aria-label={`${isDark ? 'Disable' : 'Enable'} Dark Mode`}
+        title={`${isDark ? 'Disable' : 'Enable'} Dark Mode`}
         onClick={() => setIsDark(!(isDark || false))}
         className={`${floating ? 'opacity-50' : 'opacity-100'} hover:opacity-100 focus-visible:opacity-100 active:opacity-100 transition-opacity cursor-pointer`}
       >

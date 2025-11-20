@@ -9,8 +9,9 @@ import {
   ShareIos,
 } from 'iconoir-react';
 
+import AppFrame from '../components/frames/AppFrame';
+
 import PageMeta from '../components/PageMeta';
-import AppFrame from '../components/AppFrame';
 import Visualizer from '../components/Visualizer';
 
 import useTitle from '../hooks/useTitle';
@@ -37,7 +38,7 @@ export default function Run() {
   return (
     <>
       <PageMeta
-        title={((title === null) ? '<unnamed>' : title)}
+        title={title}
         description="Visualize and learn about this algorithm for free."
       />
       <AppFrame

@@ -1,14 +1,16 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 import { Iconoir } from 'iconoir-react';
 
-import TopBar from './TopBar';
-import MainMenu from './MainMenu';
-import DarkModeToggle from './DarkModeToggle';
+import TopBar from '../headers/TopBar';
 
-import useDarkMode from '../hooks/useDarkMode';
+import MainMenu from '../MainMenu';
+import DarkModeToggle from '../DarkModeToggle';
 
-import DarkModeContext from '../contexts/DarkModeContext';
+import useDarkMode from '../../hooks/useDarkMode';
+
+import ModifiedContext from '../../contexts/ModifiedContext';
+import DarkModeContext from '../../contexts/DarkModeContext';
 
 /**
  * Renders the main app frame around the passed children elements.
@@ -18,7 +20,7 @@ import DarkModeContext from '../contexts/DarkModeContext';
  *
  * @param {Object} props
  *        React props
- * @param {string | null} props.title
+ * @param {string} props.title
  *        The title to display in the header
  * @param {function | undefined} props.setTitle
  *        A function to update the header title
@@ -44,11 +46,11 @@ export default function AppFrame(
     children,
   }:
   {
-    title: string | null
-    setTitle: ((title: string | null) => void) | undefined
+    title: string
+    setTitle: ((title: string) => void) | undefined
     mutable: boolean
     sidebar: boolean | null | undefined
-    setSidebar: ((value: boolean | null) => void) | undefined
+    setSidebar: ((sidebar: boolean | null) => void) | undefined
     menuLinks: {
       icon: typeof Iconoir
       text: string
@@ -60,6 +62,7 @@ export default function AppFrame(
   },
 ) {
   const [isDark, setIsDark] = useDarkMode();
+  const [modified, setModified] = useState(false as boolean | null);
 
   const drawerTrigger = useRef<HTMLElement>(
     { click: () => {} } as HTMLElement,
@@ -70,41 +73,43 @@ export default function AppFrame(
 
   return (
     <DarkModeContext value={isDark || false}>
-      {
-        ((title === null) ? '<unnamed>' : title) ?
-          (
-            <header>
-              <TopBar
-                title={title}
-                setTitle={setTitle}
-                mutable={mutable}
-                sidebar={sidebar}
-                setSidebar={setSidebar}
-                menuTrigger={drawerTrigger}
-                menuPanel={drawerPanel}
-              />
-            </header>
-          ) :
-          <></>
-      }
+      <ModifiedContext value={[modified, setModified]}>
+        {
+          title ?
+            (
+              <header>
+                <TopBar
+                  title={title}
+                  setTitle={setTitle}
+                  mutable={mutable}
+                  sidebar={sidebar}
+                  setSidebar={setSidebar}
+                  menuTrigger={drawerTrigger}
+                  menuPanel={drawerPanel}
+                />
+              </header>
+            ) :
+            <></>
+        }
 
-      <MainMenu
-        triggerRef={drawerTrigger}
-        panelRef={drawerPanel}
-        links={menuLinks}
-      />
-
-      <main className="h-[calc(100%-3.5rem+1px)]">
-        {children}
-      </main>
-
-      <footer>
-        <DarkModeToggle
-          floating={!mutable}
-          isDark={isDark}
-          setIsDark={setIsDark}
+        <MainMenu
+          triggerRef={drawerTrigger}
+          panelRef={drawerPanel}
+          links={menuLinks}
         />
-      </footer>
+
+        <main className="h-[calc(100%-3.5rem+1px)]">
+          {children}
+        </main>
+
+        <footer>
+          <DarkModeToggle
+            floating={!mutable}
+            isDark={isDark}
+            setIsDark={setIsDark}
+          />
+        </footer>
+      </ModifiedContext>
     </DarkModeContext>
   );
 }

@@ -98,17 +98,8 @@ export default {
     rules: [],
     colors: {
       'editor.background': '#020617',
+      'editorHoverWidget.background': '#020617',
       'editor.lineHighlightBorder': '#1e293b',
-    },
-  } as monaco.editor.IStandaloneThemeData,
-
-  AVPDarkReadOnlyTheme: {
-    base: 'vs-dark',
-    inherit: true,
-    rules: [],
-    colors: {
-      'editor.background': '#020617',
-      'editor.lineHighlightBorder': '#00000000',
     },
   } as monaco.editor.IStandaloneThemeData,
 
@@ -118,17 +109,9 @@ export default {
     rules: [],
     colors: {
       'editor.background': '#ffffff',
+      'editorHoverWidget.background': '#ffffff',
+      'editorHoverWidget.foreground': '#1e293b',
       'editor.lineHighlightBorder': '#e2e8f0',
-    },
-  } as monaco.editor.IStandaloneThemeData,
-
-  AVPLightReadOnlyTheme: {
-    base: 'vs',
-    inherit: true,
-    rules: [],
-    colors: {
-      'editor.background': '#ffffff',
-      'editor.lineHighlightBorder': '#00000000',
     },
   } as monaco.editor.IStandaloneThemeData,
 } as const;

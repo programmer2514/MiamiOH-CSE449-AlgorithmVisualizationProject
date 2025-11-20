@@ -27,10 +27,10 @@ describe('Test component: <DarkModeToggle />', async () => {
   test('Ensure button can toggle dark mode', async () => {
     const screen = await render(<Test />);
 
-    await (screen.baseElement.querySelector('button[aria-label="Toggle Dark Mode"]') as HTMLButtonElement | null)?.click();
+    await (screen.baseElement.querySelector('button[aria-label$="Dark Mode"]') as HTMLButtonElement | null)?.click();
     await expect(screen.baseElement.classList.contains('dark')).toBe(true);
 
-    await (screen.baseElement.querySelector('button[aria-label="Toggle Dark Mode"]') as HTMLButtonElement | null)?.click();
+    await (screen.baseElement.querySelector('button[aria-label$="Dark Mode"]') as HTMLButtonElement | null)?.click();
     await expect(screen.baseElement.classList.contains('dark')).toBe(false);
   });
 
@@ -38,13 +38,13 @@ describe('Test component: <DarkModeToggle />', async () => {
     const screen = await render(<Test />);
 
     await screen.getByText('Set Floating').click();
-    await expect(screen.baseElement.querySelector('button[aria-label="Toggle Dark Mode"]')?.classList.contains('opacity-50')).toBe(true);
+    await expect(screen.baseElement.querySelector('button[aria-label$="Dark Mode"]')?.classList.contains('opacity-50')).toBe(true);
   });
 
   test('Ensure non-floating button has correct opacity', async () => {
     const screen = await render(<Test />);
 
     await screen.getByText('Set Not Floating').click();
-    await expect(screen.baseElement.querySelector('button[aria-label="Toggle Dark Mode"]')?.classList.contains('opacity-100')).toBe(true);
+    await expect(screen.baseElement.querySelector('button[aria-label$="Dark Mode"]')?.classList.contains('opacity-100')).toBe(true);
   });
 });

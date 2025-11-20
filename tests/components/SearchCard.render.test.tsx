@@ -60,16 +60,16 @@ describe('Test component: <SearchCard />', async () => {
   test('Ensure toggling tags works', async () => {
     const screen = await render(<Test />);
 
-    await (screen.baseElement.querySelector('button[aria-label="Toggle \\"Tag 1\\" tag"]') as HTMLButtonElement | null)?.click();
+    await (screen.baseElement.querySelector('button[aria-label="Toggle \\"Tag 1\\" tag filter"]') as HTMLButtonElement | null)?.click();
     await expect(screen.baseElement.querySelector('#activeTags')).toHaveTextContent('Tag 1');
 
-    await (screen.baseElement.querySelector('button[aria-label="Toggle \\"Tag 2\\" tag"]') as HTMLButtonElement | null)?.click();
+    await (screen.baseElement.querySelector('button[aria-label="Toggle \\"Tag 2\\" tag filter"]') as HTMLButtonElement | null)?.click();
     await expect(screen.baseElement.querySelector('#activeTags')).toHaveTextContent('Tag 1,Tag 2');
 
-    await (screen.baseElement.querySelector('button[aria-label="Toggle \\"Tag 1\\" tag"]') as HTMLButtonElement | null)?.click();
+    await (screen.baseElement.querySelector('button[aria-label="Toggle \\"Tag 1\\" tag filter"]') as HTMLButtonElement | null)?.click();
     await expect(screen.baseElement.querySelector('#activeTags')).toHaveTextContent('Tag 2');
 
-    await (screen.baseElement.querySelector('button[aria-label="Toggle \\"Tag 2\\" tag"]') as HTMLButtonElement | null)?.click();
+    await (screen.baseElement.querySelector('button[aria-label="Toggle \\"Tag 2\\" tag filter"]') as HTMLButtonElement | null)?.click();
     await expect(screen.baseElement.querySelector('#activeTags')).toHaveTextContent('');
   });
 });

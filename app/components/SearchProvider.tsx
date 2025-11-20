@@ -109,13 +109,15 @@ export default function SearchProvider(
                   key={tag}
                   size="sm"
                   variant="outline"
+                  aria-label={`Remove ${tag} tag filter`}
+                  title={`Remove ${tag} tag filter`}
                   onClick={
                     (e) => {
                       toggleTag(tag);
                       e.preventDefault();
                     }
                   }
-                  className="text-sm shadow-none"
+                  className="text-sm shadow-none cursor-pointer"
                 >
                   <Typography>{tag}</Typography>
                   <Xmark className="h-4 w-4 stroke-2 translate-x-2" />
@@ -130,18 +132,23 @@ export default function SearchProvider(
         <Typography
           as="label"
           htmlFor="sort-options"
-          className="pr-2 text-foreground/70 hover:text-foreground"
+          className="pr-2 text-foreground/70 hover:text-foreground cursor-pointer"
         >
           Sort&nbsp;by:
         </Typography>
 
-        <Select value={((sort === null) ? 'favorites' : sort)} onValueChange={setSort}>
+        <Select
+          value={((sort === null) ? 'favorites' : sort)}
+          onValueChange={setSort}
+        >
           <Select.Trigger
             id="sort-options"
             placeholder="Select..."
-            className="w-44 shadow-none"
+            aria-label="Select sort order"
+            title="Select sort order"
+            className="w-44 shadow-none cursor-pointer"
           />
-          <Select.List>
+          <Select.List className="*:cursor-pointer">
             <Select.Option value="favorites">Sort: Favorites</Select.Option>
             <Select.Option value="name-desc">Sort: Name (Desc)</Select.Option>
             <Select.Option value="name-asc">Sort: Name (Asc)</Select.Option>

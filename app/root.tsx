@@ -113,7 +113,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
           variant="outline"
           size="xl"
           href="/"
-          className="text-xl text-primary font-light mt-[12.5vh]"
+          className="text-xl text-primary font-light mt-[12.5vh] cursor-pointer"
         >
           <ArrowLeft className="w-6 h-6 stroke-2 mr-3 -ml-1" />
           Go Home

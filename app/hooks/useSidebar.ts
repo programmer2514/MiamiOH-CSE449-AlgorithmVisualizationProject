@@ -13,6 +13,12 @@ export default function useSidebar() {
   const [sidebarMinWidth, setSidebarMinWidth] = useState(0);
   const [sidebarMaxWidth, setSidebarMaxWidth] = useState(0);
 
+  function updateDefaults() {
+    setSidebarDefaultWidth(window.innerWidth / 3);
+    setSidebarMinWidth(window.innerWidth / 6);
+    setSidebarMaxWidth(window.innerWidth * 3 / 4);
+  }
+
   useEffect(() => {
     if (sidebar === null) return;
     localStorage.setItem('sidebar', sidebar.toString());
@@ -30,17 +36,23 @@ export default function useSidebar() {
         localStorage.getItem('sidebar') === 'true',
     );
 
+    window.addEventListener('resize', updateDefaults);
+    updateDefaults();
+  }, []);
+
+  useEffect(() => {
+    if (sidebarDefaultWidth === 0) return;
+
     setSidebarWidth(
-      parseInt(
-        localStorage.getItem('sidebarWidth') ||
-        (window.innerWidth / 3).toString(),
+      Math.min(
+        Math.max(
+          parseInt(localStorage.getItem('sidebarWidth') || '0') || sidebarDefaultWidth,
+          sidebarMinWidth,
+        ),
+        sidebarMaxWidth,
       ),
     );
-
-    setSidebarDefaultWidth(window.innerWidth / 3);
-    setSidebarMinWidth(window.innerWidth / 6);
-    setSidebarMaxWidth(window.innerWidth * 3 / 4);
-  }, []);
+  }, [sidebarDefaultWidth, sidebarMinWidth, sidebarMaxWidth]);
 
   return [
     sidebar,

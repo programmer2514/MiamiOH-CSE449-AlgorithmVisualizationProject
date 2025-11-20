@@ -9,8 +9,9 @@ import {
 
 import Globals from '../globals';
 
+import AppFrame from '../components/frames/AppFrame';
+
 import PageMeta from '../components/PageMeta';
-import AppFrame from '../components/AppFrame';
 import SearchProvider from '../components/SearchProvider';
 
 import PlaceholderImg from '../resources/img/placeholder.png';
@@ -139,7 +140,7 @@ export default function Index() {
                   'Fancy Information',
                   'Algorithm',
                 ],
-                href: '/run',
+                href: '/run?algo=linear_search',
               },
             ]
           }

@@ -1,5 +1,5 @@
 import React, {
-  useEffect,
+  useContext,
   useLayoutEffect,
   useRef,
   useState,
@@ -19,7 +19,9 @@ import {
   SidebarExpand,
 } from 'iconoir-react';
 
-import FlexSpacer from './FlexSpacer';
+import FlexSpacer from '../FlexSpacer';
+
+import ModifiedContext from '../../contexts/ModifiedContext';
 
 /**
  * Renders the title and navigation bar.
@@ -29,7 +31,7 @@ import FlexSpacer from './FlexSpacer';
  *
  * @param {Object} props
  *        React props
- * @param {string | null} props.title
+ * @param {string} props.title
  *        The title to display
  * @param {function | undefined} props.setTitle
  *        A function to update the title
@@ -55,8 +57,8 @@ export default function TopBar(
     menuPanel,
   }:
   {
-    title: string | null
-    setTitle: ((title: string | null) => void) | undefined
+    title: string
+    setTitle: ((title: string) => void) | undefined
     mutable: boolean
     sidebar: boolean | null | undefined
     setSidebar: ((value: boolean | null) => void) | undefined
@@ -64,44 +66,24 @@ export default function TopBar(
     menuPanel: React.RefObject<HTMLElement>
   },
 ) {
+  const [modified, setModified] = useContext(ModifiedContext);
+
   const [width, setWidth] = useState(0);
 
-  const span = useRef({ offsetWidth: 0 } as HTMLPreElement);
+  const span = useRef({ offsetWidth: 0 } as HTMLSpanElement);
   const input = useRef({ value: '' } as HTMLInputElement);
 
   if (setTitle) {
-    // This is a bit hacky but it's the only reliable method I can find.
-    // Subscribes an interval on page load that updates the width of the input
-    // box every 100ms until the it remains the same for 1 full second.
-    useEffect(() => {
-      let prevWidth = 0;
-      let sameCount = 0;
-
-      const interval = setInterval(() => {
-        if (span.current?.offsetWidth ?? 0 == prevWidth) {
-          sameCount++;
-          if (sameCount == 10) {
-            clearInterval(interval);
-          }
-
-          return;
-        }
-
-        setWidth(span.current?.offsetWidth ?? 0);
-        prevWidth = span.current?.offsetWidth ?? 0;
-      }, 100);
-    }, []);
-
     // Using a layout effect here to avoid jittery repaints while typing
     useLayoutEffect(() => {
       // If the content is empty, set it to '<unnamed>' to avoid 0-width input
-      if (((title === null) ? '<unnamed>' : title).length === 0) {
+      if (title.length === 0) {
         setTitle('<unnamed>');
         input.current.value = '<unnamed>';
       }
 
       setWidth(span.current?.offsetWidth ?? 0);
-    }, [title]);
+    }, [title, span]);
   }
 
   return (
@@ -110,6 +92,7 @@ export default function TopBar(
         <IconButton
           variant="ghost"
           aria-label="Main Menu"
+          title="Main Menu"
           onClick={() => {
             menuTrigger.current.click();
             const interval = setInterval(() => {
@@ -119,6 +102,7 @@ export default function TopBar(
               }
             }, 10);
           }}
+          className="cursor-pointer"
         >
           <Menu className="stroke-2 w-6 h-6" />
         </IconButton>
@@ -126,26 +110,46 @@ export default function TopBar(
         {
           mutable && setTitle ?
             (
-              <>
-                <pre ref={span} className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none">{((title === null) ? '<unnamed>' : title)}</pre>
+              <div className="flex items-center">
+                <span
+                  ref={span}
+                  className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none"
+                >
+                  {title}
+                </span>
                 <Input
                   ref={input}
                   type="text"
                   size="lg"
-                  defaultValue={((title === null) ? '<unnamed>' : title)}
+                  defaultValue={title}
                   className="text-lg! font-medium ml-1 border-0 shadow-none p-1 transition-none"
                   style={{ width }}
-                  onChange={event => setTitle(event.target.value)}
+                  onChange={
+                    (event) => {
+                      setTitle(event.target.value);
+                      setModified(true);
+                    }
+                  }
                   aria-label="Algorithm name"
                 />
-              </>
+                {
+                  modified && (
+                    <Typography
+                      type="h2"
+                      className="text-sm! font-light opacity-50 ml-2 pointer-events-none"
+                    >
+                      Modified
+                    </Typography>
+                  )
+                }
+              </div>
             ) :
             (
               <Typography
                 type="h1"
                 className="text-lg! font-medium ml-2"
               >
-                {((title === null) ? '<unnamed>' : title)}
+                {title}
               </Typography>
             )
         }
@@ -159,7 +163,8 @@ export default function TopBar(
                 <IconButton
                   variant="ghost"
                   aria-label="Toggle Sidebar"
-                  className="-scale-x-100"
+                  title="Toggle Sidebar"
+                  className="-scale-x-100 cursor-pointer"
                   onClick={
                     () => setSidebar(!((sidebar === null) ? true : sidebar))
                   }
@@ -183,6 +188,7 @@ export default function TopBar(
           as="a"
           variant="ghost"
           aria-label="Get Help"
+          title="Get Help"
           href="/wiki"
           target="_blank"
         >

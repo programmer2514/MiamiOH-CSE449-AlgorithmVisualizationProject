@@ -6,8 +6,11 @@
  *        React props
  * @param {string} props.position
  *        The position of the resize handle. Must be either "top" or "left"
- * @param {number} props.size
+ * @param {number | null} props.size
  *        The current size in px of the element being resized
+ * @param {number | null} props.otherSize
+ *        The current size in px of the element on the other side of the resize
+ *        handle from the element being resized
  * @param {function} props.setSize
  *        A function to update the size of the element being resized
  * @param {number} props.defaultSize
@@ -21,6 +24,7 @@ export default function ResizeHandle(
   {
     position,
     size,
+    otherSize,
     setSize,
     defaultSize,
     minSize,
@@ -29,7 +33,8 @@ export default function ResizeHandle(
   {
     position: string
     size: number | null
-    setSize: (size: number | null) => void
+    otherSize: number | null
+    setSize: (size: number) => void
     defaultSize: number
     minSize: number
     maxSize: number
@@ -61,7 +66,22 @@ export default function ResizeHandle(
     const offset = (position === 'top') ? e.clientY : e.clientX;
     const newSize = (size || 0) + (dragging - offset);
 
-    setSize(Math.min(Math.max(newSize, minSize), maxSize));
+    const newOtherSize = (otherSize || 0) - (dragging - offset);
+    const diff = newOtherSize - minSize;
+
+    setSize(
+      Math.min(
+        Math.max(
+          newSize + (
+            (diff >= 0) ?
+              0 :
+              diff
+          ),
+          minSize,
+        ),
+        maxSize,
+      ),
+    );
   }
 
   function mouseUpLeft(e: MouseEvent) {
