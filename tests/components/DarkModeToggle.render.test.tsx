@@ -15,6 +15,7 @@ function Test() {
         floating={floating}
         isDark={isDark}
         setIsDark={setIsDark}
+        showInPortrait={true}
       />
 
       <button onClick={() => setFloating(true)}>Set Floating</button>

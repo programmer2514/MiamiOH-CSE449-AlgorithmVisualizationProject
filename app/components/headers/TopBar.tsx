@@ -95,7 +95,7 @@ export default function TopBar(
         onClick={() => {
           menuTrigger.current.click();
           const interval = setInterval(() => {
-            if (menuPanel.current.scrollTop) {
+            if (menuPanel.current?.scrollTop) {
               menuPanel.current.scrollTop = 0;
               clearInterval(interval);
             }

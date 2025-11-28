@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import TopBar from '../../app/components/TopBar';
+import TopBar from '../../../app/components/headers/TopBar';
 
 function Test() {
   const [mutable, setMutable] = useState(false);
@@ -49,7 +49,7 @@ describe('Test component: <TopBar />', async () => {
     const screen = await render(<Test />);
     await (screen.baseElement.querySelector('#toggle-mutable') as HTMLButtonElement | null)?.click();
 
-    await expect(screen.baseElement.querySelector('pre')).toHaveTextContent('Title');
+    await expect(screen.baseElement.querySelector('span')).toHaveTextContent('Title');
   });
 
   test('Ensure title updates with setTitle when mutable', async () => {
@@ -57,18 +57,18 @@ describe('Test component: <TopBar />', async () => {
     await (screen.baseElement.querySelector('#toggle-mutable') as HTMLButtonElement | null)?.click();
 
     await (screen.baseElement.querySelector('#new-title') as HTMLButtonElement | null)?.click();
-    await expect(screen.baseElement.querySelector('pre')).toHaveTextContent('New Title');
+    await expect(screen.baseElement.querySelector('span')).toHaveTextContent('New Title');
   });
 
   test('Ensure title width dynamically matches text content when mutable', async () => {
     const screen = await render(<Test />);
 
     await expect(screen.baseElement.querySelector('input[type="text"]')?.getBoundingClientRect().width)
-      .toBe(screen.baseElement.querySelector('pre')?.getBoundingClientRect().width);
+      .toBe(screen.baseElement.querySelector('span')?.getBoundingClientRect().width);
 
     await (screen.baseElement.querySelector('#new-title') as HTMLButtonElement | null)?.click();
     await expect(screen.baseElement.querySelector('input[type="text"]')?.getBoundingClientRect().width)
-      .toBe(screen.baseElement.querySelector('pre')?.getBoundingClientRect().width);
+      .toBe(screen.baseElement.querySelector('span')?.getBoundingClientRect().width);
   });
 
   test('Ensure sidebar toggle updates sidebar state', async () => {
