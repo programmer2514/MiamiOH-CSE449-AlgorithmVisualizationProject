@@ -9,12 +9,17 @@ import { Iconoir } from 'iconoir-react';
 import Globals from '../globals';
 
 import FlexSpacer from './FlexSpacer';
+import DarkModeToggle from './DarkModeToggle';
 
 /**
  * Renders the main menu sidebar panel.
  *
  * @param {Object} props
  *        React props
+ * @param {boolean | null} props.isDark
+ *        Whether dark mode is enabled or not
+ * @param {function} props.setIsDark
+ *        A function to update the dark mode state
  * @param {React.RefObject} props.triggerRef
  *        An element reference that opens the main menu on click
  * @param {React.RefObject} props.panelRef
@@ -24,11 +29,15 @@ import FlexSpacer from './FlexSpacer';
  */
 export default function MainMenu(
   {
+    isDark,
+    setIsDark,
     triggerRef,
     panelRef,
     links,
   }:
   {
+    isDark: boolean | null
+    setIsDark: ((value: boolean | null) => void)
     triggerRef: React.RefObject<HTMLElement>
     panelRef: React.RefObject<HTMLElement>
     links: {
@@ -47,13 +56,13 @@ export default function MainMenu(
         className="hidden"
         aria-hidden
       />
-      <Drawer.Overlay>
+      <Drawer.Overlay className="bg-[#000004]/50">
         <Drawer.Panel
           ref={panelRef}
           placement="left"
-          className="border-t-0 p-2 flex flex-col w-fit max-w-[67vw] max-h-screen overflow-y-scroll rounded-r-md"
+          className="bg-[#ffffff] dark:bg-[#18181c] border-[#d8d8dc] dark:border-[#38383c] border-t-0 p-2 flex flex-col w-fit max-w-[67vw] max-h-dvh overflow-y-scroll rounded-r-md"
         >
-          <header className="-mx-2 px-4 py-3.25 border-b border-secondary sticky top-0 bg-background -translate-y-2">
+          <header className="-mx-2 px-4 py-3.25 border-b border-[#d8d8dc] dark:border-[#38383c] sticky top-0 bg-[#ffffff] dark:bg-[#18181c] -translate-y-2">
             <Typography
               variant="h1"
               className="text-lg! font-medium inline-block"
@@ -76,13 +85,13 @@ export default function MainMenu(
                     { icon: Icon, text, href, onClick, separateNext },
                   ) => (
                     <a key={text} href={href} onClick={onClick}>
-                      <List.Item className="p-2 text-primary">
+                      <List.Item className="p-2 text-primary hover:bg-primary/5 focus:bg-primary/5">
                         <List.ItemStart>
                           <Icon className="h-6 w-6 stroke-2" role="presentation" />
                         </List.ItemStart>
                         {text}
                       </List.Item>
-                      {separateNext && <div role="presentation" className="border-b border-secondary my-1" />}
+                      {separateNext && <div role="presentation" className="border-b border-[#d8d8dc] dark:border-[#38383c] my-1" />}
                     </a>
                   ),
                 )
@@ -92,41 +101,49 @@ export default function MainMenu(
 
           <FlexSpacer />
 
-          <footer className="-mx-2 px-4 pt-3 pb-1.25 border-t border-secondary">
-            <Typography
-              className="text-sm! text-secondary-foreground"
-            >
-              Licensed under the
-              {` ${Globals.AppLicense}`}
-            </Typography>
-            <Typography
-              className="text-sm! text-secondary-foreground"
-            >
-              &copy;
-              {` ${new Date().getFullYear()} `}
-              Miami University
-            </Typography>
-            <Typography
-              className="text-sm! text-secondary-foreground"
-            >
-              <a
-                href={Globals.AppIssuesURL}
-                target="_blank"
-                rel="noreferrer"
-                className="underline text-info"
+          <footer className="-mx-2 px-4 pt-3 pb-1.25 border-t border-[#d8d8dc] dark:border-[#38383c] flex justify-between items-center">
+            <div>
+              <Typography
+                className="text-sm!"
               >
-                Report an Issue
-              </a>
-              {` | `}
-              <a
-                href={Globals.AppSourceURL}
-                target="_blank"
-                rel="noreferrer"
-                className="underline text-info"
+                Licensed under the
+                {` ${Globals.AppLicense}`}
+              </Typography>
+              <Typography
+                className="text-sm!"
               >
-                Source Code
-              </a>
-            </Typography>
+                &copy;
+                {` ${new Date().getFullYear()} `}
+                Miami University
+              </Typography>
+              <Typography
+                className="text-sm!"
+              >
+                <a
+                  href={Globals.AppIssuesURL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline text-info"
+                >
+                  Report an Issue
+                </a>
+                {` | `}
+                <a
+                  href={Globals.AppSourceURL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline text-info"
+                >
+                  Source Code
+                </a>
+              </Typography>
+            </div>
+            <DarkModeToggle
+              floating={false}
+              isDark={isDark}
+              setIsDark={setIsDark}
+              showInPortrait={true}
+            />
           </footer>
         </Drawer.Panel>
       </Drawer.Overlay>

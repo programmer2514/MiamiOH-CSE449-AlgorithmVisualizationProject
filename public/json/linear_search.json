@@ -270,6 +270,11 @@
           "name": "k"
         }
       }, {
+        "cmd": "var_delete",
+        "params": {
+          "name": "n"
+        }
+      }, {
         "cmd": "var_normal",
         "params": {
           "name": "a1"

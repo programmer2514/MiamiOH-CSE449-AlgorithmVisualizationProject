@@ -62,7 +62,7 @@ export default function PaneHeader(
   },
 ) {
   return (
-    <header className="flex flex-row items-center border-b border-secondary px-1 py-0.5">
+    <header className="flex flex-row items-center border-b border-[#d8d8dc] dark:border-[#38383c] px-1 py-0.5">
       <Typography
         type="h3"
         className="text-base! font-medium ml-2"

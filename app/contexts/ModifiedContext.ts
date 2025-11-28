@@ -6,10 +6,10 @@ import { createContext } from 'react';
 const ModifiedContext = createContext(
   [
     null,
-    (_: boolean | null) => {},
+    (_: number | null) => {},
   ] as [
-    boolean | null,
-    (modified: boolean | null) => void,
+    number | null,
+    (modified: number | null) => void,
   ],
 );
 

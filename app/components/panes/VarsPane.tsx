@@ -1,7 +1,3 @@
-import { useState } from 'react';
-
-import PaneHeader from '../headers/PaneHeader';
-
 import Monaco from '../Monaco';
 
 /**
@@ -9,57 +5,45 @@ import Monaco from '../Monaco';
  *
  * @param {Object} props
  *        React props
- * @param {number | null} props.varsPaneHeight
- *        The height in px of the code pane
- * @param {function} props.setVarsPaneHeight
- *        A function to update the height of the code pane
- * @param {number} props.defaultPaneHeight
- *        The default height in px of a pane
- * @param {number} props.minPaneHeight
- *        The minimum height in px of a pane
+ * @param {Object} props.vars
+ *        The variables to display
  */
 export default function VarsPane(
   {
-    varsPaneHeight,
-    setVarsPaneHeight,
-    defaultPaneHeight,
-    minPaneHeight,
+    vars,
   }:
   {
-    varsPaneHeight: number | null
-    setVarsPaneHeight: (height: number) => void
-    defaultPaneHeight: number
-    minPaneHeight: number
+    vars: { [key: string]: [any, number] }
   },
 ) {
-  const [src, setSrc] = useState(
-    `
-      a1: [1, 10, 5, 6, 4, 7, 19]
-      key: 4
-      Linear_Search(a, k): <function>
-    `.replaceAll(/\n\s+/g, '\n').replaceAll(/^\n+|\n+$/g, ''),
-  );
-
   return (
     <>
-      <PaneHeader
-        title="Variables"
-        editing={undefined}
-        setEditing={undefined}
-        save={undefined}
-        discard={undefined}
-        paneHeight={varsPaneHeight}
-        setPaneHeight={setVarsPaneHeight}
-        defaultPaneHeight={defaultPaneHeight}
-        minPaneHeight={minPaneHeight}
-      />
       <Monaco
         name="vars"
-        src={src}
-        setSrc={setSrc}
-        highlight={null}
+        src={
+          Object.keys(vars)
+            .map(key => `${key}: ${
+              JSON.stringify(vars[key][0])
+                .replaceAll(',', ', ')
+                .replaceAll('"<function>"', '<function>')
+            }`)
+            .join('\n')
+        }
+        setSrc={(_: string) => {}}
+        highlights={
+          Object.keys(vars)
+            .map((key, idx) => [idx, vars[key][1]])
+            .filter(key => key[1] > 0)
+            .map(key => key[0] + 1)
+        }
+        greyouts={
+          Object.keys(vars)
+            .map((key, idx) => [idx, vars[key][1]])
+            .filter(key => key[1] < 0)
+            .map(key => key[0] + 1)
+        }
         editing={false}
-        language="vars"
+        bindSrc={true}
       />
     </>
   );

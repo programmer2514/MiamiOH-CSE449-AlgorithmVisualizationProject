@@ -97,9 +97,8 @@ export default {
     inherit: true,
     rules: [],
     colors: {
-      'editor.background': '#020617',
-      'editorHoverWidget.background': '#020617',
-      'editor.lineHighlightBorder': '#1e293b',
+      'editor.background': '#18181c',
+      'editor.lineHighlightBorder': '#38383c',
     },
   } as monaco.editor.IStandaloneThemeData,
 
@@ -109,9 +108,7 @@ export default {
     rules: [],
     colors: {
       'editor.background': '#ffffff',
-      'editorHoverWidget.background': '#ffffff',
-      'editorHoverWidget.foreground': '#1e293b',
-      'editor.lineHighlightBorder': '#e2e8f0',
+      'editor.lineHighlightBorder': '#d8d8dc',
     },
   } as monaco.editor.IStandaloneThemeData,
 } as const;

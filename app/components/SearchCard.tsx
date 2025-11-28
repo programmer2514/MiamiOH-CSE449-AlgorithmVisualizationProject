@@ -67,7 +67,7 @@ export default function SearchCard(
     <Card
       as="a"
       href={href}
-      className="w-76 p-4 border-transparent shadow-none overflow-visible transition-all duration-300 bg-transparent hover:bg-primary/5 hover:border-secondary"
+      className="w-76 p-4 border-transparent shadow-none overflow-visible transition-all duration-300 bg-transparent hover:bg-primary/5 hover:border-[#d8d8dc] hover:dark:border-[#38383c] focus-visible:bg-primary/5 focus-visible:border-[#d8d8dc] focus-visible:dark:border-[#38383c]"
     >
       <Card.Header
         as="img"
@@ -123,7 +123,7 @@ export default function SearchCard(
                 }
                 aria-label={`Toggle "${tag}" tag filter`}
                 title={`Toggle "${tag}" tag filter`}
-                className={`text-xs shadow-none ${(activeTags || []).includes(tag) && 'bg-primary text-primary-foreground'} cursor-pointer`}
+                className={`border-primary/50 text-xs shadow-none ${(activeTags || []).includes(tag) && 'bg-primary text-primary-foreground'} cursor-pointer`}
               >
                 {tag}
               </Button>

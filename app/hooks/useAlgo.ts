@@ -1,7 +1,14 @@
 import {
   useEffect,
   useState,
+  useContext,
 } from 'react';
+
+import ModifiedContext from '../contexts/ModifiedContext';
+
+import {
+  type Step,
+} from '../types';
 
 /**
  * Provides a hook to load and read algorithm data.
@@ -24,10 +31,12 @@ export default function useAlgo(
   },
 ) {
   const [src, setSrc] = useState('');
-  const [comp, setComp] = useState([] as object);
+  const [comp, setComp] = useState([] as Step[]);
   const [error, setError] = useState('');
   const [didLoad, setDidLoad] = useState(false);
   const [didCompile, setDidCompile] = useState(false);
+
+  const [modified] = useContext(ModifiedContext);
 
   useEffect(() => {
     const algo = new URLSearchParams(window.location.search).get('algo');
@@ -65,29 +74,54 @@ export default function useAlgo(
         });
     } else {
       setTitle('<unnamed>');
-      loader.current.remove();
+      loader.current.classList.add('hidden');
     }
   }, []);
 
   useEffect(() => {
     if (!error) return;
 
-    setComp({ error });
-    setSrc(error);
+    setComp([{
+      line: -1,
+      actions: [],
+    }]);
     setTitle(error);
+    setSrc(error);
 
-    loader.current.remove();
+    loader.current.classList.add('hidden');
   }, [error]);
 
   useEffect(() => {
     if (didLoad && didCompile)
-      loader.current.remove();
+      loader.current.classList.add('hidden');
+    else loader.current.classList.remove('hidden');
   }, [didLoad, didCompile]);
+
+  useEffect(() => {
+    if (modified) {
+      setDidCompile(false);
+
+      alert('TODO: Code should be recompiled here');
+      fetch(`/json/${'TODO'}.json`)
+        .then(res => res.json())
+        .then((json) => {
+          setComp(json);
+          setDidCompile(true);
+        })
+        .catch(() => {
+          alert('Failed to compile algorithm!');
+          setComp([{
+            line: -1,
+            actions: [],
+          }]);
+          loader.current.classList.add('hidden');
+        });
+    }
+  }, [modified]);
 
   return [
     src,
     setSrc,
     comp,
-    setComp,
   ] as const;
 }

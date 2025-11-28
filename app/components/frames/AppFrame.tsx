@@ -62,7 +62,7 @@ export default function AppFrame(
   },
 ) {
   const [isDark, setIsDark] = useDarkMode();
-  const [modified, setModified] = useState(false as boolean | null);
+  const [modified, setModified] = useState(0 as number | null);
 
   const drawerTrigger = useRef<HTMLElement>(
     { click: () => {} } as HTMLElement,
@@ -93,6 +93,8 @@ export default function AppFrame(
         }
 
         <MainMenu
+          isDark={isDark}
+          setIsDark={setIsDark}
           triggerRef={drawerTrigger}
           panelRef={drawerPanel}
           links={menuLinks}
@@ -107,6 +109,7 @@ export default function AppFrame(
             floating={!mutable}
             isDark={isDark}
             setIsDark={setIsDark}
+            showInPortrait={false}
           />
         </footer>
       </ModifiedContext>

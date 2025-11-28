@@ -70,16 +70,16 @@ export default function SearchProvider(
       <form
         role="search"
         aria-label="Sort and search results"
-        className="flex items-center py-3 px-4 sticky z-50 top-0 bg-background border-b border-secondary"
+        className="flex portrait:flex-col portrait:gap-2 items-center py-3 px-4 sticky z-50 top-0 bg-[#ffffff] dark:bg-[#18181c] border-b border-[#d8d8dc] dark:border-[#38383c]"
       >
-        <div className="w-96">
+        <div className="w-96 max-w-full">
           <Input
             type="search"
             placeholder="Find an algorithm..."
             aria-label="Find an algorithm"
             value={(search || '')}
             onChange={e => setSearch(e.target.value)}
-            className="shadow-none"
+            className="shadow-none border-[#d8d8dc] dark:border-[#38383c] hover:border-[#b8b8bc] hover:dark:border-[#58585c] focus:border-[#98989c] focus:dark:border-[#78787c]"
           >
             <Input.Icon
               as="button"
@@ -101,7 +101,7 @@ export default function SearchProvider(
           </Input>
         </div>
 
-        <div className="flex flex-wrap gap-1 p-0 ml-4">
+        <div className="flex flex-wrap gap-1 p-0 ml-4 portrait:justify-center portrait:ml-0 empty:hidden">
           {
             (activeTags || []).map(
               (tag: string) => (
@@ -117,7 +117,7 @@ export default function SearchProvider(
                       e.preventDefault();
                     }
                   }
-                  className="text-sm shadow-none cursor-pointer"
+                  className="border-primary/50 text-sm shadow-none cursor-pointer"
                 >
                   <Typography>{tag}</Typography>
                   <Xmark className="h-4 w-4 stroke-2 translate-x-2" role="presentation" />
@@ -127,33 +127,35 @@ export default function SearchProvider(
           }
         </div>
 
-        <FlexSpacer />
+        <FlexSpacer className="portrait:hidden" />
 
-        <Typography
-          as="label"
-          htmlFor="sort-options"
-          className="pr-2 text-foreground/70 hover:text-foreground cursor-pointer"
-        >
-          Sort&nbsp;by:
-        </Typography>
+        <div className="flex items-center">
+          <Typography
+            as="label"
+            htmlFor="sort-options"
+            className="pr-2 text-primary/70 cursor-pointer"
+          >
+            Sort&nbsp;by:
+          </Typography>
 
-        <Select
-          value={((sort === null) ? 'favorites' : sort)}
-          onValueChange={setSort}
-        >
-          <Select.Trigger
-            id="sort-options"
-            placeholder="Select..."
-            aria-label="Select sort order"
-            title="Select sort order"
-            className="w-44 shadow-none cursor-pointer"
-          />
-          <Select.List className="*:cursor-pointer">
-            <Select.Option value="favorites">Sort: Favorites</Select.Option>
-            <Select.Option value="name-desc">Sort: Name (Desc)</Select.Option>
-            <Select.Option value="name-asc">Sort: Name (Asc)</Select.Option>
-          </Select.List>
-        </Select>
+          <Select
+            value={((sort === null) ? 'favorites' : sort)}
+            onValueChange={setSort}
+          >
+            <Select.Trigger
+              id="sort-options"
+              placeholder="Select..."
+              aria-label="Select sort order"
+              title="Select sort order"
+              className="w-44 shadow-none cursor-pointer text-primary/70 border-[#d8d8dc] dark:border-[#38383c] hover:border-[#b8b8bc] hover:dark:border-[#58585c] focus:border-[#98989c] focus:dark:border-[#78787c] data-[open=true]:border-[#98989c] data-[open=true]:dark:border-[#78787c]"
+            />
+            <Select.List className="*:cursor-pointer *:text-primary/70 *:hover:bg-primary/5! *:focus:bg-primary/5! border-[#d8d8dc] dark:border-[#38383c] transition-none bg-[#ffffff] dark:bg-[#18181c]">
+              <Select.Option value="favorites">Sort: Favorites</Select.Option>
+              <Select.Option value="name-desc">Sort: Name (Desc)</Select.Option>
+              <Select.Option value="name-asc">Sort: Name (Asc)</Select.Option>
+            </Select.List>
+          </Select>
+        </div>
       </form>
 
       <div className="flex flex-wrap justify-center gap-4 py-6 px-4">

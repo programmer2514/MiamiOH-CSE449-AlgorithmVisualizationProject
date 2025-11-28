@@ -87,116 +87,116 @@ export default function TopBar(
   }
 
   return (
-    <>
-      <Navbar className="rounded-none flex items-center border-t-0 border-l-0 border-r-0 shadow-none">
-        <IconButton
-          variant="ghost"
-          aria-label="Main Menu"
-          title="Main Menu"
-          onClick={() => {
-            menuTrigger.current.click();
-            const interval = setInterval(() => {
-              if (menuPanel.current.scrollTop) {
-                menuPanel.current.scrollTop = 0;
-                clearInterval(interval);
-              }
-            }, 10);
-          }}
-          aria-haspopup="dialog"
-          className="cursor-pointer"
-        >
-          <Menu className="stroke-2 w-6 h-6" role="presentation" />
-        </IconButton>
+    <Navbar className="rounded-none flex items-center border-[#d8d8dc] dark:border-[#38383c] border-t-0 border-l-0 border-r-0 shadow-none bg-[#ffffff] dark:bg-[#18181c]">
+      <IconButton
+        variant="ghost"
+        aria-label="Main Menu"
+        title="Main Menu"
+        onClick={() => {
+          menuTrigger.current.click();
+          const interval = setInterval(() => {
+            if (menuPanel.current.scrollTop) {
+              menuPanel.current.scrollTop = 0;
+              clearInterval(interval);
+            }
+          }, 10);
+        }}
+        aria-haspopup="dialog"
+        className="cursor-pointer"
+      >
+        <Menu className="stroke-2 w-6 h-6" role="presentation" />
+      </IconButton>
 
-        {
-          mutable && setTitle ?
-            (
-              <div className="flex items-center">
-                <span
-                  ref={span}
-                  className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none"
-                  aria-hidden
-                >
-                  {title}
-                </span>
-                <Input
-                  ref={input}
-                  type="text"
-                  size="lg"
-                  defaultValue={title}
-                  className="text-lg! font-medium ml-1 border-0 shadow-none p-1 transition-none"
-                  style={{ width }}
-                  onChange={
-                    (event) => {
-                      setTitle(event.target.value);
-                      setModified(true);
-                    }
+      {
+        mutable && setTitle ?
+          (
+            <div className="flex items-center">
+              <span
+                ref={span}
+                className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none"
+                aria-hidden
+              >
+                {title}
+              </span>
+              <Input
+                ref={input}
+                type="text"
+                size="lg"
+                defaultValue={title}
+                className="text-lg! font-medium ml-1 border-0 ring-2 shadow-none p-1 transition-none"
+                style={{ width }}
+                onChange={
+                  (event) => {
+                    setTitle(event.target.value);
+                    setModified(modified || 1);
                   }
-                  aria-label="Algorithm name"
-                />
-                {
-                  modified && (
+                }
+                aria-label="Algorithm name"
+              />
+              {
+                modified ?
+                  (
                     <Typography
                       type="h2"
                       className="text-sm! font-light opacity-50 ml-2 pointer-events-none"
                     >
                       Modified
                     </Typography>
-                  )
+                  ) :
+                  (<></>)
+              }
+            </div>
+          ) :
+          (
+            <Typography
+              type="h1"
+              className="text-lg! font-medium ml-2"
+            >
+              {title}
+            </Typography>
+          )
+      }
+
+      <FlexSpacer />
+
+      {
+        (sidebar !== undefined && setSidebar) ?
+          (
+            <>
+              <IconButton
+                variant="ghost"
+                aria-label="Toggle Sidebar"
+                title="Toggle Sidebar"
+                className="-scale-x-100 cursor-pointer"
+                onClick={
+                  () => setSidebar(!((sidebar === null) ? true : sidebar))
                 }
-              </div>
-            ) :
-            (
-              <Typography
-                type="h1"
-                className="text-lg! font-medium ml-2"
               >
-                {title}
-              </Typography>
-            )
-        }
+                {
+                  ((sidebar === null) ? true : sidebar) ?
+                    <SidebarCollapse className="stroke-2 w-6 h-6" role="presentation" /> :
+                    <SidebarExpand className="stroke-2 w-6 h-6" role="presentation" />
+                }
+              </IconButton>
+              <div
+                role="separator"
+                className="w-px h-8 mx-2 bg-[#d8d8dc] dark:bg-[#38383c]"
+              />
+            </>
+          ) :
+          (<></>)
+      }
 
-        <FlexSpacer />
-
-        {
-          (sidebar !== undefined && setSidebar) ?
-            (
-              <>
-                <IconButton
-                  variant="ghost"
-                  aria-label="Toggle Sidebar"
-                  title="Toggle Sidebar"
-                  className="-scale-x-100 cursor-pointer"
-                  onClick={
-                    () => setSidebar(!((sidebar === null) ? true : sidebar))
-                  }
-                >
-                  {
-                    ((sidebar === null) ? true : sidebar) ?
-                      <SidebarCollapse className="stroke-2 w-6 h-6" role="presentation" /> :
-                      <SidebarExpand className="stroke-2 w-6 h-6" role="presentation" />
-                  }
-                </IconButton>
-                <div
-                  role="separator"
-                  className="w-px h-8 mx-2 bg-secondary dark:bg-secondary-dark"
-                />
-              </>
-            ) :
-            (<></>)
-        }
-
-        <IconButton
-          as="a"
-          variant="ghost"
-          aria-label="Get Help"
-          title="Get Help"
-          href="/wiki"
-          target="_blank"
-        >
-          <HelpCircle className="stroke-2 w-6 h-6" role="presentation" />
-        </IconButton>
-      </Navbar>
-    </>
+      <IconButton
+        as="a"
+        variant="ghost"
+        aria-label="Get Help"
+        title="Get Help"
+        href="/wiki"
+        target="_blank"
+      >
+        <HelpCircle className="stroke-2 w-6 h-6" role="presentation" />
+      </IconButton>
+    </Navbar>
   );
 }

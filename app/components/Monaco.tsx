@@ -9,7 +9,6 @@ import { Editor } from '@monaco-editor/react';
 import Defs from '../defs';
 
 import DarkModeContext from '../contexts/DarkModeContext';
-import ModifiedContext from '../contexts/ModifiedContext';
 
 /**
  * Renders the Monaco code editor. Allows highlighting and editing through the
@@ -23,33 +22,36 @@ import ModifiedContext from '../contexts/ModifiedContext';
  *        The source code to display
  * @param {function} props.setSrc
  *        A function to update the source code
- * @param {number | [number, number] | null} props.highlight
- *        The line range to highlight
+ * @param {(number | [number, number] | null)[]} props.highlights
+ *        The line ranges to highlight
+ * @param {(number | [number, number] | null)[]} props.greyouts
+ *        The line ranges to grey out
  * @param {boolean} props.editing
  *        Whether the editor is in editing mode
- * @param {string} props.language
- *        The language to use (must be either 'avp' or 'vars')
+ * @param {boolean} props.bindSrc
+ *        Whether the editor's value should be bound to the source state
  */
 export default function Monaco(
   {
     name,
     src,
     setSrc,
-    highlight,
+    highlights,
+    greyouts,
     editing,
-    language,
+    bindSrc,
   }:
   {
     name: string
     src: string
     setSrc: (src: string) => void
-    highlight: number | [number, number] | null
+    highlights: (number | [number, number] | null)[]
+    greyouts: (number | [number, number] | null)[]
     editing: boolean
-    language: string
+    bindSrc: boolean
   },
 ) {
   const isDark = useContext(DarkModeContext);
-  const [, setModified] = useContext(ModifiedContext);
 
   const [monaco, setMonaco] = useState(null as [import('monaco-editor').editor.IStandaloneCodeEditor, typeof import('monaco-editor')] | null);
   const [decoration, setDecoration] = useState(null as import('monaco-editor').editor.IEditorDecorationsCollection | null);
@@ -70,7 +72,7 @@ export default function Monaco(
     const oldCursorPos = cursorPos;
 
     monaco[0].setValue(
-      (!editing && language === 'avp') ?
+      (!editing) ?
         src?.replaceAll(/@[\w]+<.*> ?/g, '') :
         src,
     );
@@ -82,24 +84,35 @@ export default function Monaco(
   }, [isDark, monaco, editing]);
 
   useEffect(() => {
-    if (monaco === null || highlight === null) return;
+    if (monaco === null) return;
 
     decoration?.clear();
 
-    if (typeof highlight === 'number') {
-      setDecoration(
-        monaco[0].createDecorationsCollection([
-          { range: new monaco[1].Range(highlight, 1, highlight, 1), options: { className: 'avp-highlight' } },
-        ]),
-      );
-    } else {
-      setDecoration(
-        monaco[0].createDecorationsCollection([
-          { range: new monaco[1].Range(highlight[0], 1, highlight[1], 1), options: { className: 'avp-highlight' } },
-        ]),
+    setDecoration(
+      monaco[0].createDecorationsCollection([
+        ...highlights.map((highlight) => {
+          if (highlight === null) return null;
+          if (typeof highlight === 'number') return { range: new monaco[1].Range(highlight, 1, highlight, 1), options: { className: 'avp-highlight' } };
+          return { range: new monaco[1].Range(highlight[0], 1, highlight[1], 1), options: { className: 'avp-highlight' } };
+        }).filter(highlight => highlight !== null),
+        ...greyouts.map((greyout) => {
+          if (greyout === null) return null;
+          if (typeof greyout === 'number') return { range: new monaco[1].Range(greyout, 1, greyout, 1), options: { className: 'avp-greyout' } };
+          return { range: new monaco[1].Range(greyout[0], 1, greyout[1], 1), options: { className: 'avp-greyout' } };
+        }).filter(greyout => greyout !== null),
+      ]),
+    );
+
+    if (highlights.length === 1 && greyouts.length === 0) {
+      if (highlights[0] === null) return;
+
+      monaco[0].revealLineInCenterIfOutsideViewport(
+        (typeof highlights[0] === 'number') ?
+          highlights[0] :
+          highlights[0][0],
       );
     }
-  }, [highlight, monaco, isDark]);
+  }, [highlights, greyouts, monaco, isDark]);
 
   useEffect(() => {
     if (monaco === null) return;
@@ -117,6 +130,35 @@ export default function Monaco(
       }),
     );
   }, [monaco, editing]);
+
+  useEffect(() => {
+    if (monaco === null) return;
+
+    if (bindSrc) {
+      decoration?.clear();
+
+      monaco[0].setValue(
+        (!editing) ?
+          src?.replaceAll(/@[\w]+<.*> ?/g, '') :
+          src,
+      );
+
+      setDecoration(
+        monaco[0].createDecorationsCollection([
+          ...highlights.map((highlight) => {
+            if (highlight === null) return null;
+            if (typeof highlight === 'number') return { range: new monaco[1].Range(highlight, 1, highlight, 1), options: { className: 'avp-highlight' } };
+            return { range: new monaco[1].Range(highlight[0], 1, highlight[1], 1), options: { className: 'avp-highlight' } };
+          }).filter(highlight => highlight !== null),
+          ...greyouts.map((greyout) => {
+            if (greyout === null) return null;
+            if (typeof greyout === 'number') return { range: new monaco[1].Range(greyout, 1, greyout, 1), options: { className: 'avp-greyout' } };
+            return { range: new monaco[1].Range(greyout[0], 1, greyout[1], 1), options: { className: 'avp-greyout' } };
+          }).filter(greyout => greyout !== null),
+        ]),
+      );
+    }
+  }, [monaco, src]);
 
   return (
     <div
@@ -161,16 +203,14 @@ export default function Monaco(
       <Editor
         options={{
           minimap: { enabled: false },
+          padding: { top: 10 },
         }}
         onMount={
           (editor, monaco) => {
             monaco.languages.register({ id: 'avp' });
             monaco.languages.setMonarchTokensProvider('avp', Defs.AVPLanguage);
 
-            monaco.languages.register({ id: 'vars' });
-            monaco.languages.setMonarchTokensProvider('vars', Defs.AVPLanguage);
-
-            monaco.editor.setModelLanguage(editor.getModel()!, language);
+            monaco.editor.setModelLanguage(editor.getModel()!, 'avp');
 
             monaco.editor.defineTheme('avp', Defs.AVPLightTheme);
             monaco.editor.defineTheme('avp-dark', Defs.AVPDarkTheme);
@@ -183,7 +223,6 @@ export default function Monaco(
             if (!editing) return;
 
             setSrc(value || '');
-            setModified(true);
           }
         }
         className="**:transition-none"

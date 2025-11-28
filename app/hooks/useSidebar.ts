@@ -7,20 +7,20 @@ import {
  * Provides a hook to read and edit sidebar toggle and width states.
  */
 export default function useSidebar() {
-  const [sidebar, setSidebar] = useState(null as boolean | null);
+  const [sidebar, setSidebar] = useState(null as boolean | null | undefined);
   const [sidebarWidth, setSidebarWidth] = useState(null as number | null);
   const [sidebarDefaultWidth, setSidebarDefaultWidth] = useState(0);
   const [sidebarMinWidth, setSidebarMinWidth] = useState(0);
   const [sidebarMaxWidth, setSidebarMaxWidth] = useState(0);
 
   function updateDefaults() {
-    setSidebarDefaultWidth(window.innerWidth / 3);
-    setSidebarMinWidth(window.innerWidth / 6);
-    setSidebarMaxWidth(window.innerWidth * 3 / 4);
+    setSidebarDefaultWidth(document.body.querySelector('main')!.clientWidth / 3);
+    setSidebarMinWidth(document.body.querySelector('main')!.clientWidth / 6);
+    setSidebarMaxWidth(document.body.querySelector('main')!.clientWidth * 3 / 4);
   }
 
   useEffect(() => {
-    if (sidebar === null) return;
+    if (sidebar === null || sidebar === undefined) return;
     localStorage.setItem('sidebar', sidebar.toString());
   }, [sidebar]);
 

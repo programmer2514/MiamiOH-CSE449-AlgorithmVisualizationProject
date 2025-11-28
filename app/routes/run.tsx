@@ -94,6 +94,7 @@ export default function Run() {
       >
         <Visualizer
           sidebar={sidebar}
+          setSidebar={setSidebar}
           sidebarDefaultWidth={sidebarDefaultWidth}
           sidebarMinWidth={sidebarMinWidth}
           sidebarMaxWidth={sidebarMaxWidth}

@@ -1,10 +1,12 @@
 import {
-  useState,
+  useContext,
   useRef,
+  useState,
 } from 'react';
 
 import VisualizerLayout from './frames/VisualizerLayout';
 
+import VisPane from './panes/VisPane';
 import CodePane from './panes/CodePane';
 import VarsPane from './panes/VarsPane';
 import AIPane from './panes/AIPane';
@@ -13,6 +15,10 @@ import Loader from './Loader';
 
 import useAlgo from '../hooks/useAlgo';
 import useSidebarPanes from '../hooks/useSidebarPanes';
+import useSteps from '../hooks/useSteps';
+import useEditSrc from '../hooks/useEditSrc';
+
+import ModifiedContext from '../contexts/ModifiedContext';
 
 /**
  * Renders a visualizer complete with collapsible sidebar. Includes animation,
@@ -22,6 +28,8 @@ import useSidebarPanes from '../hooks/useSidebarPanes';
  *        React props
  * @param {boolean | null} props.sidebar
  *        Whether the sidebar is toggled
+ * @param {function} props.setSidebar
+ *        A function to update the sidebar state
  * @param {number} props.sidebarDefaultWidth
  *        The default width in px of the sidebar
  * @param {number} props.sidebarMinWidth
@@ -32,10 +40,13 @@ import useSidebarPanes from '../hooks/useSidebarPanes';
  *        The current width in px of the sidebar
  * @param {function} props.setSidebarWidth
  *        A function to update the width of the sidebar
+ * @param {function} props.setTitle
+ *        A function to update the header title
  */
 export default function Visualizer(
   {
     sidebar,
+    setSidebar,
     sidebarDefaultWidth,
     sidebarMinWidth,
     sidebarMaxWidth,
@@ -44,7 +55,8 @@ export default function Visualizer(
     setTitle,
   }:
   {
-    sidebar: boolean | null
+    sidebar: boolean | null | undefined
+    setSidebar: (value: boolean | null | undefined) => void
     sidebarDefaultWidth: number
     sidebarMinWidth: number
     sidebarMaxWidth: number
@@ -55,25 +67,26 @@ export default function Visualizer(
 ) {
   const loader = useRef({ remove: () => {} } as HTMLDivElement);
 
-  const [highlight, setHighlight] =
-    useState([4, 12] as number | [number, number] | null);
+  const [editing, setEditing] = useState(false);
+
+  const [modified, setModified] = useContext(ModifiedContext);
 
   const [
     src,
     setSrc,
     comp,
-    setComp,
   ] = useAlgo({ setTitle, loader });
 
-  /*
   const [
-    numSteps,
-    step,
-    setStep,
-    stepData,
     vars,
-  ] = useSteps(comp);
-  */
+    lines,
+    numSteps,
+    nextStep,
+    prevStep,
+    reset,
+    stepNum,
+    stepDat,
+  ] = useSteps({ comp });
 
   const [
     codePaneHeight,
@@ -87,17 +100,38 @@ export default function Visualizer(
     maxPaneHeight,
   ] = useSidebarPanes();
 
+  const [
+    editSrc,
+    setEditSrc,
+    save,
+    discard,
+  ] = useEditSrc({
+    src,
+    setSrc,
+    onSave: () => {
+      setEditing(false);
+      setModified((modified || 0) + 1);
+    },
+    onDiscard: () => setEditing(false),
+  });
+
   return (
     <>
       <Loader ref={loader} />
       <VisualizerLayout
+        editing={editing}
+        setEditing={setEditing}
+        save={save}
+        discard={discard}
         sidebar={sidebar}
+        setSidebar={setSidebar}
         sidebarDefaultWidth={sidebarDefaultWidth}
         sidebarMinWidth={sidebarMinWidth}
         sidebarMaxWidth={sidebarMaxWidth}
         sidebarWidth={sidebarWidth}
         setSidebarWidth={setSidebarWidth}
         codePaneHeight={codePaneHeight}
+        setCodePaneHeight={setCodePaneHeight}
         varsPaneHeight={varsPaneHeight}
         setVarsPaneHeight={setVarsPaneHeight}
         AIPaneHeight={AIPaneHeight}
@@ -106,28 +140,22 @@ export default function Visualizer(
         minPaneHeight={minPaneHeight}
         maxPaneHeight={maxPaneHeight}
       >
-        <p>Placeholder</p>
+        <VisPane
+          numSteps={numSteps}
+          stepNum={stepNum}
+          stepDat={stepDat}
+          prevStep={prevStep}
+          nextStep={nextStep}
+          reset={reset}
+        />
         <CodePane
-          src={src}
-          setSrc={setSrc}
-          highlight={highlight}
-          codePaneHeight={codePaneHeight}
-          setCodePaneHeight={setCodePaneHeight}
-          defaultPaneHeight={defaultPaneHeight}
-          minPaneHeight={minPaneHeight}
+          src={editSrc}
+          setSrc={setEditSrc}
+          highlight={lines}
+          editing={editing}
         />
-        <VarsPane
-          varsPaneHeight={varsPaneHeight}
-          setVarsPaneHeight={setVarsPaneHeight}
-          defaultPaneHeight={defaultPaneHeight}
-          minPaneHeight={minPaneHeight}
-        />
-        <AIPane
-          AIPaneHeight={AIPaneHeight}
-          setAIPaneHeight={setAIPaneHeight}
-          defaultPaneHeight={defaultPaneHeight}
-          minPaneHeight={minPaneHeight}
-        />
+        <VarsPane vars={vars} />
+        <AIPane />
       </VisualizerLayout>
     </>
   );
