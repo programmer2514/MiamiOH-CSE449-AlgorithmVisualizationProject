@@ -1,5 +1,4 @@
-import { useRef, useState } from 'react';
-
+import { useRef } from 'react';
 import { Iconoir } from 'iconoir-react';
 
 import TopBar from '../headers/TopBar';
@@ -8,6 +7,7 @@ import MainMenu from '../MainMenu';
 import DarkModeToggle from '../DarkModeToggle';
 
 import useDarkMode from '../../hooks/useDarkMode';
+import useModified from '../../hooks/useModified';
 
 import ModifiedContext from '../../contexts/ModifiedContext';
 import DarkModeContext from '../../contexts/DarkModeContext';
@@ -62,7 +62,7 @@ export default function AppFrame(
   },
 ) {
   const [isDark, setIsDark] = useDarkMode();
-  const [modified, setModified] = useState(0 as number | null);
+  const [modified, setModified] = useModified();
 
   const drawerTrigger = useRef<HTMLElement>(
     { click: () => {} } as HTMLElement,

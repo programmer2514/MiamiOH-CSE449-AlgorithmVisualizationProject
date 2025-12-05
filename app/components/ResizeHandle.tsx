@@ -42,14 +42,7 @@ export default function ResizeHandle(
 ) {
   let dragging = null as number | null;
 
-  function contextMenu(e: MouseEvent) {
-    removeEventListener('contextmenu', contextMenu);
-    e.preventDefault();
-  }
-
   function mouseDown(e: React.MouseEvent) {
-    addEventListener('contextmenu', contextMenu);
-
     if (e.button !== 0) return;
 
     dragging = (position === 'top') ? e.clientY : e.clientX;
@@ -104,6 +97,7 @@ export default function ResizeHandle(
 
   return (
     <div
+      onContextMenu={e => e.preventDefault()}
       onMouseDown={mouseDown}
       onMouseUp={mouseUpRight}
       className={`absolute z-50 ${position === 'top' && 'w-full h-4 -translate-y-2 cursor-ns-resize'} ${position === 'left' && 'w-4 h-full -translate-x-2 cursor-ew-resize'}`}

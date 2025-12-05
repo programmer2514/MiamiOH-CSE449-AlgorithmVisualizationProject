@@ -19,6 +19,6 @@ export default {
   AppVersion: 'v0.0.1a',
   AppLicense: 'GPLv3',
   AppURL: 'http://localhost:5173',
-  AppIssuesURL: 'http://localhost:5173/issues',
-  AppSourceURL: 'http://localhost:5173/source',
+  AppIssuesURL: 'https://gitlab.csi.miamioh.edu/2026-senior-design-projects/algorithm-visualization-project/algorithm-visualization-project/-/issues',
+  AppSourceURL: 'https://gitlab.csi.miamioh.edu/2026-senior-design-projects/algorithm-visualization-project/algorithm-visualization-project',
 } as const;

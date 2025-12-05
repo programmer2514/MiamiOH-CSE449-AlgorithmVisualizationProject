@@ -1,10 +1,14 @@
 import {
   Drawer,
+  IconButton,
   List,
   Typography,
 } from '@material-tailwind/react';
 
-import { Iconoir } from 'iconoir-react';
+import {
+  Iconoir,
+  Menu,
+} from 'iconoir-react';
 
 import Globals from '../globals';
 
@@ -60,21 +64,41 @@ export default function MainMenu(
         <Drawer.Panel
           ref={panelRef}
           placement="left"
-          className="bg-[#ffffff] dark:bg-[#18181c] border-[#d8d8dc] dark:border-[#38383c] border-t-0 p-2 flex flex-col w-fit max-w-[67vw] max-h-dvh overflow-y-scroll rounded-r-md"
+          className="bg-[#ffffff] dark:bg-[#18181c] border-[#d8d8dc] dark:border-[#38383c] border-0 border-r p-2 flex flex-col w-fit max-w-[67vw] max-h-dvh overflow-y-scroll rounded-r-md"
         >
-          <header className="-mx-2 px-4 py-3.25 border-b border-[#d8d8dc] dark:border-[#38383c] sticky top-0 bg-[#ffffff] dark:bg-[#18181c] -translate-y-2">
-            <Typography
-              variant="h1"
-              className="text-lg! font-medium inline-block"
+          <header className="-mx-2 flex items-center p-2 border-b border-[#d8d8dc] dark:border-[#38383c] sticky top-0 bg-[#ffffff] dark:bg-[#18181c] -translate-y-2">
+            <IconButton
+              variant="ghost"
+              aria-label="Main Menu"
+              title="Main Menu"
+              onClick={() => {
+                triggerRef.current.click();
+                const interval = setInterval(() => {
+                  if (panelRef.current?.scrollTop) {
+                    panelRef.current.scrollTop = 0;
+                    clearInterval(interval);
+                  }
+                }, 10);
+              }}
+              aria-haspopup="dialog"
+              className="cursor-pointer mr-2"
             >
-              {Globals.AppName}
-            </Typography>
-            <Typography
-              variant="h2"
-              className="text-sm! inline-block ml-1"
-            >
-              {Globals.AppVersion}
-            </Typography>
+              <Menu className="stroke-2 w-6 h-6" role="presentation" />
+            </IconButton>
+            <a href="/" className="mr-2">
+              <Typography
+                variant="h1"
+                className="text-lg! font-medium inline-block"
+              >
+                {Globals.AppName}
+              </Typography>
+              <Typography
+                variant="h2"
+                className="text-sm! inline-block ml-1"
+              >
+                {Globals.AppVersion}
+              </Typography>
+            </a>
           </header>
 
           <nav>
@@ -87,7 +111,7 @@ export default function MainMenu(
                     <a key={text} href={href} onClick={onClick}>
                       <List.Item className="p-2 text-primary hover:bg-primary/5 focus:bg-primary/5">
                         <List.ItemStart>
-                          <Icon className="h-6 w-6 stroke-2" role="presentation" />
+                          <Icon className="h-6 w-6 stroke-2 mr-1" role="presentation" />
                         </List.ItemStart>
                         {text}
                       </List.Item>

@@ -58,6 +58,7 @@ export default function Monaco(
   const [cursorPos, setCursorPos] = useState([0, 0] as [number, number]);
   const [selectionHandler, setSelectionHandler] =
     useState(null as import('monaco-editor').IDisposable | null);
+  const [rem, setRem] = useState(14.0);
 
   useEffect(() => {
     if (!monaco) return;
@@ -160,6 +161,10 @@ export default function Monaco(
     }
   }, [monaco, src]);
 
+  useEffect(() => {
+    setRem(parseFloat(getComputedStyle(document.documentElement).fontSize));
+  }, []);
+
   return (
     <div
       id={name}
@@ -204,6 +209,7 @@ export default function Monaco(
         options={{
           minimap: { enabled: false },
           padding: { top: 10 },
+          fontSize: rem,
         }}
         onMount={
           (editor, monaco) => {

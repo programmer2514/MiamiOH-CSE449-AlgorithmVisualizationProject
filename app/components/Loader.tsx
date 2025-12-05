@@ -5,19 +5,19 @@ import { Typography } from '@material-tailwind/react';
  *
  * @param {Object} props
  *        React props
- * @param {Object} props.ref
- *        A reference to the loading overlay
+ * @param {boolean} props.hidden
+ *        Whether the loading overlay should be hidden
  */
 export default function Visualizer(
   {
-    ref,
+    hidden,
   }:
   {
-    ref: React.RefObject<HTMLDivElement>
+    hidden: boolean
   },
 ) {
   return (
-    <div ref={ref} className="flex flex-col justify-center items-center w-screen h-screen opacity-75 absolute top-0 left-0 bg-[#d8d8dc] dark:bg-[#38383c] z-50">
+    <div className={`${hidden ? 'hidden ' : ''}flex flex-col justify-center items-center w-screen h-screen opacity-75 absolute top-0 left-0 bg-[#d8d8dc] dark:bg-[#38383c] z-50`}>
       <div className="w-16 h-16 rounded-full border-6 border-primary border-t-transparent animate-spin duration-1000!"></div>
       <Typography
         type="h1"

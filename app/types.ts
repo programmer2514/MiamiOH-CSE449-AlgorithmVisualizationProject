@@ -10,3 +10,16 @@ export type Step = {
     }
   }[]
 };
+
+export type VisData = {
+  data: any[]
+  type: string
+  logs: string[]
+  marks: {
+    [key: string]: {
+      type: string
+      color: string
+      value: string
+    }[]
+  }
+};

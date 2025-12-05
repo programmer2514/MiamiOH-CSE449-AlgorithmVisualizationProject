@@ -106,6 +106,12 @@
           "type": "all"
         }
       }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 0,
+          "type": "greyout"
+        }
+      }, {
         "cmd": "var_add",
         "params": {
           "name": "n",
@@ -141,6 +147,12 @@
         "params": {
           "index": 1,
           "type": "all"
+        }
+      }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 1,
+          "type": "greyout"
         }
       }, {
         "cmd": "var_add",
@@ -180,6 +192,12 @@
           "type": "all"
         }
       }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 2,
+          "type": "greyout"
+        }
+      }, {
         "cmd": "var_add",
         "params": {
           "name": "n",
@@ -215,6 +233,12 @@
         "params": {
           "index": 3,
           "type": "all"
+        }
+      }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 3,
+          "type": "greyout"
         }
       }, {
         "cmd": "var_add",
@@ -253,6 +277,21 @@
           "index": 4,
           "type": "outline",
           "color": "green"
+        }
+      }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 4,
+          "type": "highlight",
+          "color": "green"
+        }
+      }, {
+        "cmd": "vis_mark",
+        "params": {
+          "index": 4,
+          "type": "text",
+          "color": "fg",
+          "value": "4 == 4"
         }
       }
     ]

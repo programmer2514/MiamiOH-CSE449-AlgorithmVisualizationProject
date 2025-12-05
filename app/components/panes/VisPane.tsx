@@ -1,3 +1,8 @@
+import { type Step } from '../../types';
+
+import VisFrame from '../visualization/VisFrame';
+import VisBuilder from '../visualization/VisBuilder';
+
 /**
  * Renders the visualization pane for the visualizer.
  *
@@ -7,7 +12,7 @@
  *        The number of steps in the visualization
  * @param {number} props.stepNum
  *        The current step number
- * @param {object} props.stepDat
+ * @param {Step} props.stepDat
  *        The current step data
  * @param {function} props.prevStep
  *        A function to go to the previous step
@@ -28,21 +33,24 @@ export default function VisPane(
   {
     numSteps: number
     stepNum: number
-    stepDat: object
+    stepDat: Step
     prevStep: () => void
     nextStep: () => void
     reset: () => void
   },
 ) {
   return (
-    <>
-      <button onClick={prevStep}>Prev Step</button>
-      <button onClick={nextStep}>Next Step</button>
-      <button onClick={reset}>Reset</button>
-
-      <p className="p-3">{numSteps}</p>
-      <p className="p-3">{stepNum}</p>
-      <p className="p-3">{JSON.stringify(stepDat)}</p>
-    </>
+    <VisFrame
+      numSteps={numSteps}
+      stepNum={stepNum}
+      prevStep={prevStep}
+      nextStep={nextStep}
+      reset={reset}
+    >
+      <VisBuilder
+        stepDat={stepDat}
+        stepNum={stepNum}
+      />
+    </VisFrame>
   );
 }

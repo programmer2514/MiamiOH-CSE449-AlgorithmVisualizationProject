@@ -203,6 +203,14 @@ export default function useSidebarPanes() {
         ) || defaultPaneHeight,
       ),
     );
+
+    const diff = maxPaneHeight - varsPaneHeight! -
+      codePaneHeight! - AIPaneHeight!;
+    if (diff > 0) {
+      _setAIPaneHeight(AIPaneHeight! + (diff / 3));
+      _setVarsPaneHeight(varsPaneHeight! + (diff / 3));
+      _setCodePaneHeight(codePaneHeight! + (diff / 3));
+    }
   }, [defaultPaneHeight, maxPaneHeight]);
 
   useEffect(() => {

@@ -1,6 +1,5 @@
 import {
   useContext,
-  useRef,
   useState,
 } from 'react';
 
@@ -65,8 +64,7 @@ export default function Visualizer(
     setTitle: ((value: string) => void)
   },
 ) {
-  const loader = useRef({ remove: () => {} } as HTMLDivElement);
-
+  const [loaderHidden, setLoaderHidden] = useState(false);
   const [editing, setEditing] = useState(false);
 
   const [modified, setModified] = useContext(ModifiedContext);
@@ -75,7 +73,7 @@ export default function Visualizer(
     src,
     setSrc,
     comp,
-  ] = useAlgo({ setTitle, loader });
+  ] = useAlgo({ setTitle, setLoaderHidden });
 
   const [
     vars,
@@ -117,7 +115,7 @@ export default function Visualizer(
 
   return (
     <>
-      <Loader ref={loader} />
+      <Loader hidden={loaderHidden} />
       <VisualizerLayout
         editing={editing}
         setEditing={setEditing}

@@ -3,9 +3,7 @@ import {
   useState,
 } from 'react';
 
-import {
-  type Step,
-} from '../types';
+import { type Step } from '../types';
 
 /**
  * Provides a hook to load, read, and update step data.

@@ -17,17 +17,17 @@ import {
  *        React props
  * @param {function} props.setTitle
  *        A function to update the header title
- * @param {React.RefObject} props.loader
- *        A reference to the loading overlay
+ * @param {function} props.setLoaderHidden
+ *        A function to update the loader hidden state
  */
 export default function useAlgo(
   {
     setTitle,
-    loader,
+    setLoaderHidden,
   }:
   {
     setTitle: (title: string) => void
-    loader: React.RefObject<HTMLDivElement>
+    setLoaderHidden: (hidden: boolean) => void
   },
 ) {
   const [src, setSrc] = useState('');
@@ -74,7 +74,8 @@ export default function useAlgo(
         });
     } else {
       setTitle('<unnamed>');
-      loader.current.classList.add('hidden');
+      setDidLoad(true);
+      setDidCompile(true);
     }
   }, []);
 
@@ -88,13 +89,11 @@ export default function useAlgo(
     setTitle(error);
     setSrc(error);
 
-    loader.current.classList.add('hidden');
+    setLoaderHidden(true);
   }, [error]);
 
   useEffect(() => {
-    if (didLoad && didCompile)
-      loader.current.classList.add('hidden');
-    else loader.current.classList.remove('hidden');
+    setLoaderHidden(didLoad && didCompile);
   }, [didLoad, didCompile]);
 
   useEffect(() => {
@@ -114,7 +113,7 @@ export default function useAlgo(
             line: -1,
             actions: [],
           }]);
-          loader.current.classList.add('hidden');
+          setLoaderHidden(true);
         });
     }
   }, [modified]);

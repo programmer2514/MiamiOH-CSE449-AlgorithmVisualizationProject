@@ -75,70 +75,12 @@ export default function Index() {
             [
               {
                 img: PlaceholderImg,
-                title: 'Algo #5',
+                title: 'Linear Search',
                 tags: [
-                  'Algorithm',
-                  'Numbered',
-                  'Example Tag #1',
-                ],
-                href: '/run',
-              },
-              {
-                img: PlaceholderImg,
-                title: 'Algo #2',
-                tags: [
-                  'Numbered',
-                  'Algorithm',
-                  'Example Tag #2',
-                ],
-                href: '/run',
-              },
-              {
-                img: PlaceholderImg,
-                title: 'Something',
-                tags: [
-                  'Just Text',
-                  'Other Example Tag',
-                ],
-                href: '/run',
-              },
-              {
-                img: PlaceholderImg,
-                title: 'Something Else',
-                tags: [
-                  'Just Text',
-                  'Other Example Tag',
-                ],
-                href: '/run',
-              },
-              {
-                img: PlaceholderImg,
-                title: 'Title',
-                tags: [
-                  'Oooo Tags',
-                  'Fancy Information',
-                  'Example Tag #1',
-                ],
-                href: '/run',
-              },
-              {
-                img: PlaceholderImg,
-                title: 'Title 2',
-                tags: [
-                  'Oooo Tags',
-                  'Fancy Information',
-                  'Example Tag #2',
-                  'Numbered',
-                ],
-                href: '/run',
-              },
-              {
-                img: PlaceholderImg,
-                title: 'ABCDE',
-                tags: [
-                  'Just Text',
-                  'Fancy Information',
-                  'Algorithm',
+                  'Easy',
+                  'Array',
+                  'Brute Force',
+                  'Search',
                 ],
                 href: '/run?algo=linear_search',
               },
