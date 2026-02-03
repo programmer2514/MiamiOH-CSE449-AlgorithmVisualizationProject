@@ -31,7 +31,7 @@ export default function SearchProvider(
   }:
   {
     cards: {
-      img: string
+      img: [string, string] | string
       title: string
       tags: string[]
       href: string

@@ -14,7 +14,8 @@ import AppFrame from '../components/frames/AppFrame';
 import PageMeta from '../components/PageMeta';
 import SearchProvider from '../components/SearchProvider';
 
-import PlaceholderImg from '../resources/img/placeholder.png';
+import LinearSearchDark from '../resources/img/linear-search_dark.png';
+import LinearSearchLight from '../resources/img/linear-search_light.png';
 
 /**
  * Renders the "Getting Started" page.
@@ -74,7 +75,7 @@ export default function Index() {
           cards={
             [
               {
-                img: PlaceholderImg,
+                img: [LinearSearchLight, LinearSearchDark],
                 title: 'Linear Search',
                 tags: [
                   'Easy',

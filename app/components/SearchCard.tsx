@@ -51,7 +51,7 @@ export default function SearchCard(
     toggleTag,
   }:
   {
-    img: string
+    img: [string, string] | string
     title: string
     tags: string[]
     href: string
@@ -71,9 +71,13 @@ export default function SearchCard(
     >
       <Card.Header
         as="img"
-        src={img}
+        src={
+          (typeof img === 'string') ?
+            img :
+            (isDark ? img[1] : img[0])
+        }
         alt={`${title} - Preview Image`}
-        className="m-0 w-full"
+        className="m-0 w-full rounded-lg border border-[#d8d8dc]/50 dark:border-[#38383c]/50"
       />
       <Card.Body className="flex justify-between items-center p-0 my-2">
         <Typography
