@@ -27,6 +27,7 @@ import { ParamListContext } from "./PseudocodeParser";
 import { ForEachLoopContext } from "./PseudocodeParser";
 import { IfStatementContext } from "./PseudocodeParser";
 import { WhileLoopContext } from "./PseudocodeParser";
+import { FunctionCallStmtContext } from "./PseudocodeParser";
 import { ReturnStatementContext } from "./PseudocodeParser";
 import { ExpressionContext } from "./PseudocodeParser";
 import { ComparisonExpressionContext } from "./PseudocodeParser";
@@ -336,6 +337,17 @@ export interface PseudocodeListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitWhileLoop?: (ctx: WhileLoopContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PseudocodeParser.functionCallStmt`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionCallStmt?: (ctx: FunctionCallStmtContext) => void;
+	/**
+	 * Exit a parse tree produced by `PseudocodeParser.functionCallStmt`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionCallStmt?: (ctx: FunctionCallStmtContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `PseudocodeParser.returnStatement`.

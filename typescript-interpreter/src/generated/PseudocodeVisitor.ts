@@ -27,6 +27,7 @@ import { ParamListContext } from "./PseudocodeParser";
 import { ForEachLoopContext } from "./PseudocodeParser";
 import { IfStatementContext } from "./PseudocodeParser";
 import { WhileLoopContext } from "./PseudocodeParser";
+import { FunctionCallStmtContext } from "./PseudocodeParser";
 import { ReturnStatementContext } from "./PseudocodeParser";
 import { ExpressionContext } from "./PseudocodeParser";
 import { ComparisonExpressionContext } from "./PseudocodeParser";
@@ -228,6 +229,13 @@ export interface PseudocodeVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitWhileLoop?: (ctx: WhileLoopContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PseudocodeParser.functionCallStmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFunctionCallStmt?: (ctx: FunctionCallStmtContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `PseudocodeParser.returnStatement`.

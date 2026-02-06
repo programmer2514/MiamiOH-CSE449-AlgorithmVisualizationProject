@@ -25,6 +25,7 @@ import type {
   ArrayAccessExpressionContext,
   ExpressionListContext,
   StatementContext,
+  FunctionCallStmtContext,
 } from './generated/PseudocodeParser';
 
 // Extend a base class and implement the generated visitor interface.
@@ -186,20 +187,27 @@ export default class TsInterpreterVisitor
   }
 
   // Handles: function(arg1, arg2)
-  visitFunctionCallExpression(ctx: FunctionCallExpressionContext): string {
+visitFunctionCallExpression(ctx: FunctionCallExpressionContext): string {
     const funcName = ctx.ID().text;
     let args = '';
     const list = ctx.expressionList();
     if (list) {
       args = this.visit(list);
     }
-    // Special case for 'size' -> .length
+    
+    // 1. Transform size(arr) -> arr.length
     if (funcName === 'size') {
       return `${args}.length`;
     }
+
+    // 2. Transform floor(x) -> Math.floor(x)
+    if (funcName === 'floor') {
+      return `Math.floor(${args})`;
+    }
+
+    // 3. Normal function call -> name(args)
     return `${funcName}(${args})`;
   }
-
   // Handles arguments in a function call
   visitExpressionList(ctx: ExpressionListContext): string {
     const expressions = ctx.expression();
@@ -209,11 +217,17 @@ export default class TsInterpreterVisitor
     return '';
   }
   
-  // Handles: array[index]
+  // Handles array[index]
   visitArrayAccessExpression(ctx: ArrayAccessExpressionContext): string {
     const arrayName = ctx.ID().text;
     const index = this.visit(ctx.expression());
     return `${arrayName}[${index}]`;
+  }
+  // handles inline function calls.
+  visitFunctionCallStmt(ctx: FunctionCallStmtContext): string {
+    const funcName = ctx.ID().text;
+    const args = ctx.expressionList() ? this.visit(ctx.expressionList()!) : '';
+    return `${this.indent()}${funcName}(${args});\n`;
   }
 
   // passthrough methods.

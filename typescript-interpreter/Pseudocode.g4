@@ -3,7 +3,7 @@ grammar Pseudocode;
 // This rule is updated to use NL as a statement separator
 program         : NL* statement (NL+ statement)* NL* EOF;
 
-statement       : assignment | functionDecl | forEachLoop | ifStatement | whileLoop | returnStatement;
+statement       : assignment | functionDecl | functionCallStmt | forEachLoop | ifStatement | whileLoop | returnStatement;
 assignment      : ID EQ (expression | arrayInitialization);
 
 arrayInitialization:
@@ -18,6 +18,9 @@ paramList       : ID (COMMA ID)*;
 forEachLoop     : FOR ID IN ID COLON NL+ (statement (NL+ statement)*)? NL* END FOR;
 ifStatement     : IF expression COLON NL+ (statement (NL+ statement)*)? NL* END IF;
 whileLoop       : WHILE expression COLON NL+ (statement (NL+ statement)*)? NL* END WHILE;
+
+// allows functions to be called inline
+functionCallStmt : ID LPAREN expressionList? RPAREN;
 
 returnStatement : RETURN expression;
 
@@ -58,6 +61,12 @@ expressionList
 
 atom
     : ID | INT;
+// Reserved names for standard types
+TYPE_INT    : 'Integer' | 'integer';
+TYPE_FLOAT  : 'float' | 'Float';
+TYPE_STRING : 'string' | 'String';
+TYPE_BOOL   : 'boolean' | 'Boolean';
+TYPE_DOUBLE : 'double' | 'Double';
 
 ARR     : 'arr';
 TO      : 'to';
@@ -70,6 +79,9 @@ IF      : 'if';
 RETURN  : 'return';
 END     : 'end';
 WHILE   : 'while';
+AND     : 'and';
+OR      : 'or';
+
 ID      : [a-zA-Z_][a-zA-Z_0-9]*;
 INT     : [0-9]+;
 
@@ -88,8 +100,7 @@ GREATER_THAN : '>';
 LESS_EQ : '<=';
 GREATER_EQ : '>=';
 
-// --- LEXER CHANGES ARE HERE ---
-// Newlines are now a dedicated token
 NL      : '\r'? '\n' ; 
-// Whitespace no longer includes newlines
 WS      : [ \t]+ -> skip;
+// Skip comments if necessary (our standard mentions checking simple # or //)
+COMMENT : ('#' | '//') ~[\r\n]* -> skip;
