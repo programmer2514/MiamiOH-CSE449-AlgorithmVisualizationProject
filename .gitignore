@@ -7,3 +7,6 @@
 
 # Vitest
 /screenshots/
+
+# ANTLR
+/app/hooks/interpreter/generated/

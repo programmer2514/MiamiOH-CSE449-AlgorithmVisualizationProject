@@ -1,4 +1,4 @@
-import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
+import { AbstractParseTreeVisitor } from 'antlr4ng';
 import { PseudocodeVisitor } from './generated/PseudocodeVisitor';
 import type {
   AssignmentContext,
@@ -32,8 +32,7 @@ import type {
 // specify string as the return type.
 export default class TsInterpreterVisitor
   extends AbstractParseTreeVisitor<string>
-  implements PseudocodeVisitor<string>
-{
+  implements PseudocodeVisitor<string> {
   private indentLevel = 0;
 
   // The base class requires a default result.
@@ -72,18 +71,18 @@ export default class TsInterpreterVisitor
 
   // Translates a variable assignment (e.g., key = 4).
   visitAssignment(ctx: AssignmentContext): string {
-    const varName = ctx.ID().text;
+    const varName = ctx.ID().getText();
     // Visit the expression or array init directly
-    const value = ctx.expression()
-      ? this.visit(ctx.expression()!)
-      : this.visit(ctx.arrayInitialization()!);
+    const value = ctx.expression() ?
+      this.visit(ctx.expression()!) :
+      this.visit(ctx.arrayInitialization()!);
     return `${this.indent()}let ${varName} = ${value};\n`;
   }
 
   // Creates a JavaScript array from a range (e.g., arr[1 to 5]).
   visitRangeArray(ctx: RangeArrayContext): string {
-    const from = parseInt(ctx._from.text!, 10);
-    const to = parseInt(ctx._to.text!, 10);
+    const from = parseInt(ctx._from_!.text!, 10);
+    const to = parseInt(ctx._to!.text!, 10);
     const values = [];
     for (let i = from; i <= to; i++) {
       values.push(i);
@@ -93,7 +92,7 @@ export default class TsInterpreterVisitor
 
   // Creates an empty JavaScript array of a specific size (e.g., arr(100)).
   visitSizeArray(ctx: SizeArrayContext): string {
-    const size = ctx._size.text;
+    const size = ctx._size!.text;
     return `new Array(${size})`;
   }
 
@@ -105,7 +104,7 @@ export default class TsInterpreterVisitor
 
   // Translates a function declaration.
   visitFunctionDecl(ctx: FunctionDeclContext): string {
-    const funcName = ctx.ID().text;
+    const funcName = ctx.ID().getText();
     const paramList = ctx.paramList();
     let params = '';
     if (paramList) {
@@ -120,8 +119,8 @@ export default class TsInterpreterVisitor
 
   // Translates a 'for each' loop.
   visitForEachLoop(ctx: ForEachLoopContext): string {
-    const varName = ctx.ID(0).text;
-    const arrayName = ctx.ID(1).text;
+    const varName = ctx.ID(0)!.getText();
+    const arrayName = ctx.ID(1)!.getText();
     const body = this.visitBlock(ctx);
     return `${this.indent()}for (const ${varName} of ${arrayName}) {\n${body}${this.indent()}}\n`;
   }
@@ -147,14 +146,14 @@ export default class TsInterpreterVisitor
 
   // Returns the raw text of a basic value like a variable or number.
   visitAtomExpression(ctx: AtomExpressionContext): string {
-    return ctx.atom().text;
+    return ctx.atom().getText();
   }
 
   // Handles: left > right, left == right, etc.
   visitCompareExpr(ctx: CompareExprContext): string {
-    const left = this.visit(ctx._left);
-    const right = this.visit(ctx._right);
-    const op = ctx._op.text!;
+    const left = this.visit(ctx.getChild(0)!);
+    const right = this.visit(ctx.getChild(1)!);
+    const op = ctx._op!.text!;
     // Translate pseudocode == to JavaScript ===
     const jsOp = op === '==' ? '===' : op;
     return `${left} ${jsOp} ${right}`;
@@ -162,17 +161,17 @@ export default class TsInterpreterVisitor
 
   // Handles: left + right or left - right
   visitAddExpr(ctx: AddExprContext): string {
-    const left = this.visit(ctx._left); // Use _left
-    const right = this.visit(ctx._right); // Use _right
-    const op = ctx._op.text!; // '+' or '-'
+    const left = this.visit(ctx.getChild(0)!); // Use _left
+    const right = this.visit(ctx.getChild(1)!); // Use _right
+    const op = ctx._op!.text!; // '+' or '-'
     return `${left} ${op} ${right}`;
   }
 
   // Handles: left * right or left / right
   visitMulExpr(ctx: MulExprContext): string {
-    const left = this.visit(ctx._left); // Use _left
-    const right = this.visit(ctx._right); // Use _right
-    const op = ctx._op.text!; // '*' or '/'
+    const left = this.visit(ctx.getChild(0)!); // Use _left
+    const right = this.visit(ctx.getChild(1)!); // Use _right
+    const op = ctx._op!.text!; // '*' or '/'
     return `${left} ${op} ${right}`;
   }
 
@@ -187,14 +186,14 @@ export default class TsInterpreterVisitor
   }
 
   // Handles: function(arg1, arg2)
-visitFunctionCallExpression(ctx: FunctionCallExpressionContext): string {
-    const funcName = ctx.ID().text;
+  visitFunctionCallExpression(ctx: FunctionCallExpressionContext): string {
+    const funcName = ctx.ID().getText();
     let args = '';
     const list = ctx.expressionList();
     if (list) {
-      args = this.visit(list);
+      args = this.visit(list)!;
     }
-    
+
     // 1. Transform size(arr) -> arr.length
     if (funcName === 'size') {
       return `${args}.length`;
@@ -208,6 +207,7 @@ visitFunctionCallExpression(ctx: FunctionCallExpressionContext): string {
     // 3. Normal function call -> name(args)
     return `${funcName}(${args})`;
   }
+
   // Handles arguments in a function call
   visitExpressionList(ctx: ExpressionListContext): string {
     const expressions = ctx.expression();
@@ -216,16 +216,17 @@ visitFunctionCallExpression(ctx: FunctionCallExpressionContext): string {
     }
     return '';
   }
-  
+
   // Handles array[index]
   visitArrayAccessExpression(ctx: ArrayAccessExpressionContext): string {
-    const arrayName = ctx.ID().text;
+    const arrayName = ctx.ID().getText();
     const index = this.visit(ctx.expression());
     return `${arrayName}[${index}]`;
   }
+
   // handles inline function calls.
   visitFunctionCallStmt(ctx: FunctionCallStmtContext): string {
-    const funcName = ctx.ID().text;
+    const funcName = ctx.ID().getText();
     const args = ctx.expressionList() ? this.visit(ctx.expressionList()!) : '';
     return `${this.indent()}${funcName}(${args});\n`;
   }
@@ -233,18 +234,18 @@ visitFunctionCallExpression(ctx: FunctionCallExpressionContext): string {
   // passthrough methods.
 
   visitComparisonPass(ctx: ComparisonPassContext): string {
-    return this.visit(ctx.additiveExpression());
+    return this.visit(ctx.additiveExpression())!;
   }
 
   visitAdditivePass(ctx: AdditivePassContext): string {
-    return this.visit(ctx.multiplicativeExpression());
+    return this.visit(ctx.multiplicativeExpression())!;
   }
 
   visitMultiplicativePass(ctx: MultiplicativePassContext): string {
-    return this.visit(ctx.unaryExpression());
+    return this.visit(ctx.unaryExpression())!;
   }
-  
+
   visitUnaryPass(ctx: UnaryPassContext): string {
-    return this.visit(ctx.primaryExpression());
-  }
+    return this.visit(ctx.primaryExpression())!;
+  }
 }

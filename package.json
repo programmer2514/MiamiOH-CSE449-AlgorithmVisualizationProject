@@ -18,7 +18,8 @@
     "lint": "eslint .",
     "update-deps": "npm-check-updates -u && npm install",
     "force-update-deps": "npm-check-updates -u && rimraf node_modules .react-router package-lock.json && npm install",
-    "update-nvmrc": "node --version > .nvmrc"
+    "update-nvmrc": "node --version > .nvmrc",
+    "build-g4": "rimraf app/hooks/interpreter/generated && npx antlr-ng -Dlanguage=TypeScript -v -o app/hooks/interpreter/generated app/hooks/interpreter/Pseudocode.g4"
   },
   "dependencies": {
     "@material-tailwind/react": "^3.0.0-beta.24",
@@ -43,6 +44,7 @@
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "@vitest/browser-playwright": "^4.0.18",
+    "antlr4ng": "^3.0.16",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.3.0",
