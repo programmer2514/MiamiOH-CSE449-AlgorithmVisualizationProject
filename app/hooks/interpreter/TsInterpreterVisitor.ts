@@ -1,5 +1,5 @@
 import { AbstractParseTreeVisitor } from 'antlr4ng';
-import { PseudocodeVisitor } from './generated/PseudocodeVisitor';
+import { PseudocodeVisitor } from './.antlr/PseudocodeVisitor';
 import type {
   AssignmentContext,
   ForEachLoopContext,
@@ -26,7 +26,7 @@ import type {
   ExpressionListContext,
   StatementContext,
   FunctionCallStmtContext,
-} from './generated/PseudocodeParser';
+} from './.antlr/PseudocodeParser';
 
 // Extend a base class and implement the generated visitor interface.
 // specify string as the return type.

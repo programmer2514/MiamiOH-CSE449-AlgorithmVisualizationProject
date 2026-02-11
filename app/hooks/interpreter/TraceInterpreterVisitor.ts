@@ -1,5 +1,5 @@
 import { AbstractParseTreeVisitor } from 'antlr4ng';
-import { PseudocodeVisitor } from './generated/PseudocodeVisitor';
+import { PseudocodeVisitor } from './.antlr/PseudocodeVisitor';
 import {
   ProgramContext,
   AssignmentContext,
@@ -22,7 +22,7 @@ import {
   FunctionCallExpressionContext,
   WhileLoopContext,
   // Removed LogicalExprContext to fix your error
-} from './generated/PseudocodeParser';
+} from './.antlr/PseudocodeParser';
 import { TraceStep, TraceAction } from './TraceType';
 
 type Scope = Map<string, any>;

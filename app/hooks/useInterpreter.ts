@@ -4,8 +4,8 @@ import {
 } from 'react';
 
 import { CharStream, CommonTokenStream } from 'antlr4ng';
-import { PseudocodeLexer } from './interpreter/generated/PseudocodeLexer';
-import { PseudocodeParser } from './interpreter/generated/PseudocodeParser';
+import { PseudocodeLexer } from './interpreter/.antlr/PseudocodeLexer';
+import { PseudocodeParser } from './interpreter/.antlr/PseudocodeParser';
 import TsInterpreterVisitor from './interpreter/TsInterpreterVisitor';
 import TraceInterpreterVisitor from './interpreter/TraceInterpreterVisitor';
 

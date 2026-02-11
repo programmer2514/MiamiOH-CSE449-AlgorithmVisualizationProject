@@ -19,7 +19,7 @@
     "update-deps": "npm-check-updates -u && npm install",
     "force-update-deps": "npm-check-updates -u && rimraf node_modules .react-router package-lock.json && npm install",
     "update-nvmrc": "node --version > .nvmrc",
-    "build-g4": "rimraf app/hooks/interpreter/generated && npx antlr-ng -Dlanguage=TypeScript -v -o app/hooks/interpreter/generated app/hooks/interpreter/Pseudocode.g4"
+    "build-g4": "rimraf app/hooks/interpreter/.antlr && npx antlr-ng -Dlanguage=TypeScript -v -o app/hooks/interpreter/.antlr app/hooks/interpreter/Pseudocode.g4"
   },
   "dependencies": {
     "@material-tailwind/react": "^3.0.0-beta.24",

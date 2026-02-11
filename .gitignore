@@ -9,4 +9,4 @@
 /screenshots/
 
 # ANTLR
-/app/hooks/interpreter/generated/
+.antlr/
