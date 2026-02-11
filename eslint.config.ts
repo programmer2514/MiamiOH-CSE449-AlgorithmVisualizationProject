@@ -11,6 +11,7 @@ export default defineConfig([
       '.react-router/*',
       'build/*',
       'node_modules/*',
+      '**/.antlr/*',
     ],
   },
   {
