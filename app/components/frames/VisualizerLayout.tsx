@@ -128,7 +128,7 @@ export default function VisualizerLayout(
             children.map((child, index) => (
               <div
                 key={index}
-                className={`absolute top-[calc(3.5rem-1px)] w-full h-[calc(100%-7.5rem+2px)] ${(index === 0) && 'bg-[#fafafc] dark:bg-[#1d1d20]'} ${(pane === index) ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                className={`absolute top-13.75 w-full h-[calc(100%-7.5rem+2px)] ${(index === 0) && 'bg-[#fafafc] dark:bg-[#1d1d20]'} ${(pane === index) ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               >
                 {child}
               </div>

@@ -83,7 +83,7 @@ export default function Index() {
                   'Brute Force',
                   'Search',
                 ],
-                href: '/run?algo=linear_search',
+                href: '/run?algorithm=linear_search',
               },
             ]
           }

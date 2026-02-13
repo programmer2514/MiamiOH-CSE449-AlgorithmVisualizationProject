@@ -39,7 +39,7 @@ export default function useAlgo(
   const [modified] = useContext(ModifiedContext);
 
   useEffect(() => {
-    const algo = new URLSearchParams(window.location.search).get('algo');
+    const algo = new URLSearchParams(window.location.search).get('algorithm');
 
     if (algo) {
       fetch(`/code/${algo}.avp`)

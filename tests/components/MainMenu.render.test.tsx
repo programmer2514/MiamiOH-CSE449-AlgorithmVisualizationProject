@@ -13,6 +13,8 @@ function Test() {
   return (
     <>
       <MainMenu
+        isDark={false}
+        setIsDark={() => {}}
         triggerRef={triggerRef}
         panelRef={panelRef}
         links={[

@@ -17,34 +17,32 @@ export default function VarsPane(
   },
 ) {
   return (
-    <>
-      <Monaco
-        name="vars"
-        src={
-          Object.keys(vars)
-            .map(key => `${key}: ${
-              JSON.stringify(vars[key][0])
-                .replaceAll(',', ', ')
-                .replaceAll('"<function>"', '<function>')
-            }`)
-            .join('\n')
-        }
-        setSrc={(_: string) => {}}
-        highlights={
-          Object.keys(vars)
-            .map((key, idx) => [idx, vars[key][1]])
-            .filter(key => key[1] > 0)
-            .map(key => key[0] + 1)
-        }
-        greyouts={
-          Object.keys(vars)
-            .map((key, idx) => [idx, vars[key][1]])
-            .filter(key => key[1] < 0)
-            .map(key => key[0] + 1)
-        }
-        editing={false}
-        bindSrc={true}
-      />
-    </>
+    <Monaco
+      name="vars"
+      src={
+        Object.keys(vars)
+          .map(key => `${key}: ${
+            JSON.stringify(vars[key][0])
+              .replaceAll(',', ', ')
+              .replaceAll('"<function>"', '<function>')
+          }`)
+          .join('\n')
+      }
+      setSrc={(_: string) => {}}
+      highlights={
+        Object.keys(vars)
+          .map((key, idx) => [idx, vars[key][1]])
+          .filter(key => key[1] > 0)
+          .map(key => key[0] + 1)
+      }
+      greyouts={
+        Object.keys(vars)
+          .map((key, idx) => [idx, vars[key][1]])
+          .filter(key => key[1] < 0)
+          .map(key => key[0] + 1)
+      }
+      editing={false}
+      bindSrc={true}
+    />
   );
 }
