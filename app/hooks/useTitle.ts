@@ -10,7 +10,7 @@ export default function useTitle() {
   const [title, setTitle] = useState('<unnamed>');
 
   useEffect(() => {
-    if (title === null) return;
+    if (title === '') return;
     localStorage.setItem('title', title);
   }, [title]);
 
