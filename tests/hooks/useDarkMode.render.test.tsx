@@ -8,7 +8,7 @@ function Test() {
 
   return (
     <>
-      <p>{isDark.toString()}</p>
+      <p>{(isDark || false).toString()}</p>
       <button onClick={() => setIsDark(true)}>Enable</button>
       <button onClick={() => setIsDark(false)}>Disable</button>
     </>
@@ -17,24 +17,24 @@ function Test() {
 
 describe('Test hook: useDarkMode()', async () => {
   test('Check if \'isDark\' is a boolean', async () => {
-    const screen = render(<Test />);
+    const screen = await render(<Test />);
 
-    await expect.element(screen.getByText(/(true|false)/i)).toBeInTheDocument();
+    await expect(screen.getByText(/(true|false)/i)).toBeInTheDocument();
   });
 
   test('Enable dark mode', async () => {
-    const screen = render(<Test />);
+    const screen = await render(<Test />);
 
-    await screen.getByText(/Enable/i).click();
-    await expect.element(screen.getByText(/true/i)).toBeInTheDocument();
+    await screen.getByText('Enable').click();
+    await expect(screen.getByText('true')).toBeInTheDocument();
     await expect(screen.baseElement.classList.contains('dark')).toBe(true);
   });
 
   test('Disable dark mode', async () => {
-    const screen = render(<Test />);
+    const screen = await render(<Test />);
 
-    await screen.getByText(/Disable/i).click();
-    await expect.element(screen.getByText(/false/i)).toBeInTheDocument();
+    await screen.getByText('Disable').click();
+    await expect(screen.getByText('false')).toBeInTheDocument();
     await expect(screen.baseElement.classList.contains('dark')).toBe(false);
   });
 });

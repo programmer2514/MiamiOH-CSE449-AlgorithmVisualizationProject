@@ -10,7 +10,8 @@ export default defineConfig([
     ignores: [
       '.react-router/*',
       'build/*',
-      'coverage/*',
+      'node_modules/*',
+      '**/.antlr/*',
     ],
   },
   {
@@ -40,6 +41,20 @@ export default defineConfig([
     rules: {
       'no-empty-pattern': ['error', {
         allowObjectPatternsAsParameters: true,
+      }],
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+      }],
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_+$',
       }],
     },
   },

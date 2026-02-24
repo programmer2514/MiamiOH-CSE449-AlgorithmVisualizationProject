@@ -7,14 +7,18 @@
 }
 
 body {
-  @apply min-h-screen;
-  @apply bg-white dark:bg-gray-950;
-  @apply transition-colors duration-200 [&_*]:duration-200;
+  @apply h-dvh min-h-dvh max-h-dvh w-dvw min-w-dvw max-w-dvw;
+  @apply bg-[#ffffff] dark:bg-[#18181c] text-primary;
+  @apply transition-colors duration-200 **:duration-200;
+  @apply overflow-hidden;
 }
 
-/* Prevent dark mode flicker when initializing localStorage object */
-@media (prefers-color-scheme: dark) {
-  .body-preload {
-    @apply bg-gray-950;
-  }
+.avp-highlight {
+  @apply bg-[dodgerblue]/15 dark:bg-[yellow]/15;
+  @apply w-full!;
+}
+
+.avp-greyout {
+  @apply bg-[#ffffff]/70 dark:bg-[#18181c]/70 z-50 pointer-events-none;
+  @apply w-full!;
 }

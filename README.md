@@ -22,6 +22,7 @@ Install the dependencies:
 ```bash
 npm install
 npx playwright install
+npm run build-g4
 ```
 
 ### Development
