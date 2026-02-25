@@ -16,7 +16,7 @@ The Algorithms Visualization Project is a web-based educational tool that helps 
 ### Installation
 Download and install the Node version listed in `.nvmrc`.
 - Get it directly from [the Node website](https://nodejs.org/en/download)
-- Or (Windows only), easily manage Node versions with [NVM for Windows](https://github.com/coreybutler/nvm-windows)
+- Or download it with [Node Version Manager](https://www.nvmnode.com/guide/download.html): `nvm install`
 
 Install the dependencies:
 ```bash

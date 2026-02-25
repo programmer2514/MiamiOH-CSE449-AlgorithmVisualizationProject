@@ -4,6 +4,7 @@ import tseslint from 'typescript-eslint';
 import pluginReact from 'eslint-plugin-react';
 import stylistic from '@stylistic/eslint-plugin';
 import { defineConfig } from 'eslint/config';
+import { fixupConfigRules } from '@eslint/compat';
 
 export default defineConfig([
   {
@@ -34,8 +35,8 @@ export default defineConfig([
     },
   },
   tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
-  pluginReact.configs.flat['jsx-runtime'],
+  ...fixupConfigRules(pluginReact.configs.flat.recommended),
+  ...fixupConfigRules(pluginReact.configs.flat['jsx-runtime']),
   stylistic.configs['recommended'],
   {
     rules: {
