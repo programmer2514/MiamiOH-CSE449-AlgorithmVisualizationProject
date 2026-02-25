@@ -39,6 +39,14 @@ describe('Test component: <VisFrame />', async () => {
     await expect(screen.baseElement.querySelector('button[title="Reset"]')).toBeInTheDocument();
   });
 
+  test('Ensure speed buttons are rendered', async () => {
+    const screen = await render(<Test />);
+
+    await expect(screen.baseElement.querySelector('button[title="Decrease Speed"]')).toBeInTheDocument();
+    await expect(screen.baseElement.querySelector('button[title="Increase Speed"]')).toBeInTheDocument();
+    await expect(screen.baseElement.querySelector('button[title="Reset Speed"]')).toBeInTheDocument();
+  });
+
   test('Ensure zoom buttons are rendered', async () => {
     const screen = await render(<Test />);
 
@@ -51,6 +59,7 @@ describe('Test component: <VisFrame />', async () => {
     const screen = await render(<Test />);
 
     await expect(screen.getByText('Step: 3 / 5')).toBeInTheDocument();
+    await expect(screen.getByText('Speed: 1x')).toBeInTheDocument();
     await expect(screen.getByText('Zoom: 100%')).toBeInTheDocument();
   });
 
@@ -68,6 +77,22 @@ describe('Test component: <VisFrame />', async () => {
 
     await (screen.baseElement.querySelector('button[title="Reset"]') as HTMLButtonElement).click();
     await expect(screen.getByText('Step: 0 / 5')).toBeInTheDocument();
+  });
+
+  test('Ensure speed buttons work', async () => {
+    const screen = await render(<Test />);
+
+    await expect(screen.getByText('Speed: 1x')).toBeInTheDocument();
+
+    await (screen.baseElement.querySelector('button[title="Decrease Speed"]') as HTMLButtonElement).click();
+    await expect(screen.getByText('Speed: 0.9x')).toBeInTheDocument();
+
+    await (screen.baseElement.querySelector('button[title="Increase Speed"]') as HTMLButtonElement).click();
+    await (screen.baseElement.querySelector('button[title="Increase Speed"]') as HTMLButtonElement).click();
+    await expect(screen.getByText('Speed: 1.1x')).toBeInTheDocument();
+
+    await (screen.baseElement.querySelector('button[title="Reset Speed"]') as HTMLButtonElement).click();
+    await expect(screen.getByText('Speed: 1x')).toBeInTheDocument();
   });
 
   test('Ensure zoom buttons work', async () => {

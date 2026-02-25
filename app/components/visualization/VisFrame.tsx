@@ -7,15 +7,30 @@ import {
 } from '@material-tailwind/react';
 
 import {
-  ArrowEmailForward,
+  UndoAction,
+  Forward,
   Minus,
   NavArrowLeft,
   NavArrowRight,
-  PauseSolid,
-  PlaySolid,
+  Pause,
+  Play,
   Plus,
   PrecisionTool,
+  Rewind,
 } from 'iconoir-react';
+
+// In ms
+const TICK_SPEED = 10;
+const DEFAULT_SPEED = 1000;
+
+// Multipliers of DEFAULT_SPEED
+const SPEEDS = [
+  0.1, 0.25, 0.33, 0.5,
+  0.66, 0.75, 0.9, 1.0,
+  1.1, 1.25, 1.5, 1.75,
+  2, 2.5, 3, 3.5, 4, 5,
+  10,
+];
 
 /**
  * Renders the main visualization frame around the passed child elements.
@@ -55,11 +70,14 @@ export default function VisWindowFrame(
   },
 ) {
   const [zoom, setZoom] = useState(1.0);
+  const [speed, setSpeed] = useState(DEFAULT_SPEED);
   const [offsetX, setOffsetX] = useState(0.0);
   const [offsetY, setOffsetY] = useState(0.0);
 
   const [dragging, setDragging] = useState(false);
-  const [animating, setAnimating] = useState(null as NodeJS.Timeout | null);
+
+  const [time, setTime] = useState(0);
+  const [timeStep, setTimeStep] = useState(null as NodeJS.Timeout | null);
 
   const [step, setStep] = useState(false);
   const [move, setMove] = useState(null as MouseEvent | TouchEvent | null);
@@ -67,13 +85,31 @@ export default function VisWindowFrame(
     useState(null as React.TouchEvent | TouchEvent | null);
 
   useEffect(() => {
-    if (stepNum === numSteps && animating) {
-      clearInterval(animating);
-      setAnimating(null);
-      return;
-    }
+    if (time > 0) {
+      if ((time - TICK_SPEED) %
+        (Math.round(speed / TICK_SPEED) * TICK_SPEED) === 0
+      ) {
+        setStep(true);
+      }
 
+      setTimeStep(
+        setTimeout(() => setTime(time + TICK_SPEED), TICK_SPEED),
+      );
+    } else {
+      if (timeStep) {
+        clearTimeout(timeStep);
+        setStep(false);
+      }
+    }
+  }, [time]);
+
+  useEffect(() => {
     if (step) {
+      if (stepNum === numSteps) {
+        setTime(0);
+        return;
+      }
+
       nextStep();
       setStep(false);
     }
@@ -101,14 +137,17 @@ export default function VisWindowFrame(
 
           if (newDiff === oldDiff) return;
 
-          if ((newDiff < oldDiff) && (zoom * 0.98 >= 0.1)) {
-            setZoom(zoom * 0.98);
-            setOffsetX(offsetX * 0.98);
-            setOffsetY(offsetY * 0.98);
-          } else if ((newDiff > oldDiff) && (zoom * 1.02 <= 40.0)) {
-            setZoom(zoom * 1.02);
-            setOffsetX(offsetX * 1.02);
-            setOffsetY(offsetY * 1.02);
+          const diff = Math.abs(newDiff - oldDiff);
+          if ((newDiff < oldDiff) && (zoom * Math.pow(0.99, diff) >= 0.1)) {
+            setZoom(zoom * Math.pow(0.99, diff));
+            setOffsetX(offsetX * Math.pow(0.99, diff));
+            setOffsetY(offsetY * Math.pow(0.99, diff));
+          } else if (
+            (newDiff > oldDiff) && (zoom * Math.pow(1.01, diff) <= 40.0)
+          ) {
+            setZoom(zoom * Math.pow(1.01, diff));
+            setOffsetX(offsetX * Math.pow(1.01, diff));
+            setOffsetY(offsetY * Math.pow(1.01, diff));
           }
           setTouch(move as TouchEvent);
 
@@ -175,10 +214,35 @@ export default function VisWindowFrame(
     e.preventDefault();
   }
 
+  function getNextSpeed(speed: number, dir: number) {
+    const idx = SPEEDS
+      .findIndex(s => s == DEFAULT_SPEED / speed) + ((dir > 0) ? 1 : -1);
+
+    return (idx >= 0 && idx < SPEEDS.length) ?
+      DEFAULT_SPEED / SPEEDS[idx] :
+      speed;
+  }
+
   return (
     <section className="w-full h-full">
       <div className="flex gap-1 items-center relative w-full h-0 overflow-visible px-2 justify-end z-20 translate-y-7 portrait:justify-center">
-        <div className="w-64 max-w-full mx-1">
+        <IconButton
+          variant="ghost"
+          aria-label={`${time > 0 ? 'Pause' : 'Play'} Animation`}
+          title={`${time > 0 ? 'Pause' : 'Play'} Animation`}
+          onClick={() => {
+            setTime(time > 0 ? 0 : TICK_SPEED);
+          }}
+          className="cursor-pointer"
+        >
+          {
+            time > 0 ?
+              <Pause className="stroke-2 w-6 h-6" role="presentation" /> :
+              <Play className="stroke-2 w-6 h-6" role="presentation" />
+          }
+
+        </IconButton>
+        <div className="w-64 max-w-full mx-0.5">
           <Progress
             value={stepNum / numSteps * 100}
             className="rounded-lg h-8 w-full border border-[#d8d8dc] dark:border-[#38383c] bg-[#ffffff] dark:bg-[#18181c]"
@@ -196,7 +260,7 @@ export default function VisWindowFrame(
           onClick={prevStep}
           className="cursor-pointer"
         >
-          <NavArrowLeft className="stroke-2 w-6 h-6" role="presentation" />
+          <NavArrowLeft className="stroke-2 w-6.5 h-6.5" role="presentation" />
         </IconButton>
         <IconButton
           variant="ghost"
@@ -205,45 +269,19 @@ export default function VisWindowFrame(
           onClick={nextStep}
           className="cursor-pointer"
         >
-          <NavArrowRight className="stroke-2 w-6 h-6" role="presentation" />
-        </IconButton>
-        <IconButton
-          variant="ghost"
-          aria-label={`${animating ? 'Pause' : 'Play'} Animation`}
-          title={`${animating ? 'Pause' : 'Play'} Animation`}
-          onClick={() => {
-            if (animating) {
-              clearInterval(animating);
-              setAnimating(null);
-              return;
-            }
-
-            setStep(true);
-            setAnimating(
-              setInterval(() => setStep(true), 1000),
-            );
-          }}
-          className="cursor-pointer"
-        >
-          {
-            animating ?
-              <PauseSolid className="stroke-2 w-6 h-6" role="presentation" /> :
-              <PlaySolid className="stroke-2 w-6 h-6" role="presentation" />
-          }
-
+          <NavArrowRight className="stroke-2 w-6.5 h-6.5" role="presentation" />
         </IconButton>
         <IconButton
           variant="ghost"
           aria-label="Reset"
           title="Reset"
           onClick={() => {
-            if (animating) clearInterval(animating);
-            setAnimating(null);
+            setTime(0);
             reset();
           }}
           className="cursor-pointer"
         >
-          <ArrowEmailForward className="stroke-2 w-5 h-5 -scale-x-100" role="presentation" />
+          <UndoAction className="stroke-2 w-6 h-6" role="presentation" />
         </IconButton>
       </div>
 
@@ -251,14 +289,14 @@ export default function VisWindowFrame(
         <div
           onContextMenuCapture={e => e.preventDefault()}
           onWheel={(e) => {
-            if ((e.deltaY > 0) && (zoom * 0.9 >= 0.1)) {
-              setZoom(zoom * 0.9);
-              setOffsetX(offsetX * 0.9);
-              setOffsetY(offsetY * 0.9);
-            } else if ((e.deltaY < 0) && (zoom * 1.1 <= 40.0)) {
-              setZoom(zoom * 1.1);
-              setOffsetX(offsetX * 1.1);
-              setOffsetY(offsetY * 1.1);
+            if ((e.deltaY > 0) && (zoom * 0.95 >= 0.1)) {
+              setZoom(zoom * 0.95);
+              setOffsetX(offsetX * 0.95);
+              setOffsetY(offsetY * 0.95);
+            } else if ((e.deltaY < 0) && (zoom * 1.05 <= 40.0)) {
+              setZoom(zoom * 1.05);
+              setOffsetX(offsetX * 1.05);
+              setOffsetY(offsetY * 1.05);
             }
           }}
           onMouseDownCapture={mouseDown}
@@ -274,7 +312,7 @@ export default function VisWindowFrame(
               '--offset-x': `${offsetX}px`,
               '--offset-y': `${offsetY}px`,
             } as React.CSSProperties}
-            className="relative z-10 pointer-events-none transition-none w-min h-min top-1/2 left-1/2 translate-x-[calc(-50%+var(--offset-x))] translate-y-[calc(-50%+var(--offset-y))] scale-(--zoom)"
+            className="relative z-10 pointer-events-none transition-none! w-min h-min top-1/2 left-1/2 translate-x-[calc(-50%+var(--offset-x))] translate-y-[calc(-50%+var(--offset-y))] scale-(--zoom)"
           >
             {children}
           </div>
@@ -282,7 +320,7 @@ export default function VisWindowFrame(
 
         {
           (offsetX !== 0.0 || offsetY !== 0.0) && (
-            <div className="flex items-center relative w-full h-0 overflow-visible px-2 justify-end z-20 -translate-y-7">
+            <div className="flex items-center w-full h-0 overflow-visible px-2 z-20 relative justify-start -translate-y-7 portrait:absolute portrait:justify-end portrait:-translate-y-7 portrait:-translate-x-10.5">
               <IconButton
                 variant="ghost"
                 aria-label="Re-center View"
@@ -299,8 +337,53 @@ export default function VisWindowFrame(
           )
         }
 
+        <div className="flex gap-1 items-center relative w-full h-0 overflow-visible px-2 justify-end z-20 -translate-y-7 portrait:justify-center">
+          <div className="w-64 max-w-full mx-0.5">
+            <Progress
+              value={
+                ((speed >= DEFAULT_SPEED) ?
+                  (DEFAULT_SPEED / speed) / 2 :
+                  (0.5 + (DEFAULT_SPEED / speed) / 20)) * 100
+              }
+              className="rounded-lg h-8 w-full border border-[#d8d8dc] dark:border-[#38383c] bg-[#ffffff] dark:bg-[#18181c]"
+            >
+              <Progress.Bar className="bg-[dodgerblue]" />
+            </Progress>
+            <Typography className="text-base font-medium pointer-events-none relative text-center w-full h-0 overflow-visible z-30 -translate-y-7">
+              {`Speed: ${DEFAULT_SPEED / speed}x`}
+            </Typography>
+          </div>
+          <IconButton
+            variant="ghost"
+            aria-label="Decrease Speed"
+            title="Decrease Speed"
+            onClick={() => setSpeed(getNextSpeed(speed, -1))}
+            className="cursor-pointer"
+          >
+            <Rewind className="stroke-2 w-5.5 h-5.5" role="presentation" />
+          </IconButton>
+          <IconButton
+            variant="ghost"
+            aria-label="Increase Speed"
+            title="Increase Speed"
+            onClick={() => setSpeed(getNextSpeed(speed, 1))}
+            className="cursor-pointer"
+          >
+            <Forward className="stroke-2 w-5.5 h-5.5" role="presentation" />
+          </IconButton>
+          <IconButton
+            variant="ghost"
+            aria-label="Reset Speed"
+            title="Reset Speed"
+            onClick={() => setSpeed(DEFAULT_SPEED)}
+            className="cursor-pointer"
+          >
+            <UndoAction className="stroke-2 w-6 h-6" role="presentation" />
+          </IconButton>
+        </div>
+
         <div className="flex gap-1 items-center justify-end p-2 border-[#d8d8dc] dark:border-[#38383c] border-t bg-[#ffffff] dark:bg-[#18181c] portrait:justify-center">
-          <div className="w-64 max-w-full mx-1">
+          <div className="w-64 max-w-full mx-0.5">
             <Progress
               value={((zoom <= 1) ? zoom / 2 : (0.5 + ((zoom - 1) / 8))) * 100}
               className="rounded-lg h-8 w-full border border-[#d8d8dc] dark:border-[#38383c] bg-[#ffffff] dark:bg-[#18181c]"
@@ -336,7 +419,7 @@ export default function VisWindowFrame(
             onClick={() => setZoom(1.0)}
             className="cursor-pointer"
           >
-            <ArrowEmailForward className="stroke-2 w-5 h-5 -scale-x-100" role="presentation" />
+            <UndoAction className="stroke-2 w-6 h-6" role="presentation" />
           </IconButton>
         </div>
       </div>
