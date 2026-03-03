@@ -21,7 +21,6 @@ import {
   ArrayAccessExpressionContext,
   FunctionCallExpressionContext,
   WhileLoopContext,
-  // Removed LogicalExprContext to fix your error
 } from './.antlr/PseudocodeParser';
 import { TraceStep, TraceAction } from './TraceType';
 
@@ -31,7 +30,6 @@ export default class TraceInterpreterVisitor
   extends AbstractParseTreeVisitor<any>
   implements PseudocodeVisitor<any> {
   public steps: TraceStep[] = [];
-
   private globalScope: Scope = new Map();
   private callStack: Scope[] = [];
   private functions: Map<string, FunctionDeclContext> = new Map();
@@ -39,6 +37,10 @@ export default class TraceInterpreterVisitor
   // Heuristics
   private currentLoopIndex: number | null = null;
   private currentLoopVar: string | null = null;
+  private lastComparisonLeft: any = null;
+  private lastComparisonRight: any = null;
+  private lastComparisonOp: string = '';
+  private recentArrayAccesses: Array<{ index: number, arrayName: string }> = [];
 
   protected defaultResult(): any {
     return null;
@@ -74,6 +76,27 @@ export default class TraceInterpreterVisitor
       value = this.visit(ctx.expression()!);
     }
     this.memory.set(name, value);
+
+    if (typeof value === 'number' && this.recentArrayAccesses.length > 0) {
+      const unmarkActions: TraceAction[] = [];
+
+      const accessedIndices = new Set(
+        this.recentArrayAccesses.map(a => a.index),
+      );
+      for (const idx of accessedIndices) {
+        unmarkActions.push({ cmd: 'vis_unmark', params: { index: idx, type: 'all' } });
+      }
+
+      // Add the variable assignment
+      unmarkActions.push({ cmd: 'var_add', params: { name, value } });
+
+      this.addStep(ctx.start!.line, unmarkActions);
+
+      // Clear the array access history
+      this.recentArrayAccesses = [];
+      return;
+    }
+
     this.addStep(ctx.start!.line, [{ cmd: 'var_add', params: { name, value } }]);
   }
 
@@ -85,7 +108,7 @@ export default class TraceInterpreterVisitor
   visitRangeArray(ctx: RangeArrayContext): any[] {
     const from = parseInt(ctx._from_!.text!, 10);
     const to = parseInt(ctx._to!.text!, 10);
-    const arr = [];
+    const arr: number[] = [];
     for (let i = from; i <= to; i++) arr.push(i);
     return arr;
   }
@@ -111,15 +134,7 @@ export default class TraceInterpreterVisitor
     const funcName = ctx.ID().getText();
     const args = ctx.expressionList() ? this.visit(ctx.expressionList()!) : [];
 
-    // Handle merge sort
-    if (funcName === 'merge_sort' && Array.isArray(args[0])) {
-      args[0].sort((a: number, b: number) => a - b);
-      this.addStep(ctx.start!.line, [{
-        cmd: 'vis_init', params: { data: args[0], type: 'table' }, // Re-init with sorted data
-      }]);
-      return;
-    }
-
+    // Execute any function generically
     return this.executeFunction(funcName, args, ctx.start!.line);
   }
 
@@ -153,7 +168,7 @@ export default class TraceInterpreterVisitor
     if (stmts) {
       for (const stmt of stmts) {
         const res = this.visit(stmt);
-        if (res !== undefined && res !== null && stmt.returnStatement()) {
+        if (res !== undefined && res !== null) {
           retVal = res;
           break;
         }
@@ -180,7 +195,6 @@ export default class TraceInterpreterVisitor
         const val = arrayData[i];
         this.memory.set(iterVarName, val);
 
-        // Usage of loop index (fixes unused variable error)
         this.currentLoopIndex = i;
         this.currentLoopVar = iterVarName;
 
@@ -195,15 +209,30 @@ export default class TraceInterpreterVisitor
         const stmts = ctx.statement();
         if (stmts) {
           for (const stmt of stmts) {
+            console.log(`Visiting statement at index ${i}, value ${val}`);
             const res = this.visit(stmt);
-            if (res !== undefined && res !== null && stmt.returnStatement())
+            console.log(`Result: ${res}, Type: ${typeof res}, Undefined? ${res === undefined}, Null? ${res === null}`);
+
+            // Check if a statement returned a value
+            if (res !== undefined && res !== null) {
+              console.log(`SHOULD RETURN HERE with value ${res}`);
+              // Add final cleanup before returning
+              this.addStep(ctx.start!.line, [
+                { cmd: 'vis_unmark', params: { index: i, type: 'all' } },
+              ]);
+              this.currentLoopIndex = null;
+              this.currentLoopVar = null;
               return res;
+            }
           }
         }
       }
-      this.addStep(ctx.start!.line, [{ cmd: 'vis_unmark', params: { index: arrayData.length - 1, type: 'all' } }]);
+      if (arrayData.length > 0) {
+        this.addStep(ctx.start!.line, [
+          { cmd: 'vis_unmark', params: { index: arrayData.length - 1, type: 'all' } },
+        ]);
+      }
 
-      // Resetting them (also counts as usage)
       this.currentLoopIndex = null;
       this.currentLoopVar = null;
     }
@@ -211,68 +240,157 @@ export default class TraceInterpreterVisitor
 
   visitWhileLoop(ctx: WhileLoopContext): any {
     let limit = 20; // Safety break
+    let iterations = 0;
+
+    console.log('Starting while loop');
+
     while (this.visit(ctx.expression()) && limit-- > 0) {
+      iterations++;
+      console.log(`While loop iteration ${iterations}`);
+
       const stmts = ctx.statement();
       if (stmts) {
         for (const stmt of stmts) {
           const res = this.visit(stmt);
-          if (res !== undefined && res !== null && stmt.returnStatement())
+          console.log(`Statement result: ${res}`);
+          if (res !== undefined && res !== null) {
+            console.log(`While loop returning: ${res}`);
             return res;
+          }
         }
       }
     }
+
+    console.log(`While loop ended after ${iterations} iterations`);
   }
 
   visitIfStatement(ctx: IfStatementContext): any {
-    // Reads currentLoopIndex and currentLoopVar
-    if (this.currentLoopIndex !== null && this.currentLoopVar !== null) {
-      const lhsVal = this.memory.get(this.currentLoopVar);
-      const rhsVal = this.memory.get('k') || this.memory.get('key');
-
-      this.addStep(ctx.start!.line, [{
-        cmd: 'vis_mark', params: { index: this.currentLoopIndex, type: 'text', color: 'fg', value: `${lhsVal} == ${rhsVal}?` },
-      }]);
-    }
-
-    // Check if 'mid' exists
-    const midVal = this.memory.get('mid');
-    if (midVal !== undefined && typeof midVal === 'number') {
-      this.addStep(ctx.start!.line, [{
-        cmd: 'vis_mark', params: { index: Math.floor(midVal), type: 'outline', color: 'blue' },
-      }]);
-    }
-
     const condition = this.visit(ctx.expression());
+
+    // DYNAMIC: Visualize any array access that happened during the comparison
+    // This works for binary search, linear search, sorting, or ANY algorithm
+    if (this.recentArrayAccesses.length > 0) {
+      const visualizeActions: TraceAction[] = [];
+
+      // Visualize all recent array accesses
+      for (const access of this.recentArrayAccesses) {
+        visualizeActions.push({
+          cmd: 'vis_mark',
+          params: {
+            index: access.index,
+            type: 'outline',
+            color: 'yellow',
+          },
+        });
+      }
+
+      if (this.lastComparisonLeft !== null &&
+        this.lastComparisonRight !== null) {
+        const mostRecent = this.recentArrayAccesses[this.recentArrayAccesses.length - 1];
+        visualizeActions.push({
+          cmd: 'vis_mark',
+          params: {
+            index: mostRecent.index,
+            type: 'text',
+            color: 'fg',
+            value: `${this.lastComparisonLeft} ${this.lastComparisonOp} ${this.lastComparisonRight}?`,
+          },
+        });
+      }
+
+      this.addStep(ctx.start!.line, visualizeActions);
+      this.recentArrayAccesses = [];
+    } else if (this.currentLoopIndex !== null &&
+      this.lastComparisonLeft !== null &&
+      this.lastComparisonRight !== null) {
+      this.addStep(ctx.start!.line, [{
+        cmd: 'vis_mark',
+        params: {
+          index: this.currentLoopIndex,
+          type: 'text',
+          color: 'fg',
+          value: `${this.lastComparisonLeft} ${this.lastComparisonOp} ${this.lastComparisonRight}?`,
+        },
+      }]);
+    }
+
     if (condition) {
       const stmts = ctx.statement();
       if (stmts) {
         for (const stmt of stmts) {
-          // Reads currentLoopIndex
-          if (stmt.returnStatement() && this.currentLoopIndex !== null) {
-            this.addStep(stmt.start!.line, [{
-              cmd: 'vis_mark', params: { index: this.currentLoopIndex, type: 'outline', color: 'green' },
-            }]);
+          if (stmt.returnStatement()) {
+            const matchActions: TraceAction[] = [];
+
+            // DYNAMIC: Use most recent array access OR loop index
+            let indexToMark: number | null = null;
+
+            if (this.recentArrayAccesses.length > 0) {
+              indexToMark = this.recentArrayAccesses[this.recentArrayAccesses.length - 1].index;
+            } else if (this.currentLoopIndex !== null) {
+              indexToMark = this.currentLoopIndex;
+            }
+
+            if (indexToMark !== null) {
+              matchActions.push(
+                {
+                  cmd: 'vis_mark',
+                  params: { index: indexToMark, type: 'outline', color: 'green' },
+                },
+                {
+                  cmd: 'vis_mark',
+                  params: { index: indexToMark, type: 'highlight', color: 'green' },
+                },
+              );
+
+              if (this.lastComparisonLeft !== null &&
+                this.lastComparisonRight !== null) {
+                matchActions.push({
+                  cmd: 'vis_mark',
+                  params: {
+                    index: indexToMark,
+                    type: 'text',
+                    color: 'fg',
+                    value: `${this.lastComparisonLeft} ${this.lastComparisonOp} ${this.lastComparisonRight}`,
+                  },
+                });
+              }
+
+              this.addStep(stmt.start!.line, matchActions);
+            }
           }
+
           const res = this.visit(stmt);
-          if (res !== undefined && res !== null && stmt.returnStatement())
+          if (res !== undefined && res !== null) {
+          // Clear all state
+            this.lastComparisonLeft = null;
+            this.lastComparisonRight = null;
+            this.lastComparisonOp = '';
+            this.recentArrayAccesses = [];
             return res;
+          }
         }
       }
     }
+
+    // Clear state after if statement
+    this.lastComparisonLeft = null;
+    this.lastComparisonRight = null;
+    this.lastComparisonOp = '';
+
+    return undefined;
   }
 
   // math/expressions
-
   visitAddExpr(ctx: AddExprContext): any {
     const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(1)!);
+    const right = this.visit(ctx.getChild(2)!);
     if (ctx._op!.text === '+') return left + right;
     return left - right;
   }
 
   visitMulExpr(ctx: MulExprContext): any {
     const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(1)!);
+    const right = this.visit(ctx.getChild(2)!);
     if (ctx._op!.text === '*') return left * right;
     return left / right;
   }
@@ -287,7 +405,12 @@ export default class TraceInterpreterVisitor
 
   visitCompareExpr(ctx: CompareExprContext): boolean {
     const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(1)!);
+    const right = this.visit(ctx.getChild(2)!);
+
+    this.lastComparisonLeft = left;
+    this.lastComparisonRight = right;
+    this.lastComparisonOp = ctx._op!.text!;
+
     switch (ctx._op!.text) {
       case '==': return left === right;
       case '<': return left < right;
@@ -302,6 +425,10 @@ export default class TraceInterpreterVisitor
     const arrayName = ctx.ID().getText();
     const index = Math.floor(this.visit(ctx.expression()));
     const arr = this.memory.get(arrayName);
+    this.recentArrayAccesses.push({ index, arrayName });
+    if (this.recentArrayAccesses.length > 5) {
+      this.recentArrayAccesses.shift();
+    }
     if (Array.isArray(arr)) return arr[index];
     return null;
   }
@@ -309,23 +436,25 @@ export default class TraceInterpreterVisitor
   visitFunctionCallExpression(ctx: FunctionCallExpressionContext): any {
     const funcName = ctx.ID().getText();
     const args = ctx.expressionList() ? this.visit(ctx.expressionList()!) : [];
-
-    // Built-in size
     if (funcName === 'size' && Array.isArray(args[0])) {
       return args[0].length;
     }
-
-    // Built-in floor b/c typescript automatically uses floats for arithmetic ig
     if (funcName === 'floor' && typeof args[0] === 'number') {
       return Math.floor(args[0]);
     }
+
     return this.executeFunction(funcName, args, ctx.start!.line);
   }
 
   visitAtomExpression(ctx: AtomExpressionContext): any {
     const text = ctx.getText();
-    if (!isNaN(Number(text))) return Number(text);
-    return this.memory.get(text);
+    if (!isNaN(Number(text))) {
+      console.log(`Atom is number: ${text} -> ${Number(text)}`);
+      return Number(text);
+    }
+    const value = this.memory.get(text);
+    console.log(`Atom is variable '${text}': ${value}`);
+    return value;
   }
 
   visitExpressionList(ctx: ExpressionListContext): any[] {

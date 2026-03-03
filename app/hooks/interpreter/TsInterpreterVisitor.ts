@@ -83,7 +83,7 @@ export default class TsInterpreterVisitor
   visitRangeArray(ctx: RangeArrayContext): string {
     const from = parseInt(ctx._from_!.text!, 10);
     const to = parseInt(ctx._to!.text!, 10);
-    const values = [];
+    const values: number[] = [];
     for (let i = from; i <= to; i++) {
       values.push(i);
     }
@@ -99,7 +99,8 @@ export default class TsInterpreterVisitor
   // Creates a JavaScript array from a list of values (e.g., arr[1, 2, 3]).
   visitValueArray(ctx: ValueArrayContext): string {
     const values = ctx.INT();
-    return `[${values.map((i: any) => i.text).join(', ')}]`;
+    console.log('NEW CODE - ValueArray values:', values.map((i: any) => i.getText()));
+    return `[${values.map((i: any) => i.getText()).join(', ')}]`;
   }
 
   // Translates a function declaration.
@@ -110,14 +111,13 @@ export default class TsInterpreterVisitor
     if (paramList) {
       const paramIds = paramList.ID();
       if (paramIds) {
-        params = paramIds.map((p: any) => p.text).join(', ');
+        params = paramIds.map((p: any) => p.getText()).join(', ');
       }
     }
     const body = this.visitBlock(ctx);
     return `${this.indent()}function ${funcName}(${params}) {\n${body}${this.indent()}}\n`;
   }
 
-  // Translates a 'for each' loop.
   visitForEachLoop(ctx: ForEachLoopContext): string {
     const varName = ctx.ID(0)!.getText();
     const arrayName = ctx.ID(1)!.getText();
@@ -149,29 +149,25 @@ export default class TsInterpreterVisitor
     return ctx.atom().getText();
   }
 
-  // Handles: left > right, left == right, etc.
   visitCompareExpr(ctx: CompareExprContext): string {
     const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(1)!);
+    const right = this.visit(ctx.getChild(2)!);
     const op = ctx._op!.text!;
-    // Translate pseudocode == to JavaScript ===
     const jsOp = op === '==' ? '===' : op;
     return `${left} ${jsOp} ${right}`;
   }
 
-  // Handles: left + right or left - right
   visitAddExpr(ctx: AddExprContext): string {
-    const left = this.visit(ctx.getChild(0)!); // Use _left
-    const right = this.visit(ctx.getChild(1)!); // Use _right
-    const op = ctx._op!.text!; // '+' or '-'
+    const left = this.visit(ctx.getChild(0)!);
+    const right = this.visit(ctx.getChild(2)!);
+    const op = ctx._op!.text!;
     return `${left} ${op} ${right}`;
   }
 
-  // Handles: left * right or left / right
   visitMulExpr(ctx: MulExprContext): string {
-    const left = this.visit(ctx.getChild(0)!); // Use _left
-    const right = this.visit(ctx.getChild(1)!); // Use _right
-    const op = ctx._op!.text!; // '*' or '/'
+    const left = this.visit(ctx.getChild(0)!);
+    const right = this.visit(ctx.getChild(2)!);
+    const op = ctx._op!.text!;
     return `${left} ${op} ${right}`;
   }
 
