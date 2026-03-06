@@ -1,14 +1,13 @@
 import {
   useEffect,
   useState,
-  useContext,
 } from 'react';
-
-import ModifiedContext from '../contexts/ModifiedContext';
 
 import {
   type Step,
 } from '../types';
+
+import useInterpreter from './useInterpreter';
 
 /**
  * Provides a hook to load and read algorithm data.
@@ -36,7 +35,12 @@ export default function useAlgo(
   const [didLoad, setDidLoad] = useState(false);
   const [didCompile, setDidCompile] = useState(false);
 
-  const [modified] = useContext(ModifiedContext);
+  const [
+    _,
+    __,
+    interpreterTrace,
+    interpreterError,
+  ] = useInterpreter(src);
 
   useEffect(() => {
     const algo = new URLSearchParams(window.location.search).get('algorithm');
@@ -48,25 +52,12 @@ export default function useAlgo(
           const title = text.match(/\/\/ (.*)\r?\n/);
 
           if (title !== null) {
-            setSrc(text.replace(/\/\/.*\r?\n\r?\n/, ''));
+            setSrc(text.replace(/\/\/.*\r?\n\r?\n/, '').replaceAll(/@[\w]+<.*> ?/g, '')); // TODO: Fix this once @-directives are implemented
             setTitle(title[1]);
             setDidLoad(true);
           } else if (!error) {
             setError(`Failed to load algorithm '${algo}': Incorrect file format`);
           }
-        })
-        .then(() => {
-          if (error) return;
-          fetch(`/json/${algo}.json`)
-            .then(res => res.json())
-            .then((json) => {
-              setComp(json);
-              setDidCompile(true);
-            })
-            .catch(() => {
-              if (error) return;
-              setError(`Failed to load algorithm '${algo}': Compilation error`);
-            });
         })
         .catch(() => {
           if (error) return;
@@ -97,26 +88,22 @@ export default function useAlgo(
   }, [didLoad, didCompile]);
 
   useEffect(() => {
-    if (modified) {
-      setDidCompile(false);
+    if (!interpreterTrace) return;
+    setDidCompile(false);
 
-      alert('TODO: Code should be recompiled here');
-      fetch(`/json/${'TODO'}.json`)
-        .then(res => res.json())
-        .then((json) => {
-          setComp(json);
-          setDidCompile(true);
-        })
-        .catch(() => {
-          alert('Failed to compile algorithm!');
-          setComp([{
-            line: -1,
-            actions: [],
-          }]);
-          setLoaderHidden(true);
-        });
+    if (interpreterError) {
+      alert('Failed to compile algorithm!');
+      setComp([{
+        line: -1,
+        actions: [],
+      }]);
+      setLoaderHidden(true);
+      return;
     }
-  }, [modified]);
+
+    setComp(JSON.parse(interpreterTrace));
+    setDidCompile(true);
+  }, [interpreterTrace]);
 
   return [
     src,

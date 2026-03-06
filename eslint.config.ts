@@ -44,10 +44,10 @@ export default defineConfig([
         allowObjectPatternsAsParameters: true,
       }],
       '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
-        destructuredArrayIgnorePattern: '^_',
+        argsIgnorePattern: '^_+$',
+        varsIgnorePattern: '^_+$',
+        caughtErrorsIgnorePattern: '^_+$',
+        destructuredArrayIgnorePattern: '^_+$',
       }],
       '@typescript-eslint/no-explicit-any': 'off',
     },
@@ -56,6 +56,7 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_+$',
+        varsIgnorePattern: '^_+$',
       }],
     },
   },

@@ -286,7 +286,9 @@ export default class TraceInterpreterVisitor
 
       if (this.lastComparisonLeft !== null &&
         this.lastComparisonRight !== null) {
-        const mostRecent = this.recentArrayAccesses[this.recentArrayAccesses.length - 1];
+        const mostRecent = this.recentArrayAccesses[
+          this.recentArrayAccesses.length - 1
+        ];
         visualizeActions.push({
           cmd: 'vis_mark',
           params: {
@@ -325,7 +327,9 @@ export default class TraceInterpreterVisitor
             let indexToMark: number | null = null;
 
             if (this.recentArrayAccesses.length > 0) {
-              indexToMark = this.recentArrayAccesses[this.recentArrayAccesses.length - 1].index;
+              indexToMark = this.recentArrayAccesses[
+                this.recentArrayAccesses.length - 1
+              ].index;
             } else if (this.currentLoopIndex !== null) {
               indexToMark = this.currentLoopIndex;
             }
