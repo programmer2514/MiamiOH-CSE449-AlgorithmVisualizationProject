@@ -1,0 +1,9 @@
+// bubble sort
+fun bubble_sort(collection): 
+    n = length(collection) // do we want to do it like this or collection.length
+    swapped = false
+
+    for (i = 0, i < n, i += 1)
+
+
+end fun
