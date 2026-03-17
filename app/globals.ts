@@ -21,4 +21,5 @@ export default {
   AppURL: 'http://localhost:5173',
   AppIssuesURL: 'https://gitlab.csi.miamioh.edu/2026-senior-design-projects/algorithm-visualization-project/algorithm-visualization-project/-/issues',
   AppSourceURL: 'https://gitlab.csi.miamioh.edu/2026-senior-design-projects/algorithm-visualization-project/algorithm-visualization-project',
+  RouteBaseName: '/MiamiOH-AVP-Demo/',
 } as const;

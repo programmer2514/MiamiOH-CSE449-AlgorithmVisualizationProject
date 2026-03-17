@@ -7,6 +7,8 @@ import {
   type Step,
 } from '../types';
 
+import Globals from '../globals';
+
 import useInterpreter from './useInterpreter';
 
 /**
@@ -46,7 +48,7 @@ export default function useAlgo(
     const algo = new URLSearchParams(window.location.search).get('algorithm');
 
     if (algo) {
-      fetch(`/code/${algo}.avp`)
+      fetch(`${Globals.RouteBaseName}code/${algo}.avp`)
         .then(res => res.text())
         .then((text) => {
           const title = text.match(/\/\/ (.*)\r?\n/);

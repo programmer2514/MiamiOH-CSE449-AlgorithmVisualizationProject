@@ -19,6 +19,8 @@ import {
   SidebarExpand,
 } from 'iconoir-react';
 
+import Globals from '../../globals';
+
 import FlexSpacer from '../FlexSpacer';
 
 import ModifiedContext from '../../contexts/ModifiedContext';
@@ -192,7 +194,7 @@ export default function TopBar(
         variant="ghost"
         aria-label="Get Help"
         title="Get Help"
-        href="/wiki"
+        href={`${Globals.RouteBaseName}wiki`}
         target="_blank"
       >
         <HelpCircle className="stroke-2 w-6 h-6" role="presentation" />

@@ -4,12 +4,15 @@ import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { playwright } from '@vitest/browser-playwright';
 
+import Globals from './app/globals';
+
 export default defineConfig({
   plugins: [
     !process.env.VITEST && reactRouter(),
     tailwindcss(),
     tsconfigPaths(),
   ],
+  base: Globals.RouteBaseName,
   test: {
     projects: [
       {

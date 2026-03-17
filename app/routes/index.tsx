@@ -83,7 +83,7 @@ export default function Index() {
                   'Brute Force',
                   'Search',
                 ],
-                href: '/run?algorithm=linear_search',
+                href: `${Globals.RouteBaseName}run?algorithm=linear_search`,
               },
             ]
           }

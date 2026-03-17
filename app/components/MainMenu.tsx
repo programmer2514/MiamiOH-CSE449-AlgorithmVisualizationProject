@@ -85,7 +85,7 @@ export default function MainMenu(
             >
               <Menu className="stroke-2 w-6 h-6" role="presentation" />
             </IconButton>
-            <a href="/" className="mr-2">
+            <a href={Globals.RouteBaseName} className="mr-2">
               <Typography
                 variant="h1"
                 className="text-lg! font-medium inline-block"

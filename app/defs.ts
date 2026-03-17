@@ -22,6 +22,7 @@ export default {
       'fun',
       'if',
       'in',
+      'to',
       'return',
     ],
 

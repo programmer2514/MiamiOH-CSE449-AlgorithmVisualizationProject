@@ -19,6 +19,8 @@ import PageMeta from './components/PageMeta';
 import type { Route } from './+types/root';
 import './app.css';
 
+import Globals from './globals';
+
 /**
  * Root layout component used across all routes.
  *
@@ -112,7 +114,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
           as="a"
           variant="outline"
           size="xl"
-          href="/"
+          href={Globals.RouteBaseName}
           className="text-xl text-primary font-light mt-[12.5vh] cursor-pointer"
         >
           <ArrowLeft className="w-6 h-6 stroke-2 mr-3 -ml-1" role="presentation" />
