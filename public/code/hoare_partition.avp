@@ -1,0 +1,37 @@
+// hoare partition
+
+a1 = arr[1, 10, 5, 6, 4, 7, 19]
+
+fun Hoare_Partition(arr, low, high): 
+    // choose the pivot - first element of sub-array
+    pivot = arr[low]
+
+    // initialize pointers i and j outside bounds of do-while
+    i = low - 1
+    j = high + 1
+
+    while (true):
+        // move left pointer forward until element >= pivot is found
+        do:
+            i += 1
+        while (arr[i] < pivot)
+
+        // move right pointer backward until element <= pivot is found
+        do:
+            j -= 1
+        while (arr[i] < pivot)
+
+        // if pointers cross/meet, then the partition op is completed.
+        if (i >= j):
+            return j
+        end if
+
+        // swap elements at i and j if in the wrong partition
+        swap (arr, i, j)
+
+    end while
+
+    
+end fun
+
+result = Hoare_Partition(a1, 0, length(arr) - 1)

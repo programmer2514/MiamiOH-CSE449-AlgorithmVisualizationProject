@@ -1,5 +1,9 @@
 // Binary Search
-fun binary_search(collection, target, size): 
+
+a1 = arr[1, 3, 5, 7, 9, 11, 19]
+key = 11
+
+fun Binary_Search(collection, target, size): 
     low = 0
     high = size - 1
 
@@ -25,3 +29,5 @@ fun binary_search(collection, target, size):
 
     return -1
 end fun
+
+result = Binary_Search(a1, key, length(a1))
