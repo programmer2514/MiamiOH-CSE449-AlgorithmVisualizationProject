@@ -3,7 +3,9 @@ grammar Pseudocode;
 // This rule is updated to use NL as a statement separator
 program         : NL* statement (NL+ statement)* NL* EOF;
 
-statement       : assignment | functionDecl | functionCallStmt | forEachLoop | ifStatement | whileLoop | returnStatement;
+// Statements can now have optional metadata directives before them
+statement       : metadata* (assignment | functionDecl | functionCallStmt | forEachLoop | ifStatement | whileLoop | returnStatement);
+
 assignment      : ID EQ (expression | arrayInitialization);
 
 arrayInitialization:
@@ -12,11 +14,19 @@ arrayInitialization:
   | ARR LBRACK INT (COMMA INT)* RBRACK     # ValueArray
   ;
 
+// Metadata directive rule
+metadata        : AT ID LT metadataParams GT;
+metadataParams  : metadataParam (COMMA metadataParam)*;
+metadataParam   : ID | INT | STRING;
+
 // These block rules are updated to require newlines
 functionDecl    : FUN ID LPAREN paramList? RPAREN COLON NL+ (statement (NL+ statement)*)? NL* END FUN;
 paramList       : ID (COMMA ID)*;
 forEachLoop     : FOR ID IN ID COLON NL+ (statement (NL+ statement)*)? NL* END FOR;
-ifStatement     : IF expression COLON NL+ (statement (NL+ statement)*)? NL* END IF;
+ifStatement : IF expression COLON NL+ (statement (NL+ statement)*)? NL*
+              (ELSEIF expression COLON NL+ (statement (NL+ statement)*)? NL*)*
+              (ELSE COLON NL+ (statement (NL+ statement)*)? NL*)?
+              END IF;
 whileLoop       : WHILE expression COLON NL+ (statement (NL+ statement)*)? NL* END WHILE;
 
 // allows functions to be called inline
@@ -29,7 +39,7 @@ expression
     ;
 
 comparisonExpression
-    : left=additiveExpression op=(EQEQ | LOW_THAN | GREATER_THAN | LESS_EQ | GREATER_EQ) right=additiveExpression # CompareExpr
+    : left=additiveExpression op=(EQEQ | LESS_EQ | GREATER_EQ) right=additiveExpression # CompareExpr
     | additiveExpression # ComparisonPass
     ;
 
@@ -61,6 +71,7 @@ expressionList
 
 atom
     : ID | INT;
+
 // Reserved names for standard types
 TYPE_INT    : 'Integer' | 'integer';
 TYPE_FLOAT  : 'float' | 'Float';
@@ -76,14 +87,20 @@ FUN     : 'fun';
 FOR     : 'for';
 IN      : 'in';
 IF      : 'if';
+ELSE    : 'else';
+ELSEIF  : 'else if';
 RETURN  : 'return';
 END     : 'end';
 WHILE   : 'while';
 AND     : 'and';
 OR      : 'or';
+AT      : '@';
+LT      : '<';
+GT      : '>';
 
 ID      : [a-zA-Z_][a-zA-Z_0-9]*;
 INT     : [0-9]+;
+STRING  : '"' (~["\r\n])* '"';
 
 EQ      : '=';
 EQEQ    : '==';
@@ -95,8 +112,6 @@ PLUS    : '+';
 MINUS   : '-';
 STAR    : '*';
 SLASH   : '/';
-LOW_THAN : '<';
-GREATER_THAN : '>';
 LESS_EQ : '<=';
 GREATER_EQ : '>=';
 
