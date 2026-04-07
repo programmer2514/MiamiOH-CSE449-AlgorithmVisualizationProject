@@ -33,9 +33,23 @@ fun Hoare_Partition(arr, low, high):
         end if
 
         // swap elements at i and j if in the wrong partition
-        swap (arr, i, j)
+        swap (arr[i], arr[j]) 
 
     end while
 end fun
+
+// -----------------------------------------------------------------
+//          START OF DO NOT MODIFY THIS FUNCTION SECTION
+// -----------------------------------------------------------------
+
+fun swap(itemA, itemB): 
+    temp = itemA
+    itemA = itemB
+    itemB = temp
+
+end fun
+// -----------------------------------------------------------------
+//          END OF DO NOT MODIFY THIS FUNCTION SECTION
+// -----------------------------------------------------------------
 
 result = Hoare_Partition(a1, 0, length(arr) - 1)

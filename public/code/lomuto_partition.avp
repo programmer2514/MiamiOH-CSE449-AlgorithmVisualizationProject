@@ -13,14 +13,28 @@ fun Lomuto_Partition(arr, low, high):
         // check to see if current element is smaller than pivot
         if (arr[j] < pivot):
             i += 1
-            swap(arr, i, j) // NOTE: will need to overload swap
+            swap (arr[i], arr[j]) 
         end if
     end for
 
-    swap(arr, i + 1, high)
+    swap (arr[i + 1], arr[high]) 
 
     return i + 1  // return the high pivot index
 
 end fun
+
+// -----------------------------------------------------------------
+//          START OF DO NOT MODIFY THIS FUNCTION SECTION
+// -----------------------------------------------------------------
+
+fun swap(itemA, itemB): 
+    temp = itemA
+    itemA = itemB
+    itemB = temp
+
+end fun
+// -----------------------------------------------------------------
+//          END OF DO NOT MODIFY THIS FUNCTION SECTION
+// -----------------------------------------------------------------
 
 result = Lomuto_Partition(a1, 0, length(arr) - 1)

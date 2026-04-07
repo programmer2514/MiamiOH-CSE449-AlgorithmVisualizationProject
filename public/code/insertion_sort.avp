@@ -3,7 +3,7 @@
 a1 = arr[1, 10, 5, 6, 4, 7, 19]
 
 fun Insertion_Sort(arr): 
-    n = length(arr) // do we want to do 'arr.length' instead???
+    n = length(arr)
 
     // starting from 2nd element (index 1) as the first is assumed sorted
     for (i = 0, i < n, i += 1):
