@@ -23,8 +23,8 @@ fun swap(itemA, itemB):
     temp = itemA
     itemA = itemB
     itemB = temp
-
 end fun
+
 // -----------------------------------------------------------------
 //          END OF DO NOT MODIFY THIS FUNCTION SECTION
 // -----------------------------------------------------------------

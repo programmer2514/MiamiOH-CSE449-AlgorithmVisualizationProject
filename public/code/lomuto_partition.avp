@@ -23,18 +23,18 @@ fun Lomuto_Partition(arr, low, high):
 
 end fun
 
-// -----------------------------------------------------------------
-//          START OF DO NOT MODIFY THIS FUNCTION SECTION
-// -----------------------------------------------------------------
+// +---------------------------------------------------------------+
+// |         START OF DO NOT MODIFY THIS FUNCTION SECTION          |
+// +---------------------------------------------------------------+
 
 fun swap(itemA, itemB): 
     temp = itemA
     itemA = itemB
     itemB = temp
-
 end fun
-// -----------------------------------------------------------------
-//          END OF DO NOT MODIFY THIS FUNCTION SECTION
-// -----------------------------------------------------------------
+
+// +---------------------------------------------------------------+
+// |        END OF DO NOT MODIFY THIS FUNCTION SECTION             |
+// +---------------------------------------------------------------+
 
 result = Lomuto_Partition(a1, 0, length(arr) - 1)
