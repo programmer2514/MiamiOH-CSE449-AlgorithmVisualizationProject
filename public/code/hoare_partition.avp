@@ -12,14 +12,20 @@ fun Hoare_Partition(arr, low, high):
 
     while (true):
         // move left pointer forward until element >= pivot is found
-        do:
+        while (true):
             i += 1
-        while (arr[i] < pivot)
+            if (arr[i] >= pivot):
+                break
+            end if
+        end while
 
         // move right pointer backward until element <= pivot is found
-        do:
+        while (true):
             j -= 1
-        while (arr[i] < pivot)
+            if (arr[j] <= pivot):
+                break
+            end if
+        end while
 
         // if pointers cross/meet, then the partition op is completed.
         if (i >= j):
@@ -30,8 +36,6 @@ fun Hoare_Partition(arr, low, high):
         swap (arr, i, j)
 
     end while
-
-    
 end fun
 
 result = Hoare_Partition(a1, 0, length(arr) - 1)
