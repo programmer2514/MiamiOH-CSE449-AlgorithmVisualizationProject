@@ -151,6 +151,9 @@ export default function Visualizer(
           setSrc={setEditSrc}
           highlight={lines}
           editing={editing}
+          setEditing={setEditing}
+          save={save}
+          discard={discard}
         />
         <VarsPane vars={vars} />
         <AIPane />
