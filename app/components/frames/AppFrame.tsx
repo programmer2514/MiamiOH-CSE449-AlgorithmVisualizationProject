@@ -20,7 +20,7 @@ import DarkModeContext from '../../contexts/DarkModeContext';
  *
  * @param {Object} props
  *        React props
- * @param {string} props.title
+ * @param {string | undefined} props.title
  *        The title to display in the header
  * @param {function | undefined} props.setTitle
  *        A function to update the header title
@@ -46,7 +46,7 @@ export default function AppFrame(
     children,
   }:
   {
-    title: string
+    title: string | undefined
     setTitle: ((title: string) => void) | undefined
     mutable: boolean
     sidebar: boolean | null | undefined
@@ -75,7 +75,7 @@ export default function AppFrame(
     <DarkModeContext value={isDark || false}>
       <ModifiedContext value={[modified, setModified]}>
         {
-          title ?
+          (title !== undefined) ?
             (
               <header>
                 <TopBar

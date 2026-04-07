@@ -1,5 +1,6 @@
 import React, {
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -71,9 +72,30 @@ export default function TopBar(
   const [modified, setModified] = useContext(ModifiedContext);
 
   const [width, setWidth] = useState(0);
+  const [titleInterval, setTitleInterval] = useState(
+    null as NodeJS.Timeout | null,
+  );
 
   const span = useRef({ offsetWidth: 0 } as HTMLSpanElement);
   const input = useRef({ value: '' } as HTMLInputElement);
+
+  useEffect(() => {
+    document.body.addEventListener('click', (event) => {
+      if (event.target === input.current) return;
+      input.current.blur();
+    });
+
+    // Ensure the title is the correct width after a page reload
+    setTitleInterval(
+      setInterval(() => {
+        if (setTitle && input.current.value !== title) {
+          setTitle(input.current.value);
+        } else if (titleInterval) {
+          clearInterval(titleInterval);
+        }
+      }, 250),
+    );
+  }, []);
 
   if (setTitle) {
     // Using a layout effect here to avoid jittery repaints while typing
@@ -82,6 +104,7 @@ export default function TopBar(
       if (title.length === 0) {
         setTitle('<unnamed>');
         input.current.value = '<unnamed>';
+        input.current.setSelectionRange(0, 9);
       }
 
       setWidth(span.current?.offsetWidth ?? 0);
@@ -131,6 +154,13 @@ export default function TopBar(
                   (event) => {
                     setTitle(event.target.value);
                     setModified(modified || 1);
+                  }
+                }
+                onKeyUp={
+                  (event) => {
+                    if (event.key === 'Enter') {
+                      input.current.blur();
+                    }
                   }
                 }
                 aria-label="Algorithm name"
