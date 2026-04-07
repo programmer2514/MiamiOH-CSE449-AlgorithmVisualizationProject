@@ -76,7 +76,7 @@ export default function TopBar(
     null as NodeJS.Timeout | null,
   );
 
-  const span = useRef({ offsetWidth: 0 } as HTMLSpanElement);
+  const pre = useRef({ offsetWidth: 0 } as HTMLPreElement);
   const input = useRef({ value: '' } as HTMLInputElement);
 
   useEffect(() => {
@@ -104,11 +104,11 @@ export default function TopBar(
       if (title.length === 0) {
         setTitle('<unnamed>');
         input.current.value = '<unnamed>';
-        input.current.setSelectionRange(0, 9);
+        input.current.setSelectionRange(0, 9); // Length of '<unnamed>'
       }
 
-      setWidth(span.current?.offsetWidth ?? 0);
-    }, [title, span]);
+      setWidth(pre.current?.offsetWidth ?? 0);
+    }, [title, pre]);
   }
 
   return (
@@ -136,13 +136,13 @@ export default function TopBar(
         mutable && setTitle ?
           (
             <div className="flex items-center">
-              <span
-                ref={span}
+              <pre
+                ref={pre}
                 className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none"
                 aria-hidden
               >
                 {title}
-              </span>
+              </pre>
               <Input
                 ref={input}
                 type="text"
