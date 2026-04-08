@@ -32,6 +32,17 @@ const SPEEDS = [
   10,
 ];
 
+let progressDragData = null as null | {
+  target: HTMLElement
+  low: number
+  high: number
+  round: number
+  left: number
+  width: number
+  callback: (num: number) => void
+  lastResult: number
+};
+
 /**
  * Renders the main visualization frame around the passed child elements.
  * Provides step, view, and zoom controls to control and resize contents.
@@ -46,17 +57,20 @@ const SPEEDS = [
  *        A function to go to the previous step
  * @param {function} props.nextStep
  *        A function to go to the next step
+ * @param {function} props.setStepNum
+ *        A function to update the step number directly
  * @param {function} props.reset
  *        A function to reset the visualization
  * @param {React.ReactNode} props.children
  *        Child elements
  */
-export default function VisWindowFrame(
+export default function VisFrame(
   {
     numSteps,
     stepNum,
     prevStep,
     nextStep,
+    setStepNum,
     reset,
     children,
   }:
@@ -65,6 +79,7 @@ export default function VisWindowFrame(
     stepNum: number
     prevStep: () => void
     nextStep: () => void
+    setStepNum: (num: number) => void
     reset: () => void
     children: React.ReactNode
   },
@@ -78,6 +93,8 @@ export default function VisWindowFrame(
 
   const [time, setTime] = useState(0);
   const [timeStep, setTimeStep] = useState(null as NodeJS.Timeout | null);
+
+  const [scrollLocked, setScrollLocked] = useState(false);
 
   const [step, setStep] = useState(false);
   const [move, setMove] = useState(null as MouseEvent | TouchEvent | null);
@@ -127,12 +144,12 @@ export default function VisWindowFrame(
           const newTouch2 = (move as TouchEvent).touches[1];
 
           const oldDiff = Math.hypot(
-            oldTouch1.pageX - oldTouch2.pageX,
-            oldTouch1.pageY - oldTouch2.pageY,
+            oldTouch1.clientX - oldTouch2.clientX,
+            oldTouch1.clientY - oldTouch2.clientY,
           );
           const newDiff = Math.hypot(
-            newTouch1.pageX - newTouch2.pageX,
-            newTouch1.pageY - newTouch2.pageY,
+            newTouch1.clientX - newTouch2.clientX,
+            newTouch1.clientY - newTouch2.clientY,
           );
 
           if (newDiff === oldDiff) return;
@@ -162,8 +179,8 @@ export default function VisWindowFrame(
         const oldTouch = (touch as TouchEvent).touches[0];
         const newTouch = (move as TouchEvent).touches[0];
 
-        setOffsetX(offsetX + newTouch.pageX - oldTouch.pageX);
-        setOffsetY(offsetY + newTouch.pageY - oldTouch.pageY);
+        setOffsetX(offsetX + newTouch.clientX - oldTouch.clientX);
+        setOffsetY(offsetY + newTouch.clientY - oldTouch.clientY);
 
         setTouch(move as TouchEvent);
       } else {
@@ -175,6 +192,23 @@ export default function VisWindowFrame(
     }
   }, [move, dragging]);
 
+  useEffect(() => {
+    if (zoom < 0.1) {
+      setZoom(0.1);
+    } else if (zoom > 40.0) {
+      setZoom(40.0);
+    }
+  }, [zoom]);
+
+  useEffect(() => {
+    if (speed > 1000 / 0.1) {
+      setSpeed(1000 / 0.1);
+    } else if (speed < 1000 / 10) {
+      setSpeed(1000 / 10);
+    }
+  }, [speed]);
+
+  // MouseUp/TouchEnd event for main visualization canvas
   function mouseUp() {
     setDragging(false);
 
@@ -187,10 +221,13 @@ export default function VisWindowFrame(
     setTouch(null);
   }
 
+  // MouseMove/TouchMove event for main visualization canvas
   function mouseMove(e: MouseEvent | TouchEvent) {
     setMove(e);
+    e.preventDefault();
   }
 
+  // MouseDown/TouchStart event for main visualization canvas
   function mouseDown(e: React.MouseEvent | React.TouchEvent) {
     const isTouch = Object.keys(e).includes('touches');
 
@@ -223,6 +260,97 @@ export default function VisWindowFrame(
       speed;
   }
 
+  function setSpeedInt(num: number) {
+    setSpeed(DEFAULT_SPEED / SPEEDS[num]);
+  }
+
+  // MouseDown/TouchStart event for progress bars
+  function mouseDownProgress(
+    event: React.MouseEvent | React.TouchEvent, low: number, high: number,
+    round: number, callback: (val: number) => void,
+  ) {
+    const isTouch = Object.keys(event).includes('touches');
+    const eventX = isTouch ?
+      (event as React.TouchEvent).touches[0].clientX :
+      (event as React.MouseEvent).clientX;
+
+    if (!isTouch && (event as React.MouseEvent).button !== 0) return;
+
+    let target = event.target as HTMLElement;
+    while (!target.hasAttribute('data-parent')) {
+      target = target.parentElement!;
+    }
+
+    const boundingRect = target.getBoundingClientRect();
+    const left = boundingRect.left;
+    const width = boundingRect.right - left;
+    const x = eventX - left;
+    const pct = x / width;
+    const result = pct * (high - low) + low;
+    const resultRounded = Math.round(result / round) * round;
+
+    (target.children[0] as HTMLElement).style
+      .setProperty('transition', 'none', 'important');
+
+    progressDragData = {
+      target, low, high, round, left, width, callback,
+      lastResult: resultRounded,
+    };
+
+    if (isTouch) {
+      addEventListener('touchmove', mouseMoveProgress);
+      addEventListener('touchend', mouseUpProgress);
+    } else {
+      addEventListener('mousemove', mouseMoveProgress);
+      addEventListener('mouseup', mouseUpProgress);
+    }
+
+    callback(resultRounded);
+    event.preventDefault();
+  }
+
+  // MouseMove/TouchMove event for progress bars
+  function mouseMoveProgress(event: MouseEvent | TouchEvent) {
+    if (progressDragData === null) return;
+
+    const eventX = (event instanceof TouchEvent) ?
+      (event as TouchEvent).touches[0].clientX :
+      (event as MouseEvent).clientX;
+
+    const x = eventX - progressDragData.left;
+    const pct = x / progressDragData.width;
+
+    const result = pct * (
+      progressDragData.high - progressDragData.low
+    ) + progressDragData.low;
+
+    const resultRounded = Math.round(
+      result / progressDragData.round,
+    ) * progressDragData.round;
+
+    const resultClamped = Math.min(
+      Math.max(resultRounded, progressDragData.low),
+      progressDragData.high,
+    );
+
+    if (resultClamped === progressDragData.lastResult) return;
+
+    progressDragData.lastResult = resultClamped;
+    progressDragData.callback(resultClamped);
+  }
+
+  // MouseUp/TouchEnd event for progress bars
+  function mouseUpProgress() {
+    (progressDragData!.target.children[0] as HTMLElement).style
+      .removeProperty('transition');
+    progressDragData = null;
+
+    removeEventListener('mousemove', mouseMoveProgress);
+    removeEventListener('mouseup', mouseUpProgress);
+    removeEventListener('touchmove', mouseMoveProgress);
+    removeEventListener('touchend', mouseUpProgress);
+  }
+
   return (
     <section className="w-full h-full">
       <div className="flex gap-1 items-center relative w-full h-0 overflow-visible px-2 justify-end z-20 translate-y-7 portrait:justify-center">
@@ -245,6 +373,27 @@ export default function VisWindowFrame(
         <div className="w-64 max-w-full mx-0.5">
           <Progress
             value={stepNum / numSteps * 100}
+            onWheel={(e) => {
+              if (scrollLocked) return;
+
+              if ((e.deltaY > 0)) {
+                prevStep();
+              } else if ((e.deltaY < 0)) {
+                nextStep();
+              }
+
+              setScrollLocked(true);
+              setTimeout(
+                () => setScrollLocked(false), TICK_SPEED * (50 / numSteps),
+              );
+            }}
+            onMouseDownCapture={
+              e => mouseDownProgress(e, 0, numSteps, 1, setStepNum)
+            }
+            onTouchStartCapture={
+              e => mouseDownProgress(e, 0, numSteps, 1, setStepNum)
+            }
+            data-parent
             className="rounded-lg h-8 w-full border border-[#d8d8dc] dark:border-[#38383c] bg-[#ffffff] dark:bg-[#18181c]"
           >
             <Progress.Bar className="bg-[dodgerblue]" />
@@ -341,10 +490,29 @@ export default function VisWindowFrame(
           <div className="w-64 max-w-full mx-0.5">
             <Progress
               value={
-                ((speed >= DEFAULT_SPEED) ?
-                  (DEFAULT_SPEED / speed) / 2 :
-                  (0.5 + (DEFAULT_SPEED / speed) / 20)) * 100
+                (
+                  SPEEDS.findIndex(s => s == DEFAULT_SPEED / speed) + 1
+                ) / 18 * 100
               }
+              onWheel={(e) => {
+                if (scrollLocked) return;
+
+                if ((e.deltaY > 0)) {
+                  setSpeed(getNextSpeed(speed, -1));
+                } else if ((e.deltaY < 0)) {
+                  setSpeed(getNextSpeed(speed, 1));
+                }
+
+                setScrollLocked(true);
+                setTimeout(() => setScrollLocked(false), TICK_SPEED * 5);
+              }}
+              onMouseDownCapture={
+                e => mouseDownProgress(e, 0, 17, 1, setSpeedInt)
+              }
+              onTouchStartCapture={
+                e => mouseDownProgress(e, 0, 17, 1, setSpeedInt)
+              }
+              data-parent
               className="rounded-lg h-8 w-full border border-[#d8d8dc] dark:border-[#38383c] bg-[#ffffff] dark:bg-[#18181c]"
             >
               <Progress.Bar className="bg-[dodgerblue]" />
@@ -385,7 +553,26 @@ export default function VisWindowFrame(
         <div className="flex gap-1 items-center justify-end p-2 border-[#d8d8dc] dark:border-[#38383c] border-t bg-[#ffffff] dark:bg-[#18181c] portrait:justify-center">
           <div className="w-64 max-w-full mx-0.5">
             <Progress
-              value={((zoom <= 1) ? zoom / 2 : (0.5 + ((zoom - 1) / 8))) * 100}
+              value={zoom / 5 * 100}
+              onWheel={(e) => {
+                if (scrollLocked) return;
+
+                if ((e.deltaY > 0) && (zoom - 0.1 >= 0.1)) {
+                  setZoom(zoom - 0.1);
+                } else if ((e.deltaY < 0) && (zoom + 0.1 <= 5.0)) {
+                  setZoom(zoom + 0.1);
+                }
+
+                setScrollLocked(true);
+                setTimeout(() => setScrollLocked(false), TICK_SPEED * 4);
+              }}
+              onMouseDownCapture={
+                e => mouseDownProgress(e, 0, 5, 0.1, setZoom)
+              }
+              onTouchStartCapture={
+                e => mouseDownProgress(e, 0, 5, 0.1, setZoom)
+              }
+              data-parent
               className="rounded-lg h-8 w-full border border-[#d8d8dc] dark:border-[#38383c] bg-[#ffffff] dark:bg-[#18181c]"
             >
               <Progress.Bar className="bg-[dodgerblue]" />

@@ -83,6 +83,7 @@ export default function Visualizer(
     prevStep,
     reset,
     stepNum,
+    setStepNum,
     stepDat,
   ] = useSteps({ comp });
 
@@ -144,6 +145,7 @@ export default function Visualizer(
           stepDat={stepDat}
           prevStep={prevStep}
           nextStep={nextStep}
+          setStepNum={setStepNum}
           reset={reset}
         />
         <CodePane

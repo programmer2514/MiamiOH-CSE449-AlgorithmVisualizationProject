@@ -9,7 +9,9 @@ import {
 export default function usePortrait() {
   const [portrait, setPortrait] = useState(false);
 
-  useEffect(() => setPortrait(matchMedia('(orientation: portrait)').matches));
+  useEffect(
+    () => setPortrait(matchMedia('(orientation: portrait)').matches), [],
+  );
 
   return [portrait] as const;
 }

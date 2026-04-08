@@ -54,7 +54,7 @@ export default function useAlgo(
           const title = text.match(/\/\/ (.*)\r?\n/);
 
           if (title !== null) {
-            setSrc(text.replace(/\/\/.*\r?\n\r?\n/, '').replaceAll(/@[\w]+<.*> ?/g, '')); // TODO: Fix this once @-directives are implemented
+            setSrc(text.replace(/\/\/.*\r?\n\r?\n/, ''));
             setTitle(title[1]);
             setDidLoad(true);
           } else if (!error) {
