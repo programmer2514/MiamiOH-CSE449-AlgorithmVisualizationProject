@@ -1,7 +1,6 @@
 import { reactRouter } from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { playwright } from '@vitest/browser-playwright';
 
 import Globals from './app/globals';
@@ -10,8 +9,10 @@ export default defineConfig({
   plugins: [
     !process.env.VITEST && reactRouter(),
     tailwindcss(),
-    tsconfigPaths(),
   ],
+  resolve: {
+    tsconfigPaths: true,
+  },
   base: Globals.RouteBaseName,
   test: {
     projects: [
