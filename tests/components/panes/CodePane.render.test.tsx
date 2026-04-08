@@ -10,6 +10,9 @@ function Test() {
       setSrc={() => {}}
       highlight={1}
       editing={false}
+      setEditing={(_: boolean) => {}}
+      save={() => {}}
+      discard={() => {}}
     />
   );
 };

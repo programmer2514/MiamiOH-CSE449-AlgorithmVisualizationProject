@@ -14,6 +14,7 @@ function Test() {
       stepNum={stepNum}
       prevStep={() => setStepNum(stepNum - 1)}
       nextStep={() => setStepNum(stepNum + 1)}
+      setStepNum={setStepNum}
       reset={() => setStepNum(0)}
     >
       <h1>Test Header</h1>

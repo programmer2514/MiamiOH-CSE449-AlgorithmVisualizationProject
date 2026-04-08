@@ -77,19 +77,23 @@ export default function TopBar(
   );
 
   const pre = useRef({ offsetWidth: 0 } as HTMLPreElement);
-  const input = useRef({ value: '' } as HTMLInputElement);
+  const input = useRef({
+    value: '',
+    setSelectionRange: () => {},
+    blur: () => {},
+  } as unknown as HTMLInputElement);
 
   useEffect(() => {
     document.body.addEventListener('click', (event) => {
       if (event.target === input.current) return;
-      input.current.blur();
+      input.current?.blur();
     });
 
     // Ensure the title is the correct width after a page reload
     setTitleInterval(
       setInterval(() => {
-        if (setTitle && input.current.value !== title) {
-          setTitle(input.current.value);
+        if (setTitle && title !== input.current?.value) {
+          setTitle(input.current?.value ?? '');
         } else if (titleInterval) {
           clearInterval(titleInterval);
         }
@@ -159,7 +163,7 @@ export default function TopBar(
                 onKeyUp={
                   (event) => {
                     if (event.key === 'Enter') {
-                      input.current.blur();
+                      input.current?.blur();
                     }
                   }
                 }
