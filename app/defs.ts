@@ -16,13 +16,18 @@ export default {
     tokenPostfix: '.avp',
 
     keywords: [
+      'arr',
       'else',
       'end',
       'for',
+      'while',
       'fun',
       'if',
       'in',
       'to',
+      'and',
+      'or',
+      'not',
       'return',
     ],
 
