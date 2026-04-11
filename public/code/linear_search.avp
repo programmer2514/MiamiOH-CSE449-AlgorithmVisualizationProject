@@ -1,13 +1,16 @@
 // Linear Search
 
 a1 = arr[1, 10, 5, 6, 4, 7, 19]
-key = 4
+key = 7
 
+// Finds the first occurence of an element in an array
 fun Linear_Search(@init<table> a, k):
+    index = 0
     for @mark<outline, yellow> (n in a):
         @mark<n, text, fg> if (n == k):
-            @mark<highlight, green> return n
+            @mark<highlight, green> return index
         end if
+        index = index + 1
     end for
 
     @log<"Not found: "> return -1

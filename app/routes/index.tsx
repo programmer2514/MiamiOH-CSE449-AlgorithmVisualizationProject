@@ -5,9 +5,6 @@ import AppFrame from '../components/frames/AppFrame';
 import PageMeta from '../components/PageMeta';
 import SearchProvider from '../components/SearchProvider';
 
-import LinearSearchDark from '../resources/img/linear-search_dark.png';
-import LinearSearchLight from '../resources/img/linear-search_light.png';
-
 /**
  * Renders the "Getting Started" page.
  *
@@ -30,21 +27,7 @@ export default function Index() {
         menuLinks={Globals.MenuLinksHome}
       >
         <SearchProvider
-          cards={
-            [
-              {
-                img: [LinearSearchLight, LinearSearchDark],
-                title: 'Linear Search',
-                tags: [
-                  'Easy',
-                  'Array',
-                  'Brute Force',
-                  'Search',
-                ],
-                href: `${Globals.RouteBaseName}run?algorithm=linear_search`,
-              },
-            ]
-          }
+          cards={Globals.AlgorithmCards}
         />
       </AppFrame>
     </>

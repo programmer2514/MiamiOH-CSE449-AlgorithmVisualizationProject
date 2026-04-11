@@ -1,0 +1,24 @@
+// Check Unique
+
+a1 = arr[1, 2, 3, 4, 5, 3]
+
+// Determines if all elements of an array are unique
+fun check_unique(array):
+    idx_i = 0
+    for (i in array):
+        idx_j = 0
+        for (j in array):
+            if (idx_j > idx_i):
+                if (i == j):
+                    return 0  // Duplicate found
+                end if
+            end if
+            idx_j = idx_j + 1
+        end for
+        idx_i = idx_i + 1
+    end for
+
+    return 1  // No duplicates found
+end fun
+
+result = check_unique(a1)

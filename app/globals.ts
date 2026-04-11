@@ -134,6 +134,39 @@ const Globals = {
       separateNext: false,
     },
   ],
+
+  AlgorithmCards: [
+    {
+      img: [
+        `${RouteBaseName}img/linear-search_light.png`,
+        `${RouteBaseName}img/linear-search_dark.png`,
+      ],
+      title: 'Linear Search',
+      tags: [
+        'Easy',
+        'Array',
+        'Brute Force',
+        'Search',
+        'O(n)',
+      ],
+      href: `${RouteBaseName}run?algorithm=linear_search`,
+    },
+    {
+      img: [
+        `${RouteBaseName}img/check-unique_light.png`,
+        `${RouteBaseName}img/check-unique_dark.png`,
+      ],
+      title: 'Check Unique',
+      tags: [
+        'Easy',
+        'Array',
+        'Brute Force',
+        'Search',
+        'O(n\u00B2)',
+      ],
+      href: `${RouteBaseName}run?algorithm=check_unique`,
+    },
+  ],
 } as const;
 
 export default Globals;
