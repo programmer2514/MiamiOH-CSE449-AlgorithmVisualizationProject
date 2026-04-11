@@ -51,11 +51,12 @@ export default function AppFrame(
     mutable: boolean
     sidebar: boolean | null | undefined
     setSidebar: ((sidebar: boolean | null) => void) | undefined
-    menuLinks: {
+    menuLinks: readonly {
       icon: typeof Iconoir
       text: string
       href?: string
       onClick?: () => void
+      disabled?: boolean
       separateNext: boolean
     }[]
     children: React.ReactNode

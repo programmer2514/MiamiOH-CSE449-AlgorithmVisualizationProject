@@ -1,12 +1,3 @@
-import {
-  Folder,
-  HelpCircle,
-  Import,
-  InfoCircle,
-  PlusCircle,
-  Settings,
-} from 'iconoir-react';
-
 import Globals from '../globals';
 
 import AppFrame from '../components/frames/AppFrame';
@@ -36,40 +27,7 @@ export default function Index() {
         mutable={false}
         sidebar={undefined}
         setSidebar={undefined}
-        menuLinks={
-          [
-            {
-              icon: PlusCircle,
-              text: 'Create...',
-              separateNext: false,
-            },
-            {
-              icon: Folder,
-              text: 'Open...',
-              separateNext: true,
-            },
-            {
-              icon: Import,
-              text: 'Import...',
-              separateNext: true,
-            },
-            {
-              icon: Settings,
-              text: 'Settings',
-              separateNext: false,
-            },
-            {
-              icon: HelpCircle,
-              text: 'Wiki',
-              separateNext: false,
-            },
-            {
-              icon: InfoCircle,
-              text: 'About',
-              separateNext: false,
-            },
-          ]
-        }
+        menuLinks={Globals.MenuLinksHome}
       >
         <SearchProvider
           cards={

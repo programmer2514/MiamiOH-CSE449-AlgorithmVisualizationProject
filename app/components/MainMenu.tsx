@@ -44,11 +44,12 @@ export default function MainMenu(
     setIsDark: ((value: boolean | null) => void)
     triggerRef: React.RefObject<HTMLElement>
     panelRef: React.RefObject<HTMLElement>
-    links: {
+    links: readonly {
       icon: typeof Iconoir
       text: string
       href?: string
       onClick?: () => void
+      disabled?: boolean
       separateNext: boolean
     }[]
   },
@@ -106,10 +107,10 @@ export default function MainMenu(
               {
                 links.map(
                   (
-                    { icon: Icon, text, href, onClick, separateNext },
+                    { icon: Icon, text, href, onClick, disabled, separateNext },
                   ) => (
                     <a key={text} href={href} onClick={onClick}>
-                      <List.Item className="p-2 text-primary hover:bg-primary/5 focus:bg-primary/5">
+                      <List.Item className={`p-2 ${disabled ? 'text-primary/50! hover:bg-transparent focus:bg-transparent' : 'text-primary hover:bg-primary/5 focus:bg-primary/5'}`}>
                         <List.ItemStart>
                           <Icon className="h-6 w-6 stroke-2 mr-1" role="presentation" />
                         </List.ItemStart>
