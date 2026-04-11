@@ -2,11 +2,11 @@
 
 a1 = arr[1, 10, 5, 6, 4, 7, 19]
 
-fun Hoare_Partition(arr, low, high): 
+fun Hoare_Partition(@init<table> array, low, high): 
     // choose the pivot - first element of sub-array
-    pivot = arr[low]
+    @mark<low, highlight, yellow> pivot = array[low]
 
-    // initialize pointers i and j outside bounds of do-while
+    // initialize pointers i and j outside bounds of loop
     i = low - 1
     j = high + 1
 
@@ -14,7 +14,7 @@ fun Hoare_Partition(arr, low, high):
         // move left pointer forward until element >= pivot is found
         while (true):
             i += 1
-            if (arr[i] >= pivot):
+            @mark<i, outline, yellow> if (array[i] >= pivot):
                 break
             end if
         end while
@@ -22,18 +22,18 @@ fun Hoare_Partition(arr, low, high):
         // move right pointer backward until element <= pivot is found
         while (true):
             j -= 1
-            if (arr[j] <= pivot):
+            @mark<j, outline, yellow> if (array[j] <= pivot):
                 break
             end if
         end while
 
         // if pointers cross/meet, then the partition op is completed.
         if (i >= j):
-            return j
+            @log<info, "Partition complete"> return j
         end if
 
         // swap elements at i and j if in the wrong partition
-        swap (arr[i], arr[j]) 
+        @mark<i, highlight, green> swap (array[i], array[j]) 
 
     end while
 end fun
@@ -52,4 +52,4 @@ end fun
 // |        END OF DO NOT MODIFY THIS FUNCTION SECTION             |
 // +---------------------------------------------------------------+
 
-result = Hoare_Partition(a1, 0, length(arr) - 1)
+result = Hoare_Partition(a1, 0, length(a1) - 1)

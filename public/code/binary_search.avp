@@ -3,7 +3,7 @@
 a1 = arr[1, 3, 5, 7, 9, 11, 19]
 key = 11
 
-fun Binary_Search(collection, target, size): 
+fun Binary_Search(@init<table> collection, target, size): 
     low = 0
     high = size - 1
 
@@ -12,22 +12,22 @@ fun Binary_Search(collection, target, size):
         mid = (low + high) / 2
         
         // Get value at the middle
-        val = collection[mid]
+        @mark<mid, highlight, yellow> val = collection[mid]
         
         if (val == target):
-            return mid
+            @mark<mid, highlight, green> return mid
         end if
         
         if (val < target):
-            low = mid + 1
+            @mark<low, outline, yellow> low = mid + 1
         end if
         
         if (val > target):
-            high = mid - 1
+            @mark<high, outline, yellow> high = mid - 1
         end if
     end while
 
-    return -1
+    @log<warn, "Not found"> return -1
 end fun
 
 result = Binary_Search(a1, key, length(a1))
