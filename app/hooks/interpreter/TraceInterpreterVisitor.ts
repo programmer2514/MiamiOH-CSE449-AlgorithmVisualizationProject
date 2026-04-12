@@ -22,6 +22,14 @@ import {
   FunctionCallExpressionContext,
   WhileLoopContext,
   MetadataContext,
+  BlockContext,
+  StatementContext,
+  PowerExpressionContext,
+  LogicalAndExpressionContext,
+  LogicalOrExpressionContext,
+  ForLoopContext,
+  DoWhileLoopContext,
+  BreakStatementContext
 } from './.antlr/PseudocodeParser';
 import { TraceStep, TraceAction } from './TraceType';
 
@@ -35,32 +43,29 @@ export default class TraceInterpreterVisitor
   private callStack: Scope[] = [];
   private functions: Map<string, FunctionDeclContext> = new Map();
 
-  // Heuristics - all generic, no hardcoded names
-  private currentLoopIndex: number | null = null;
-  private currentLoopVar: string | null = null;
+  // Heuristics & States
+  private activeLoopIndices: number[] = [];
   private lastComparisonLeft: any = null;
   private lastComparisonRight: any = null;
   private lastComparisonOp: string = '';
-  private recentArrayAccesses: Array<{ index: number, arrayName: string }> = [];
+  private recentArrayAccesses: Array<{ index: number; arrayName: string }> = [];
+  private isReferenceMode: boolean = false; 
 
-  protected defaultResult(): any {
-    return null;
+  protected defaultResult(): any { return null; }
+
+  protected aggregateResult(aggregate: any, nextResult: any): any {
+    if (aggregate !== null && aggregate !== undefined) return aggregate;
+    return nextResult;
   }
 
   private get memory(): Scope {
-    return this.callStack.length > 0 ?
-      this.callStack[this.callStack.length - 1] :
-      this.globalScope;
+    return this.callStack.length > 0 ? this.callStack[this.callStack.length - 1] : this.globalScope;
   }
 
   private addStep(line: number | number[], actions: TraceAction[]) {
     this.steps.push({ line, actions });
   }
 
-  /**
-   * Process metadata directive and generate appropriate trace action
-   * Works for any metadata directive
-   */
   private processMetadata(ctx: MetadataContext): TraceAction | null {
     const directive = ctx.ID().getText();
     const paramsCtx = ctx.metadataParams();
@@ -69,154 +74,151 @@ export default class TraceInterpreterVisitor
 
     const params = paramsCtx.metadataParam().map((p) => {
       const text = p.getText();
-
-      // Remove quotes from strings
-      if (text.startsWith('"') && text.endsWith('"')) {
-        return text.slice(1, -1);
-      }
-
-      // Parse numbers
-      if (!isNaN(Number(text))) {
-        return Number(text);
-      }
-
-      // Return identifiers as-is
+      if (text.startsWith('"') && text.endsWith('"')) return text.slice(1, -1);
+      if (!isNaN(Number(text))) return Number(text);
+      
+      const memVal = this.memory.get(text);
+      if (memVal !== undefined && typeof memVal === 'number') return memVal;
+      
       return text;
     });
 
     let action: TraceAction | null = null;
 
-    // Handle @log directive
     if (directive === 'log') {
-      if (params.length === 1) {
-        // @log<"message"> - defaults to 'info'
-        action = {
-          cmd: 'vis_log',
-          params: {
-            level: 'info',
-            text: String(params[0]),
-          },
-        };
-      } else if (params.length === 2) {
-        // @log<level, "message">
-        action = {
-          cmd: 'vis_log',
-          params: {
-            level: String(params[0]),
-            text: String(params[1]),
-          },
-        };
-      }
+      action = {
+        cmd: 'vis_log',
+        params: { level: params.length > 1 ? String(params[0]) : 'info', text: String(params.length > 1 ? params[1] : params[0]) },
+      };
+    } else if (directive === 'init') {
+      action = { cmd: 'vis_init', params: { type: String(params[0]) } };
+    } else if (directive === 'mark') {
+      action = {
+        cmd: 'vis_mark',
+        params: {
+          index: Number(params[0]),
+          color: params.length > 1 ? String(params[1]) : 'yellow',
+          type: params.length > 2 ? String(params[2]) : 'outline',
+        },
+      };
     }
-
-    // Handle @init directive
-    else if (directive === 'init') {
-      if (params.length >= 1) {
-        // e.g. @init<"table">
-        action = {
-          cmd: 'vis_init',
-          params: {
-            type: String(params[0]),
-          },
-        };
-      }
-    }
-
-    // Handle @mark directive
-    else if (directive === 'mark') {
-      if (params.length >= 1) {
-        // pass @mark<index> OR @mark<index, color> OR @mark<index, color, type>
-        action = {
-          cmd: 'vis_mark',
-          params: {
-            index: Number(params[0]),
-            color: params.length > 1 ? String(params[1]) : 'yellow', // Default color
-            type: params.length > 2 ? String(params[2]) : 'outline', // Default type
-          },
-        };
-      }
-    }
-
-    // Console log the trace result
-    if (action) {
-      console.log(`[Trace Interpreter] Parsed @${directive} ->`, action);
-    } else {
-      console.log(`[Trace Interpreter] Ignored or invalid @${directive} with params:`, params);
-    }
-
     return action;
   }
 
-  /**
-   * Extract all metadata actions from statement context
-   */
   private extractMetadataActions(ctx: any): TraceAction[] {
     const actions: TraceAction[] = [];
-
-    // Check if this context has metadata
     if (typeof ctx.metadata === 'function') {
       const metadataList = ctx.metadata();
       if (metadataList && Array.isArray(metadataList)) {
         for (const metaCtx of metadataList) {
           const action = this.processMetadata(metaCtx);
-          if (action) {
-            actions.push(action);
-          }
+          if (action) actions.push(action);
         }
       }
     }
-
-    // Console log the extracted actions
-    if (actions.length > 0) {
-      console.log(`[Trace Extractor] Extracted ${actions.length} action(s) from current statement.`);
-    }
-
     return actions;
   }
 
-  // --- Entry ---
-  visitProgram(ctx: ProgramContext): any {
-    if (ctx.statement()) {
-      for (const stmt of ctx.statement()) {
-        this.visit(stmt);
+  private flushComparisons(line: number, extraActions: TraceAction[] = []) {
+    const actions: TraceAction[] = [...extraActions];
+    let targetIndex: number | null = null;
+    
+    if (this.recentArrayAccesses.length > 0) {
+      for (const access of this.recentArrayAccesses) {
+        if (!actions.some(a => a.cmd === 'vis_mark' && a.params.index === access.index && a.params.type === 'outline')) {
+          actions.push({ cmd: 'vis_mark', params: { index: access.index, type: 'outline', color: 'yellow' } });
+        }
+      }
+      targetIndex = this.recentArrayAccesses[this.recentArrayAccesses.length - 1].index;
+    } else if (this.activeLoopIndices.length > 0) {
+      targetIndex = this.activeLoopIndices[this.activeLoopIndices.length - 1];
+      if (!actions.some(a => a.cmd === 'vis_mark' && a.params.index === targetIndex && a.params.type === 'outline')) {
+           actions.push({ cmd: 'vis_mark', params: { index: targetIndex, type: 'outline', color: 'yellow' } });
       }
     }
+
+    if (targetIndex !== null && this.lastComparisonLeft !== null && this.lastComparisonRight !== null && this.lastComparisonOp) {
+      actions.push({
+        cmd: 'vis_mark',
+        params: { index: targetIndex, type: 'text', color: 'fg', value: `${this.lastComparisonLeft} ${this.lastComparisonOp} ${this.lastComparisonRight}?` },
+      });
+    }
+
+    if (actions.length > extraActions.length || extraActions.length > 0) {
+      this.addStep(line, actions);
+    }
+
+    this.recentArrayAccesses = [];
+    this.lastComparisonLeft = null;
+    this.lastComparisonRight = null;
+    this.lastComparisonOp = '';
+  }
+
+  visitProgram(ctx: ProgramContext): any {
+    if (ctx.statement()) for (const stmt of ctx.statement()) this.visit(stmt);
     return this.steps;
   }
 
-  // --- Statements ---
-  visitAssignment(ctx: AssignmentContext): any {
-    // Extract metadata
-    const metadataActions = this.extractMetadataActions(ctx);
+  visitStatement(ctx: StatementContext): any {
+    if (ctx.assignment()) return this.visit(ctx.assignment()!);
+    if (ctx.functionDecl()) return this.visit(ctx.functionDecl()!);
+    if (ctx.functionCallStmt()) return this.visit(ctx.functionCallStmt()!);
+    if (ctx.forEachLoop()) return this.visit(ctx.forEachLoop()!);
+    if (ctx.whileLoop()) return this.visit(ctx.whileLoop()!);
+    if (ctx.ifStatement()) return this.visit(ctx.ifStatement()!);
+    if (ctx.returnStatement()) return this.visit(ctx.returnStatement()!);
+    if (ctx.forLoop()) return this.visit(ctx.forLoop()!);
+    if (ctx.doWhileLoop()) return this.visit(ctx.doWhileLoop()!);
+    if (ctx.breakStatement()) return this.visit(ctx.breakStatement()!);
+    return null;
+  }
 
-    const name = ctx.ID().getText();
-    let value;
-    if (ctx.arrayInitialization()) {
-      value = this.visit(ctx.arrayInitialization()!);
-    } else {
-      value = this.visit(ctx.expression()!);
+  visitBreakStatement(ctx: BreakStatementContext): any {
+    return { __type: 'break' };
+  }
+
+  visitAssignment(ctx: AssignmentContext): any {
+    const metadataActions = this.extractMetadataActions(ctx);
+    const assignableCtx = ctx.assignable();
+    const name = assignableCtx.ID().getText();
+    const isArrayAccess = !!assignableCtx.LBRACK();
+
+    let value = ctx.arrayInitialization() ? this.visit(ctx.arrayInitialization()!) : this.visit(ctx.expression()!);
+    
+    if (!isArrayAccess) {
+        if (ctx.PLUS_EQ()) value = (this.memory.get(name) || 0) + value;
+        else if (ctx.MINUS_EQ()) value = (this.memory.get(name) || 0) - value;
     }
+
+    if (isArrayAccess) {
+        // Temporarily disable reference mode so index math executes cleanly
+        const prevRef = this.isReferenceMode;
+        this.isReferenceMode = false;
+        const index = Math.floor(this.visit(assignableCtx.expression()!));
+        this.isReferenceMode = prevRef;
+
+        const arr = this.memory.get(name);
+        if (Array.isArray(arr)) {
+            arr[index] = value;
+            const actions: TraceAction[] = [...metadataActions, 
+                { cmd: 'vis_mark', params: { index, type: 'highlight', color: 'green' } },
+                { cmd: 'var_add', params: { name, value: [...arr] } }
+            ];
+            this.addStep(ctx.start!.line, actions);
+        }
+        return;
+    }
+
     this.memory.set(name, value);
 
-    // Clear array access visualization when ANY numeric variable changes
     if (typeof value === 'number' && this.recentArrayAccesses.length > 0) {
-      const unmarkActions: TraceAction[] = [];
-
-      // Add metadata first
-      unmarkActions.push(...metadataActions);
-
-      // Unmark all recent array accesses (deduplicated)
+      const unmarkActions: TraceAction[] = [...metadataActions];
       const accessedIndices = new Set(this.recentArrayAccesses.map((a) => a.index));
       for (const idx of accessedIndices) {
         unmarkActions.push({ cmd: 'vis_unmark', params: { index: idx, type: 'all' } });
       }
-
-      // Add the variable assignment
       unmarkActions.push({ cmd: 'var_add', params: { name, value } });
-
       this.addStep(ctx.start!.line, unmarkActions);
-
-      // Clear the array access history
       this.recentArrayAccesses = [];
       return;
     }
@@ -225,91 +227,125 @@ export default class TraceInterpreterVisitor
     this.addStep(ctx.start!.line, actions);
   }
 
-  // --- Arrays ---
   visitValueArray(ctx: ValueArrayContext): any[] {
-    return ctx.INT().map((n) => parseInt(n.getText(), 10));
+    return ctx.expressionList().expression().map((e) => {
+      const val = this.visit(e);
+      return typeof val === 'number' ? val : parseInt(String(val), 10);
+    });
   }
 
   visitRangeArray(ctx: RangeArrayContext): any[] {
-    const from = parseInt(ctx._from_!.text!, 10);
-    const to = parseInt(ctx._to!.text!, 10);
+    const from = Math.floor(this.visit(ctx._from_!));
+    const to = Math.floor(this.visit(ctx._to!));
     const arr: number[] = [];
     for (let i = from; i <= to; i++) arr.push(i);
     return arr;
   }
 
   visitSizeArray(ctx: SizeArrayContext): any[] {
-    const size = parseInt(ctx._size!.text!, 10);
-    return new Array(size).fill(0);
+    const size = Math.floor(this.visit(ctx._size!));
+    const defaultVal = ctx._defaultVal != null ? this.visit(ctx._defaultVal) : 0;
+    return new Array(size).fill(defaultVal);
   }
 
-  // --- Functions ---
   visitFunctionDecl(ctx: FunctionDeclContext): any {
-    // Extract metadata
     const metadataActions = this.extractMetadataActions(ctx);
-
     const funcName = ctx.ID().getText();
     this.functions.set(funcName, ctx);
     const start = ctx.start!.line;
     const end = ctx.stop?.line || start;
 
-    const actions: TraceAction[] = [
+    this.addStep([start, end], [
       ...metadataActions,
-      {
-        cmd: 'var_add',
-        params: { name: `${funcName}(...)`, value: '<function>' },
-      },
-    ];
-
-    this.addStep([start, end], actions);
+      { cmd: 'var_add', params: { name: `${funcName}(...)`, value: '<function>' } },
+    ]);
   }
 
   visitFunctionCallStmt(ctx: FunctionCallStmtContext): any {
-    // Extract metadata
     const metadataActions = this.extractMetadataActions(ctx);
-    if (metadataActions.length > 0) {
-      this.addStep(ctx.start!.line, metadataActions);
-    }
+    if (metadataActions.length > 0) this.addStep(ctx.start!.line, metadataActions);
 
     const funcName = ctx.ID().getText();
-    const args = ctx.expressionList() ? this.visit(ctx.expressionList()!) : [];
+    const exprList = ctx.expressionList();
 
-    // Execute any function generically
+if (funcName === 'swap' && exprList) {
+        const exprs = exprList.expression();
+        if (exprs.length === 2) {
+            this.isReferenceMode = true;
+            const ref1 = this.visit(exprs[0]);
+            this.isReferenceMode = true;
+            const ref2 = this.visit(exprs[1]);
+            this.isReferenceMode = false;
+            
+            if (ref1?.isArrayAccess && ref2?.isArrayAccess) {
+                const arrName = ref1.arrayName;
+                const arr = this.memory.get(arrName);
+                if (Array.isArray(arr)) {
+                    const temp = arr[ref1.index];
+                    arr[ref1.index] = arr[ref2.index];
+                    arr[ref2.index] = temp;
+
+                    this.addStep(ctx.start!.line, [
+                        { cmd: 'var_add', params: { name: arrName, value: [...arr] } },
+                        { cmd: 'vis_mark', params: { index: ref1.index, type: 'highlight', color: 'green' } },
+                        { cmd: 'vis_mark', params: { index: ref2.index, type: 'highlight', color: 'green' } }
+                    ]);
+                    return;
+                }
+            }
+        }
+    }
+
+    const args = exprList ? this.visit(exprList) : [];
     return this.executeFunction(funcName, args, ctx.start!.line);
   }
 
   executeFunction(name: string, args: any[], callLine: number) {
     const funcCtx = this.functions.get(name);
     if (!funcCtx) return;
-
-    const paramNames = funcCtx.paramList()?.ID().map((n) => n.getText()) || [];
+    
+    const paramCtxs = funcCtx.paramList()?.param() || [];
     const newScope: Scope = new Map();
     const initActions: TraceAction[] = [];
 
-    paramNames.forEach((pName, i) => {
+    paramCtxs.forEach((pCtx, i) => {
+      const pName = pCtx.ID().getText();
       const val = args[i];
       newScope.set(pName, val);
       initActions.push({ cmd: 'var_add', params: { name: pName, value: val } });
-      if (Array.isArray(val)) {
+      
+      let hasInit = false;
+      if (pCtx.metadata) {
+        const metaList = pCtx.metadata();
+        for (const meta of metaList) {
+          const action = this.processMetadata(meta);
+          if (action && action.cmd === 'vis_init') {
+            action.params.data = val; 
+            initActions.push(action);
+            hasInit = true;
+          }
+        }
+      }
+      if (!hasInit && Array.isArray(val)) {
         initActions.push({ cmd: 'vis_init', params: { data: val, type: 'table' } });
       }
     });
 
-    this.globalScope.forEach((_, key) =>
-      initActions.push({ cmd: 'var_greyout', params: { name: key } }),
-    );
+    this.globalScope.forEach((_, key) => initActions.push({ cmd: 'var_greyout', params: { name: key } }));
 
+    const funcBlock: BlockContext | null = funcCtx.block();
     let entryLine = funcCtx.start!.line;
-    if (funcCtx.statement(0)) entryLine = funcCtx.statement(0)!.start!.line;
+    if (funcBlock && funcBlock.statement(0)) entryLine = funcBlock.statement(0)!.start!.line;
     this.addStep(entryLine, initActions);
 
     this.callStack.push(newScope);
     let retVal = null;
 
-    const stmts = funcCtx.statement();
+    const stmts = funcBlock?.statement();
     if (stmts) {
       for (const stmt of stmts) {
         const res = this.visit(stmt);
+        if (res && res.__type === 'break') break; 
         if (res !== undefined && res !== null) {
           retVal = res;
           break;
@@ -318,26 +354,72 @@ export default class TraceInterpreterVisitor
     }
 
     const cleanup: TraceAction[] = [];
-    newScope.forEach((_, key) =>
-      cleanup.push({ cmd: 'var_delete', params: { name: key } }),
-    );
-    this.globalScope.forEach((_, key) =>
-      cleanup.push({ cmd: 'var_normal', params: { name: key } }),
-    );
-    if (retVal !== null)
-      cleanup.push({ cmd: 'var_add', params: { name: 'result', value: retVal } });
+    newScope.forEach((_, key) => cleanup.push({ cmd: 'var_delete', params: { name: key } }));
+    this.globalScope.forEach((_, key) => cleanup.push({ cmd: 'var_normal', params: { name: key } }));
+    if (retVal !== null) cleanup.push({ cmd: 'var_add', params: { name: 'result', value: retVal } });
 
     this.addStep(callLine, cleanup);
     this.callStack.pop();
     return retVal;
   }
 
-  visitForEachLoop(ctx: ForEachLoopContext): any {
-    // Extract metadata
+  visitForLoop(ctx: ForLoopContext): any {
     const metadataActions = this.extractMetadataActions(ctx);
-    if (metadataActions.length > 0) {
-      this.addStep(ctx.start!.line, metadataActions);
+    this.visit(ctx.assignment(0)!);
+
+    let limit = 1000;
+    let isFirst = true;
+    while (true) {
+      const condition = this.visit(ctx.expression()!);
+      this.flushComparisons(ctx.start!.line, isFirst ? metadataActions : []);
+      isFirst = false;
+
+      if (!condition || limit-- <= 0) break;
+
+      const stmts = ctx.block()?.statement();
+      let broke = false;
+      if (stmts) {
+        for (const stmt of stmts) {
+          const res = this.visit(stmt);
+          if (res && res.__type === 'break') {
+            broke = true;
+            break;
+          }
+          if (res !== undefined && res !== null) return res;
+        }
+      }
+      if (broke) break;
+      this.visit(ctx.assignment(1)!);
     }
+  }
+
+  visitDoWhileLoop(ctx: DoWhileLoopContext): any {
+    let limit = 1000;
+    do {
+      const stmts = ctx.block()?.statement();
+      let broke = false;
+      if (stmts) {
+        for (const stmt of stmts) {
+          const res = this.visit(stmt);
+          if (res && res.__type === 'break') {
+            broke = true;
+            break;
+          }
+          if (res !== undefined && res !== null) return res;
+        }
+      }
+      if (broke) break;
+
+      const condition = this.visit(ctx.expression()!);
+      this.flushComparisons(ctx.stop?.line || 0);
+
+      if (!condition) break;
+    } while (limit-- > 0);
+  }
+
+  visitForEachLoop(ctx: ForEachLoopContext): any {
+    const metadataActions = this.extractMetadataActions(ctx);
+    if (metadataActions.length > 0) this.addStep(ctx.start!.line, metadataActions);
 
     const iterVarName = ctx.ID(0)!.getText();
     const arrayName = ctx.ID(1)!.getText();
@@ -347,263 +429,227 @@ export default class TraceInterpreterVisitor
       for (let i = 0; i < arrayData.length; i++) {
         const val = arrayData[i];
         this.memory.set(iterVarName, val);
-
-        this.currentLoopIndex = i;
-        this.currentLoopVar = iterVarName;
+        this.activeLoopIndices.push(i);
 
         const actions: TraceAction[] = [
           { cmd: 'var_add', params: { name: iterVarName, value: val } },
           { cmd: 'vis_mark', params: { index: i, type: 'outline', color: 'yellow' } },
         ];
-        if (i > 0)
-          actions.unshift({ cmd: 'vis_unmark', params: { index: i - 1, type: 'all' } });
+        if (i > 0) actions.unshift({ cmd: 'vis_unmark', params: { index: i - 1, type: 'all' } });
 
         this.addStep(ctx.start!.line, actions);
-
-        const stmts = ctx.statement();
+        
+        const stmts = ctx.block()?.statement();
         if (stmts) {
           for (const stmt of stmts) {
             const res = this.visit(stmt);
-
-            // Check if a statement returned a value
+            if (res && res.__type === 'break') {
+               this.addStep(ctx.start!.line, [{ cmd: 'vis_unmark', params: { index: i, type: 'all' } }]);
+               this.activeLoopIndices.pop();
+               return undefined; 
+            }
             if (res !== undefined && res !== null) {
-              // Add final cleanup before returning
-              this.addStep(ctx.start!.line, [
-                { cmd: 'vis_unmark', params: { index: i, type: 'all' } },
-              ]);
-              this.currentLoopIndex = null;
-              this.currentLoopVar = null;
+              this.addStep(ctx.start!.line, [{ cmd: 'vis_unmark', params: { index: i, type: 'all' } }]);
+              this.activeLoopIndices.pop();
               return res;
             }
           }
         }
+        this.activeLoopIndices.pop();
       }
-
-      // Only unmark last element if the entire loop completed without returning
       if (arrayData.length > 0) {
-        this.addStep(ctx.start!.line, [
-          { cmd: 'vis_unmark', params: { index: arrayData.length - 1, type: 'all' } },
-        ]);
+        this.addStep(ctx.start!.line, [{ cmd: 'vis_unmark', params: { index: arrayData.length - 1, type: 'all' } }]);
       }
-
-      this.currentLoopIndex = null;
-      this.currentLoopVar = null;
     }
   }
 
   visitWhileLoop(ctx: WhileLoopContext): any {
-    // Extract metadata
     const metadataActions = this.extractMetadataActions(ctx);
-    if (metadataActions.length > 0) {
-      this.addStep(ctx.start!.line, metadataActions);
-    }
+    let limit = 1000;
+    let isFirst = true;
 
-    let limit = 20; // Safety break
-    while (this.visit(ctx.expression()) && limit-- > 0) {
-      const stmts = ctx.statement();
+    while (true) {
+      const condition = this.visit(ctx.expression()!);
+      this.flushComparisons(ctx.start!.line, isFirst ? metadataActions : []);
+      isFirst = false;
+
+      if (!condition || limit-- <= 0) break;
+
+      const stmts = ctx.block()?.statement();
+      let broke = false;
       if (stmts) {
         for (const stmt of stmts) {
           const res = this.visit(stmt);
-          if (res !== undefined && res !== null) {
-            return res;
+          if (res && res.__type === 'break') {
+            broke = true;
+            break;
           }
+          if (res !== undefined && res !== null) return res;
         }
       }
+      if (broke) break;
     }
   }
 
   visitIfStatement(ctx: IfStatementContext): any {
-    // Extract metadata
     const metadataActions = this.extractMetadataActions(ctx);
+    const expressions = ctx.expression();
+    const blocks = ctx.block();
+    let matchedBlockIndex = -1;
 
-    const condition = this.visit(ctx.expression());
+    for (let i = 0; i < expressions.length; i++) {
+      const condition = this.visit(expressions[i]);
+      
+      this.flushComparisons(ctx.start!.line, i === 0 ? metadataActions : []);
 
-    // Visualize any array access that happened during the comparison
-    if (this.recentArrayAccesses.length > 0) {
-      const visualizeActions: TraceAction[] = [...metadataActions];
-
-      // Visualize all recent array accesses
-      for (const access of this.recentArrayAccesses) {
-        visualizeActions.push({
-          cmd: 'vis_mark',
-          params: {
-            index: access.index,
-            type: 'outline',
-            color: 'yellow',
-          },
-        });
+      if (condition) {
+        matchedBlockIndex = i;
+        break;
       }
-
-      // Add comparison text on the most recent access
-      if (this.lastComparisonLeft !== null && this.lastComparisonRight !== null) {
-        const mostRecent =
-          this.recentArrayAccesses[this.recentArrayAccesses.length - 1];
-        visualizeActions.push({
-          cmd: 'vis_mark',
-          params: {
-            index: mostRecent.index,
-            type: 'text',
-            color: 'fg',
-            value: `${this.lastComparisonLeft} ${this.lastComparisonOp} ${this.lastComparisonRight}?`,
-          },
-        });
-      }
-
-      this.addStep(ctx.start!.line, visualizeActions);
-
-      // FIXED: Clear after visualizing to prevent accumulation
-      this.recentArrayAccesses = [];
-    } else if (
-      this.currentLoopIndex !== null &&
-      this.lastComparisonLeft !== null &&
-      this.lastComparisonRight !== null
-    ) {
-      // Fallback for for-each loops (linear search)
-      const actions: TraceAction[] = [
-        ...metadataActions,
-        {
-          cmd: 'vis_mark',
-          params: {
-            index: this.currentLoopIndex,
-            type: 'text',
-            color: 'fg',
-            value: `${this.lastComparisonLeft} ${this.lastComparisonOp} ${this.lastComparisonRight}?`,
-          },
-        },
-      ];
-      this.addStep(ctx.start!.line, actions);
-    } else if (metadataActions.length > 0) {
-      // Just add metadata if no visualization
-      this.addStep(ctx.start!.line, metadataActions);
     }
 
-    if (condition) {
-      const stmts = ctx.statement();
+    if (matchedBlockIndex === -1 && blocks.length > expressions.length) matchedBlockIndex = blocks.length - 1;
+
+    if (matchedBlockIndex !== -1) {
+      const stmts = blocks[matchedBlockIndex].statement();
       if (stmts) {
         for (const stmt of stmts) {
           if (stmt.returnStatement()) {
-            const matchActions: TraceAction[] = [];
-
-            // Use most recent array access OR loop index
-            let indexToMark: number | null = null;
-
-            if (this.recentArrayAccesses.length > 0) {
-              indexToMark =
-                this.recentArrayAccesses[this.recentArrayAccesses.length - 1].index;
-            } else if (this.currentLoopIndex !== null) {
-              indexToMark = this.currentLoopIndex;
-            }
-
-            if (indexToMark !== null) {
-              matchActions.push(
-                {
-                  cmd: 'vis_mark',
-                  params: { index: indexToMark, type: 'outline', color: 'green' },
-                },
-                {
-                  cmd: 'vis_mark',
-                  params: { index: indexToMark, type: 'highlight', color: 'green' },
-                },
-              );
-
-              if (
-                this.lastComparisonLeft !== null &&
-                this.lastComparisonRight !== null
-              ) {
-                matchActions.push({
-                  cmd: 'vis_mark',
-                  params: {
-                    index: indexToMark,
-                    type: 'text',
-                    color: 'fg',
-                    value: `${this.lastComparisonLeft} ${this.lastComparisonOp} ${this.lastComparisonRight}`,
-                  },
-                });
-              }
-
-              this.addStep(stmt.start!.line, matchActions);
+            let idx = null;
+            if (this.recentArrayAccesses.length > 0) idx = this.recentArrayAccesses[this.recentArrayAccesses.length - 1].index;
+            else if (this.activeLoopIndices.length > 0) idx = this.activeLoopIndices[this.activeLoopIndices.length - 1];
+            
+            if (idx !== null) {
+                this.addStep(stmt.start!.line, [
+                    { cmd: 'vis_mark', params: { index: idx, type: 'outline', color: 'green' } },
+                    { cmd: 'vis_mark', params: { index: idx, type: 'highlight', color: 'green' } }
+                ]);
             }
           }
 
           const res = this.visit(stmt);
+          if (res && res.__type === 'break') return res;
           if (res !== undefined && res !== null) {
-            // Clear all state
-            this.lastComparisonLeft = null;
-            this.lastComparisonRight = null;
-            this.lastComparisonOp = '';
             this.recentArrayAccesses = [];
             return res;
           }
         }
       }
     }
-
-    // Clear state after if statement
-    this.lastComparisonLeft = null;
-    this.lastComparisonRight = null;
-    this.lastComparisonOp = '';
-
     return undefined;
   }
 
-  // math/expressions
+  visitLogicalOrExpression(ctx: LogicalOrExpressionContext): any {
+    let left = this.visit(ctx._left!);
+    const rights = ctx._right;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    for (let i = 0; i < rightArray.length; i++) left = left || this.visit(rightArray[i]);
+    return left;
+  }
+
+  visitLogicalAndExpression(ctx: LogicalAndExpressionContext): any {
+    let left = this.visit(ctx._left!);
+    const rights = ctx._right;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    for (let i = 0; i < rightArray.length; i++) left = left && this.visit(rightArray[i]);
+    return left;
+  }
+
+  visitCompareExpr(ctx: CompareExprContext): boolean | any {
+    let left = this.visit(ctx._left!);
+    const rights = ctx._right;
+    const ops = ctx._op;
+    
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    const opArray = Array.isArray(ops) ? ops : [ops];
+
+    for (let i = 0; i < rightArray.length; i++) {
+        const right = this.visit(rightArray[i]);
+        const opText = opArray[i].text!;
+        
+        this.lastComparisonLeft = left;
+        this.lastComparisonRight = right;
+        this.lastComparisonOp = opText;
+
+        switch(opText) {
+            case '==': left = left === right; break;
+            case '<':  left = left < right; break;
+            case '>':  left = left > right; break;
+            case '<=': left = left <= right; break;
+            case '>=': left = left >= right; break;
+        }
+    }
+    return left;
+  }
+
   visitAddExpr(ctx: AddExprContext): any {
-    const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(2)!);
-    if (ctx._op!.text === '+') return left + right;
-    return left - right;
+    let left = this.visit(ctx._left!);
+    const rights = ctx._right;
+    const ops = ctx._op;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    const opArray = Array.isArray(ops) ? ops : [ops];
+
+    for (let i = 0; i < rightArray.length; i++) {
+        const right = this.visit(rightArray[i]);
+        const opText = opArray[i].text!;
+        left = opText === '+' ? left + right : left - right;
+    }
+    return left;
   }
 
   visitMulExpr(ctx: MulExprContext): any {
-    const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(2)!);
-    if (ctx._op!.text === '*') return left * right;
-    return left / right;
-  }
+    let left = this.visit(ctx._left!);
+    const rights = ctx._right;
+    const ops = ctx._op;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    const opArray = Array.isArray(ops) ? ops : [ops];
 
-  visitParenExpression(ctx: ParenExpressionContext): any {
-    return this.visit(ctx.expression());
-  }
-
-  visitUnaryMinusExpr(ctx: UnaryMinusExprContext): any {
-    return -this.visit(ctx.unaryExpression());
-  }
-
-  visitCompareExpr(ctx: CompareExprContext): boolean {
-    const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(2)!);
-
-    // Store comparison info for visualization
-    this.lastComparisonLeft = left;
-    this.lastComparisonRight = right;
-    this.lastComparisonOp = ctx._op!.text!;
-
-    switch (ctx._op!.text) {
-      case '==':
-        return left === right;
-      case '<':
-        return left < right;
-      case '>':
-        return left > right;
-      case '<=':
-        return left <= right;
-      case '>=':
-        return left >= right;
+    for (let i = 0; i < rightArray.length; i++) {
+        const right = this.visit(rightArray[i]);
+        const opText = opArray[i].text!;
+        left = opText === '*' ? left * right : left / right;
     }
-    return false;
+    return left;
   }
+
+  visitPowerExpression(ctx: PowerExpressionContext): any {
+    let left = this.visit(ctx._left!);
+    const rights = ctx._right;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    for (let i = 0; i < rightArray.length; i++) left = Math.pow(left, this.visit(rightArray[i]));
+    return left;
+  }
+
+  visitParenExpression(ctx: ParenExpressionContext): any { return this.visit(ctx.expression()!); }
+  visitUnaryMinusExpr(ctx: UnaryMinusExprContext): any { return -this.visit(ctx.unaryExpression()!); }
 
   visitArrayAccessExpression(ctx: ArrayAccessExpressionContext): any {
     const arrayName = ctx.ID().getText();
-    const index = Math.floor(this.visit(ctx.expression()));
-    const arr = this.memory.get(arrayName);
 
-    // Track this array access
+    // Disable ref mode deeply so nested indexes evaluate normally
+    const prevRefMode = this.isReferenceMode;
+    this.isReferenceMode = false;
+    const index = Math.floor(this.visit(ctx.expression()!));
+    this.isReferenceMode = prevRefMode;
+
     this.recentArrayAccesses.push({ index, arrayName });
-    if (this.recentArrayAccesses.length > 5) {
-      this.recentArrayAccesses.shift(); // Keep only last 5
+    if (this.recentArrayAccesses.length > 5) this.recentArrayAccesses.shift();
+
+    if (this.isReferenceMode) {
+        this.isReferenceMode = false; // consume it safely
+        return { isArrayAccess: true, arrayName, index };
     }
 
+    const arr = this.memory.get(arrayName);
     if (Array.isArray(arr)) return arr[index];
     return null;
   }
@@ -612,24 +658,18 @@ export default class TraceInterpreterVisitor
     const funcName = ctx.ID().getText();
     const args = ctx.expressionList() ? this.visit(ctx.expressionList()!) : [];
 
-    // Built-in size
-    if (funcName === 'size' && Array.isArray(args[0])) {
-      return args[0].length;
-    }
-
-    // Built-in floor
-    if (funcName === 'floor' && typeof args[0] === 'number') {
-      return Math.floor(args[0]);
-    }
-
+    if ((funcName === 'size' || funcName === 'length') && Array.isArray(args[0])) return args[0].length;
+    if (funcName === 'floor' && typeof args[0] === 'number') return Math.floor(args[0]);
     return this.executeFunction(funcName, args, ctx.start!.line);
   }
 
   visitAtomExpression(ctx: AtomExpressionContext): any {
     const text = ctx.getText();
-    if (!isNaN(Number(text))) {
-      return Number(text);
-    }
+    if (text === 'true' || text === 'True') return true;
+    if (text === 'false' || text === 'False') return false;
+    if (text === 'null' || text === 'Null') return null;
+    if (!isNaN(Number(text))) return Number(text);
+    if (text.startsWith('"') && text.endsWith('"')) return text.slice(1, -1);
     return this.memory.get(text);
   }
 
@@ -638,12 +678,8 @@ export default class TraceInterpreterVisitor
   }
 
   visitReturnStatement(ctx: ReturnStatementContext): any {
-    // Extract metadata
     const metadataActions = this.extractMetadataActions(ctx);
-    if (metadataActions.length > 0) {
-      this.addStep(ctx.start!.line, metadataActions);
-    }
-
-    return this.visit(ctx.expression());
+    if (metadataActions.length > 0) this.addStep(ctx.start!.line, metadataActions);
+    return this.visit(ctx.expression()!);
   }
 }
