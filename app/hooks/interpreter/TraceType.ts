@@ -6,11 +6,12 @@ export interface ActionParams {
   type?: string
   data?: any[]
   index?: number
+  index2?: number
   color?: string
 }
 
 export interface TraceAction {
-  cmd: 'var_add' | 'var_delete' | 'var_greyout' | 'var_normal' | 'vis_init' | 'vis_mark' | 'vis_unmark' | 'vis_log'
+  cmd: 'var_add' | 'var_delete' | 'var_greyout' | 'var_normal' | 'vis_init' | 'vis_mark' | 'vis_unmark' | 'vis_log' | 'vis_insert' | 'vis_delete' | 'vis_update' | 'vis_swap' | 'vis_sort'
   params: ActionParams
 }
 

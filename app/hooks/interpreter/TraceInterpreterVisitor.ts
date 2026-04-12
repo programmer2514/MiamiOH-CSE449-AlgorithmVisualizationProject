@@ -67,43 +67,43 @@ export default class TraceInterpreterVisitor
   }
 
   private processMetadata(ctx: MetadataContext): TraceAction | null {
-    const directive = ctx.ID().getText();
-    const paramsCtx = ctx.metadataParams();
+      const directive = ctx.ID().getText();
+      const paramsCtx = ctx.metadataParams();
 
-    if (!paramsCtx) return null;
+      if (!paramsCtx) return null;
 
-    const params = paramsCtx.metadataParam().map((p) => {
-      const text = p.getText();
-      if (text.startsWith('"') && text.endsWith('"')) return text.slice(1, -1);
-      if (!isNaN(Number(text))) return Number(text);
-      
-      const memVal = this.memory.get(text);
-      if (memVal !== undefined && typeof memVal === 'number') return memVal;
-      
-      return text;
-    });
+      const params = paramsCtx.metadataParam().map((p) => {
+        const text = p.getText();
+        if (text.startsWith('"') && text.endsWith('"')) return text.slice(1, -1);
+        if (!isNaN(Number(text))) return Number(text);
+        
+        const memVal = this.memory.get(text);
+        if (memVal !== undefined && typeof memVal === 'number') return memVal;
+        
+        return text;
+      });
 
-    let action: TraceAction | null = null;
+      let action: TraceAction | null = null;
 
-    if (directive === 'log') {
-      action = {
-        cmd: 'vis_log',
-        params: { level: params.length > 1 ? String(params[0]) : 'info', text: String(params.length > 1 ? params[1] : params[0]) },
-      };
-    } else if (directive === 'init') {
-      action = { cmd: 'vis_init', params: { type: String(params[0]) } };
-    } else if (directive === 'mark') {
-      action = {
-        cmd: 'vis_mark',
-        params: {
-          index: Number(params[0]),
-          color: params.length > 1 ? String(params[1]) : 'yellow',
-          type: params.length > 2 ? String(params[2]) : 'outline',
-        },
-      };
+      if (directive === 'log') {
+        action = { cmd: 'vis_log', params: { level: params.length > 1 ? String(params[0]) : 'info', text: String(params.length > 1 ? params[1] : params[0]) } };
+      } else if (directive === 'init') {
+        action = { cmd: 'vis_init', params: { type: String(params[0]) } };
+      } else if (directive === 'mark') {
+        action = { cmd: 'vis_mark', params: { index: Number(params[0]), color: params.length > 1 ? String(params[1]) : 'yellow', type: params.length > 2 ? String(params[2]) : 'outline' } };
+      } else if (directive === 'insert') {
+        action = { cmd: 'vis_insert', params: { index: Number(params[0]), value: params[1] } };
+      } else if (directive === 'delete') {
+        action = { cmd: 'vis_delete', params: { index: Number(params[0]) } };
+      } else if (directive === 'update') {
+        action = { cmd: 'vis_update', params: { index: Number(params[0]), value: params[1] } };
+      } else if (directive === 'swap') {
+        action = { cmd: 'vis_swap', params: { index: Number(params[0]), index2: Number(params[1]) } };
+      } else if (directive === 'sort') {
+        action = { cmd: 'vis_sort', params: { name: String(params[0]) } };
+      }
+      return action;
     }
-    return action;
-  }
 
   private extractMetadataActions(ctx: any): TraceAction[] {
     const actions: TraceAction[] = [];
@@ -178,36 +178,36 @@ export default class TraceInterpreterVisitor
   }
 
   visitAssignment(ctx: AssignmentContext): any {
-    const metadataActions = this.extractMetadataActions(ctx);
-    const assignableCtx = ctx.assignable();
-    const name = assignableCtx.ID().getText();
-    const isArrayAccess = !!assignableCtx.LBRACK();
+      const metadataActions = this.extractMetadataActions(ctx);
+      const assignableCtx = ctx.assignable();
+      const name = assignableCtx.ID().getText();
+      const isArrayAccess = !!assignableCtx.LBRACK();
 
-    let value = ctx.arrayInitialization() ? this.visit(ctx.arrayInitialization()!) : this.visit(ctx.expression()!);
-    
-    if (!isArrayAccess) {
-        if (ctx.PLUS_EQ()) value = (this.memory.get(name) || 0) + value;
-        else if (ctx.MINUS_EQ()) value = (this.memory.get(name) || 0) - value;
-    }
+      let value = ctx.arrayInitialization() ? this.visit(ctx.arrayInitialization()!) : this.visit(ctx.expression()!);
+      
+      if (!isArrayAccess) {
+          if (ctx.PLUS_EQ()) value = (this.memory.get(name) || 0) + value;
+          else if (ctx.MINUS_EQ()) value = (this.memory.get(name) || 0) - value;
+      }
 
-    if (isArrayAccess) {
-        // Temporarily disable reference mode so index math executes cleanly
-        const prevRef = this.isReferenceMode;
-        this.isReferenceMode = false;
-        const index = Math.floor(this.visit(assignableCtx.expression()!));
-        this.isReferenceMode = prevRef;
+      if (isArrayAccess) {
+          const prevRef = this.isReferenceMode;
+          this.isReferenceMode = false;
+          const index = Math.floor(this.visit(assignableCtx.expression()!));
+          this.isReferenceMode = prevRef;
 
-        const arr = this.memory.get(name);
-        if (Array.isArray(arr)) {
-            arr[index] = value;
-            const actions: TraceAction[] = [...metadataActions, 
-                { cmd: 'vis_mark', params: { index, type: 'highlight', color: 'green' } },
-                { cmd: 'var_add', params: { name, value: [...arr] } }
-            ];
-            this.addStep(ctx.start!.line, actions);
-        }
-        return;
-    }
+          const arr = this.memory.get(name);
+          if (Array.isArray(arr)) {
+              arr[index] = value;
+              const actions: TraceAction[] = [...metadataActions, 
+                  { cmd: 'vis_mark', params: { index, type: 'highlight', color: 'green' } },
+                  { cmd: 'vis_update', params: { index, value } }, // <-- ADDED THIS!
+                  { cmd: 'var_add', params: { name, value: [...arr] } }
+              ];
+              this.addStep(ctx.start!.line, actions);
+          }
+          return;
+      }
 
     this.memory.set(name, value);
 
@@ -262,43 +262,44 @@ export default class TraceInterpreterVisitor
   }
 
   visitFunctionCallStmt(ctx: FunctionCallStmtContext): any {
-    const metadataActions = this.extractMetadataActions(ctx);
-    if (metadataActions.length > 0) this.addStep(ctx.start!.line, metadataActions);
+      const metadataActions = this.extractMetadataActions(ctx);
+      if (metadataActions.length > 0) this.addStep(ctx.start!.line, metadataActions);
 
-    const funcName = ctx.ID().getText();
-    const exprList = ctx.expressionList();
+      const funcName = ctx.ID().getText();
+      const exprList = ctx.expressionList();
 
-if (funcName === 'swap' && exprList) {
-        const exprs = exprList.expression();
-        if (exprs.length === 2) {
-            this.isReferenceMode = true;
-            const ref1 = this.visit(exprs[0]);
-            this.isReferenceMode = true;
-            const ref2 = this.visit(exprs[1]);
-            this.isReferenceMode = false;
-            
-            if (ref1?.isArrayAccess && ref2?.isArrayAccess) {
-                const arrName = ref1.arrayName;
-                const arr = this.memory.get(arrName);
-                if (Array.isArray(arr)) {
-                    const temp = arr[ref1.index];
-                    arr[ref1.index] = arr[ref2.index];
-                    arr[ref2.index] = temp;
+      if (funcName === 'swap' && exprList) {
+          const exprs = exprList.expression();
+          if (exprs.length === 2) {
+              this.isReferenceMode = true;
+              const ref1 = this.visit(exprs[0]);
+              this.isReferenceMode = true;
+              const ref2 = this.visit(exprs[1]);
+              this.isReferenceMode = false;
+              
+              if (ref1?.isArrayAccess && ref2?.isArrayAccess) {
+                  const arrName = ref1.arrayName;
+                  const arr = this.memory.get(arrName);
+                  if (Array.isArray(arr)) {
+                      const temp = arr[ref1.index];
+                      arr[ref1.index] = arr[ref2.index];
+                      arr[ref2.index] = temp;
 
-                    this.addStep(ctx.start!.line, [
-                        { cmd: 'var_add', params: { name: arrName, value: [...arr] } },
-                        { cmd: 'vis_mark', params: { index: ref1.index, type: 'highlight', color: 'green' } },
-                        { cmd: 'vis_mark', params: { index: ref2.index, type: 'highlight', color: 'green' } }
-                    ]);
-                    return;
-                }
-            }
-        }
+                      this.addStep(ctx.start!.line, [
+                          { cmd: 'var_add', params: { name: arrName, value: [...arr] } },
+                          { cmd: 'vis_mark', params: { index: ref1.index, type: 'highlight', color: 'green' } },
+                          { cmd: 'vis_mark', params: { index: ref2.index, type: 'highlight', color: 'green' } },
+                          { cmd: 'vis_swap', params: { index: ref1.index, index2: ref2.index } } // <-- ADDED THIS!
+                      ]);
+                      return;
+                  }
+              }
+          }
+      }
+
+      const args = exprList ? this.visit(exprList) : [];
+      return this.executeFunction(funcName, args, ctx.start!.line);
     }
-
-    const args = exprList ? this.visit(exprList) : [];
-    return this.executeFunction(funcName, args, ctx.start!.line);
-  }
 
   executeFunction(name: string, args: any[], callLine: number) {
     const funcCtx = this.functions.get(name);
