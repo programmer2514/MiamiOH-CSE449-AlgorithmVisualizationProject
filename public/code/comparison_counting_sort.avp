@@ -5,8 +5,8 @@ a1 = arr[1, 10, 5, 6, 4, 7, 19]
 fun Comparison_Counting_Sort(@init<table> array): 
     n = length(array)
 
-    @init<table> count = array[n]  // create array to store counts
-    @init<table> result = array[n]  // create result array to be returned
+    @init<table> count = arr[n]  // create array to store counts
+    @init<table> result = arr[n]  // create result array to be returned
 
     // initialize the count array
     for (i = 0; i < n; i += 1):
