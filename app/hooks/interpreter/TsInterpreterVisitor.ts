@@ -13,53 +13,48 @@ import type {
   ValueArrayContext,
   WhileLoopContext,
   CompareExprContext,
-  ComparisonPassContext,
   AddExprContext,
-  AdditivePassContext,
   MulExprContext,
-  MultiplicativePassContext,
   UnaryMinusExprContext,
-  UnaryPassContext,
   ParenExpressionContext,
   FunctionCallExpressionContext,
   ArrayAccessExpressionContext,
   ExpressionListContext,
-  StatementContext,
   FunctionCallStmtContext,
+  BlockContext,
+  StatementContext,
+  PowerExpressionContext,
+  LogicalAndExpressionContext,
+  LogicalOrExpressionContext, 
+  ForLoopContext,
+  DoWhileLoopContext,
+  BreakStatementContext
 } from './.antlr/PseudocodeParser';
 
-// Extend a base class and implement the generated visitor interface.
-// specify string as the return type.
 export default class TsInterpreterVisitor
   extends AbstractParseTreeVisitor<string>
   implements PseudocodeVisitor<string> {
   private indentLevel = 0;
 
-  // The base class requires a default result.
-  protected defaultResult(): string {
-    return ''; // Return an empty string by default
+  protected defaultResult(): string { return ''; }
+  private indent(): string { return '  '.repeat(this.indentLevel); }
+
+  protected aggregateResult(aggregate: any, nextResult: any): any {
+    if (aggregate !== null && aggregate !== undefined && aggregate !== '') return aggregate;
+    return nextResult;
   }
 
-  // Creates an indentation string based on the current level.
-  private indent(): string {
-    return '  '.repeat(this.indentLevel);
-  }
-
-  // Manages indentation for a multi-line block of code.
-  private visitBlock(ctx: { statement: () => StatementContext[] }): string {
+  visitBlock(ctx: BlockContext): string {
     this.indentLevel++;
     let blockContent = '';
-    if (ctx.statement) {
-      const statements = ctx.statement();
-      if (statements) {
-        blockContent = statements.map(stmt => this.visit(stmt)).join('');
-      }
+    const statements = ctx.statement();
+    if (statements) {
+      blockContent = statements.map(stmt => this.visit(stmt)).join('');
     }
     this.indentLevel--;
     return blockContent;
   }
 
-  // Begins the translation for the entire pseudocode program.
   visitProgram(ctx: ProgramContext): string {
     let programCode = '';
     const statements = ctx.statement();
@@ -69,179 +64,227 @@ export default class TsInterpreterVisitor
     return programCode;
   }
 
-  // Translates a variable assignment (e.g., key = 4).
+  visitStatement(ctx: StatementContext): string {
+    if (ctx.assignment()) return this.visit(ctx.assignment()!) ?? '';
+    if (ctx.functionDecl()) return this.visit(ctx.functionDecl()!) ?? '';
+    if (ctx.functionCallStmt()) return this.visit(ctx.functionCallStmt()!) ?? '';
+    if (ctx.forEachLoop()) return this.visit(ctx.forEachLoop()!) ?? '';
+    if (ctx.whileLoop()) return this.visit(ctx.whileLoop()!) ?? '';
+    if (ctx.ifStatement()) return this.visit(ctx.ifStatement()!) ?? '';
+    if (ctx.returnStatement()) return this.visit(ctx.returnStatement()!) ?? '';
+    if (ctx.forLoop()) return this.visit(ctx.forLoop()!) ?? '';
+    if (ctx.doWhileLoop()) return this.visit(ctx.doWhileLoop()!) ?? '';
+    if (ctx.breakStatement()) return this.visit(ctx.breakStatement()!) ?? '';
+    return '';
+  }
+
+  visitBreakStatement(ctx: BreakStatementContext): string {
+    return `${this.indent()}break;\n`;
+  }
+  
   visitAssignment(ctx: AssignmentContext): string {
-    const varName = ctx.ID().getText();
-    // Visit the expression or array init directly
-    const value = ctx.expression() ?
-      this.visit(ctx.expression()!) :
-      this.visit(ctx.arrayInitialization()!);
-    return `${this.indent()}let ${varName} = ${value};\n`;
+    const assignableText = ctx.assignable().getText();
+    const value = ctx.expression() ? this.visit(ctx.expression()!) : this.visit(ctx.arrayInitialization()!);
+    const op = ctx.EQ() ? '=' : (ctx.PLUS_EQ() ? '+=' : '-=');
+    const isArrayAccess = assignableText.includes('[');
+    const prefix = isArrayAccess ? '' : 'let ';
+    return `${this.indent()}${prefix}${assignableText} ${op} ${value};\n`;
   }
 
-  // Creates a JavaScript array from a range (e.g., arr[1 to 5]).
   visitRangeArray(ctx: RangeArrayContext): string {
-    const from = parseInt(ctx._from_!.text!, 10);
-    const to = parseInt(ctx._to!.text!, 10);
-    const values: number[] = [];
-    for (let i = from; i <= to; i++) {
-      values.push(i);
-    }
-    return `[${values.join(', ')}]`;
+    const from = this.visit(ctx._from_!);
+    const to = this.visit(ctx._to!);
+    return `Array.from({length: (${to}) - (${from}) + 1}, (_, i) => (${from}) + i)`;
   }
 
-  // Creates an empty JavaScript array of a specific size (e.g., arr(100)).
   visitSizeArray(ctx: SizeArrayContext): string {
-    const size = ctx._size!.text;
-    return `new Array(${size})`;
+    const size = this.visit(ctx._size!);
+    let defaultVal = '0';
+    if (ctx._defaultVal) {
+      defaultVal = this.visit(ctx._defaultVal)!;
+    }
+    return `new Array(${size}).fill(${defaultVal})`;
   }
 
-  // Creates a JavaScript array from a list of values (e.g., arr[1, 2, 3]).
   visitValueArray(ctx: ValueArrayContext): string {
-    const values = ctx.INT();
-    console.log('NEW CODE - ValueArray values:', values.map((i: any) => i.getText()));
-    return `[${values.map((i: any) => i.getText()).join(', ')}]`;
+    const elements = this.visit(ctx.expressionList()!);
+    return `[${elements}]`;
   }
 
-  // Translates a function declaration.
   visitFunctionDecl(ctx: FunctionDeclContext): string {
     const funcName = ctx.ID().getText();
     const paramList = ctx.paramList();
     let params = '';
     if (paramList) {
-      const paramIds = paramList.ID();
-      if (paramIds) {
-        params = paramIds.map((p: any) => p.getText()).join(', ');
-      }
+      const paramCtxs = paramList.param();
+      if (paramCtxs) params = paramCtxs.map((p: any) => p.ID().getText()).join(', ');
     }
-    const body = this.visitBlock(ctx);
+    const body = this.visitBlock(ctx.block()!);
     return `${this.indent()}function ${funcName}(${params}) {\n${body}${this.indent()}}\n`;
+  }
+
+  visitForLoop(ctx: ForLoopContext): string {
+    const initRaw = this.visit(ctx.assignment(0)!) ?? '';
+    let init = initRaw.trim().replace(/;$/, '');
+    if (init.startsWith('let ')) init = init.substring(4); 
+    
+    const cond = this.visit(ctx.expression()!) ?? '';
+    
+    const updateRaw = this.visit(ctx.assignment(1)!) ?? '';
+    let update = updateRaw.trim().replace(/;$/, '');
+    if (update.startsWith('let ')) update = update.substring(4);
+
+    const body = this.visitBlock(ctx.block()!);
+    return `${this.indent()}for (let ${init}; ${cond}; ${update}) {\n${body}${this.indent()}}\n`;
+  }
+
+  visitDoWhileLoop(ctx: DoWhileLoopContext): string {
+    const body = this.visitBlock(ctx.block()!);
+    const cond = this.visit(ctx.expression()!);
+    return `${this.indent()}do {\n${body}${this.indent()}} while (${cond});\n`;
   }
 
   visitForEachLoop(ctx: ForEachLoopContext): string {
     const varName = ctx.ID(0)!.getText();
     const arrayName = ctx.ID(1)!.getText();
-    const body = this.visitBlock(ctx);
+    const body = this.visitBlock(ctx.block()!);
     return `${this.indent()}for (const ${varName} of ${arrayName}) {\n${body}${this.indent()}}\n`;
   }
 
-  // Translates a 'while' loop.
   visitWhileLoop(ctx: WhileLoopContext): string {
-    const condition = this.visit(ctx.expression());
-    const body = this.visitBlock(ctx);
+    const condition = this.visit(ctx.expression()!);
+    const body = this.visitBlock(ctx.block()!);
     return `${this.indent()}while (${condition}) {\n${body}${this.indent()}}\n`;
   }
 
-  // Translates an 'if' statement.
   visitIfStatement(ctx: IfStatementContext): string {
-    const condition = this.visit(ctx.expression());
-    const body = this.visitBlock(ctx);
+    const condition = this.visit(ctx.expression(0)!);
+    const body = this.visitBlock(ctx.block(0)!);
     return `${this.indent()}if (${condition}) {\n${body}${this.indent()}}\n`;
   }
 
-  // Translates a 'return' statement.
   visitReturnStatement(ctx: ReturnStatementContext): string {
-    return `${this.indent()}return ${this.visit(ctx.expression())};\n`;
+    return `${this.indent()}return ${this.visit(ctx.expression()!)};\n`;
   }
 
-  // Returns the raw text of a basic value like a variable or number.
-  visitAtomExpression(ctx: AtomExpressionContext): string {
-    return ctx.atom().getText();
+  visitAtomExpression(ctx: AtomExpressionContext): string { 
+    return ctx.atom().getText(); 
+  }
+
+  visitLogicalOrExpression(ctx: LogicalOrExpressionContext): string {
+    let left = this.visit(ctx._left!) as string;
+    const rights = ctx._right;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    for (let i = 0; i < rightArray.length; i++) left = `${left} || ${this.visit(rightArray[i])}`;
+    return left;
+  }
+
+  visitLogicalAndExpression(ctx: LogicalAndExpressionContext): string {
+    let left = this.visit(ctx._left!) as string;
+    const rights = ctx._right;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    for (let i = 0; i < rightArray.length; i++) left = `${left} && ${this.visit(rightArray[i])}`;
+    return left;
   }
 
   visitCompareExpr(ctx: CompareExprContext): string {
-    const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(2)!);
-    const op = ctx._op!.text!;
-    const jsOp = op === '==' ? '===' : op;
-    return `${left} ${jsOp} ${right}`;
+    let left = this.visit(ctx._left!) as string;
+    const rights = ctx._right;
+    const ops = ctx._op;
+    
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    const opArray = Array.isArray(ops) ? ops : [ops];
+
+    for (let i = 0; i < rightArray.length; i++) {
+      const right = this.visit(rightArray[i]);
+      const opText = opArray[i].text!;
+      const jsOp = opText === '==' ? '===' : opText;
+      left = `${left} ${jsOp} ${right}`;
+    }
+    return left;
   }
 
   visitAddExpr(ctx: AddExprContext): string {
-    const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(2)!);
-    const op = ctx._op!.text!;
-    return `${left} ${op} ${right}`;
+    let left = this.visit(ctx._left!) as string;
+    const rights = ctx._right;
+    const ops = ctx._op;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    const opArray = Array.isArray(ops) ? ops : [ops];
+    for (let i = 0; i < rightArray.length; i++) left = `${left} ${opArray[i].text!} ${this.visit(rightArray[i])}`;
+    return left;
   }
 
   visitMulExpr(ctx: MulExprContext): string {
-    const left = this.visit(ctx.getChild(0)!);
-    const right = this.visit(ctx.getChild(2)!);
-    const op = ctx._op!.text!;
-    return `${left} ${op} ${right}`;
+    let left = this.visit(ctx._left!) as string;
+    const rights = ctx._right;
+    const ops = ctx._op;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    const opArray = Array.isArray(ops) ? ops : [ops];
+    for (let i = 0; i < rightArray.length; i++) left = `${left} ${opArray[i].text!} ${this.visit(rightArray[i])}`;
+    return left;
   }
 
-  // Handles: (expression)
-  visitParenExpression(ctx: ParenExpressionContext): string {
-    return `(${this.visit(ctx.expression())})`;
+  visitPowerExpression(ctx: PowerExpressionContext): string {
+    let left = this.visit(ctx._left!) as string;
+    const rights = ctx._right;
+    if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
+    const rightArray = Array.isArray(rights) ? rights : [rights];
+    for (let i = 0; i < rightArray.length; i++) left = `Math.pow(${left}, ${this.visit(rightArray[i])})`;
+    return left;
   }
 
-  // Handles: -value
-  visitUnaryMinusExpr(ctx: UnaryMinusExprContext): string {
-    return `-${this.visit(ctx.unaryExpression())}`;
+  visitParenExpression(ctx: ParenExpressionContext): string { 
+    return `(${this.visit(ctx.expression()!)})`; 
+  }
+  
+  visitUnaryMinusExpr(ctx: UnaryMinusExprContext): string { 
+    return `-${this.visit(ctx.unaryExpression()!)}`; 
   }
 
-  // Handles: function(arg1, arg2)
   visitFunctionCallExpression(ctx: FunctionCallExpressionContext): string {
     const funcName = ctx.ID().getText();
     let args = '';
     const list = ctx.expressionList();
-    if (list) {
-      args = this.visit(list)!;
-    }
+    if (list) args = this.visit(list)!;
 
-    // 1. Transform size(arr) -> arr.length
-    if (funcName === 'size') {
-      return `${args}.length`;
-    }
-
-    // 2. Transform floor(x) -> Math.floor(x)
-    if (funcName === 'floor') {
-      return `Math.floor(${args})`;
-    }
-
-    // 3. Normal function call -> name(args)
+    if ((funcName === 'size' || funcName === 'length')) return `${args}.length`;
+    if (funcName === 'floor') return `Math.floor(${args})`;
     return `${funcName}(${args})`;
   }
 
-  // Handles arguments in a function call
   visitExpressionList(ctx: ExpressionListContext): string {
     const expressions = ctx.expression();
-    if (expressions) {
-      return expressions.map(expr => this.visit(expr)).join(', ');
-    }
+    if (expressions) return expressions.map(expr => this.visit(expr)).join(', ');
     return '';
   }
 
-  // Handles array[index]
   visitArrayAccessExpression(ctx: ArrayAccessExpressionContext): string {
     const arrayName = ctx.ID().getText();
-    const index = this.visit(ctx.expression());
+    const index = this.visit(ctx.expression()!);
     return `${arrayName}[${index}]`;
   }
 
-  // handles inline function calls.
   visitFunctionCallStmt(ctx: FunctionCallStmtContext): string {
     const funcName = ctx.ID().getText();
-    const args = ctx.expressionList() ? this.visit(ctx.expressionList()!) : '';
+    const exprList = ctx.expressionList();
+    
+    // JS Compile: Destructure arrays so that swap actually mutates memory
+    if (funcName === 'swap' && exprList) {
+        const exprs = exprList.expression();
+        if (exprs.length === 2) {
+            const arg1 = this.visit(exprs[0]);
+            const arg2 = this.visit(exprs[1]);
+            return `${this.indent()}[${arg1}, ${arg2}] = [${arg2}, ${arg1}];\n`;
+        }
+    }
+
+    const args = exprList ? this.visit(exprList) : '';
     return `${this.indent()}${funcName}(${args});\n`;
-  }
-
-  // passthrough methods.
-
-  visitComparisonPass(ctx: ComparisonPassContext): string {
-    return this.visit(ctx.additiveExpression())!;
-  }
-
-  visitAdditivePass(ctx: AdditivePassContext): string {
-    return this.visit(ctx.multiplicativeExpression())!;
-  }
-
-  visitMultiplicativePass(ctx: MultiplicativePassContext): string {
-    return this.visit(ctx.unaryExpression())!;
-  }
-
-  visitUnaryPass(ctx: UnaryPassContext): string {
-    return this.visit(ctx.primaryExpression())!;
   }
 }
