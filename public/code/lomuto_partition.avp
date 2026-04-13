@@ -1,16 +1,17 @@
-// lomuto partition
+// Lomuto Partition
 
 a1 = arr[1, 10, 5, 6, 4, 7, 19]
 
+// Partitions an array for use in QuickSort
 fun Lomuto_Partition(@init<table> array, low, high): 
-    // choose the pivot - last element of sub-array
+    // Choose pivot - last element of sub-array
     @mark<high, highlight, yellow> pivot = array[high]
 
-    // index of smaller element (boundary for elements < pivot)
+    // Index of smaller element (boundary for elements < pivot)
     i = low - 1
 
     for (j = low; j < high; j += 1):
-        // check to see if current element is smaller than pivot
+        // Check to see if current element is smaller than pivot
         @mark<j, outline, yellow> if (array[j] < pivot):
             i += 1
             @mark<i, highlight, green> swap (array[i], array[j]) 
@@ -19,7 +20,7 @@ fun Lomuto_Partition(@init<table> array, low, high):
 
     @mark<i, highlight, green> swap (array[i + 1], array[high]) 
 
-    return i + 1  // return the high pivot index
+    return i + 1  // Return the high pivot index
 
 end fun
 

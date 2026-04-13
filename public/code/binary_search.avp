@@ -3,6 +3,7 @@
 a1 = arr[1, 3, 5, 7, 9, 11, 19]
 key = 11
 
+// Finds an element in a sorted array
 fun Binary_Search(@init<table> collection, target, size): 
     low = 0
     high = size - 1
@@ -14,16 +15,12 @@ fun Binary_Search(@init<table> collection, target, size):
         // Get value at the middle
         @mark<mid, highlight, yellow> val = collection[mid]
         
-        if (val == target):
-            @mark<mid, highlight, green> return mid
-        end if
-        
         if (val < target):
             @mark<low, outline, yellow> low = mid + 1
-        end if
-        
-        if (val > target):
+        else if (val > target):
             @mark<high, outline, yellow> high = mid - 1
+        else:
+            @mark<mid, highlight, green> return mid
         end if
     end while
 

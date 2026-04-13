@@ -1,19 +1,20 @@
-// comparison counting sort
+// Comparison Counting Sort
 
 a1 = arr[1, 10, 5, 6, 4, 7, 19]
 
+// Sorts an array of values in ascending order
 fun Comparison_Counting_Sort(@init<table> array): 
     n = length(array)
 
-    @init<table> count = array[n]  // create array to store counts
-    @init<table> result = array[n]  // create result array to be returned
+    @init<table> count = array[n]  // Create array to store counts
+    @init<table> result = array[n]  // Create result array to be returned
 
-    // initialize the count array
+    // Initialize the count array
     for (i = 0; i < n; i += 1):
         count[i] = 0
     end for
 
-    // count comparisons
+    // Count comparisons
     for (i = 0; i < n - 1; i += 1):
         for (j = i + 1; j < n - 1; j += 1):
             @mark<j, outline, yellow> if (array[i] < array[j]):
@@ -24,7 +25,7 @@ fun Comparison_Counting_Sort(@init<table> array):
         end for
     end for
 
-    // place elements in the sorted array
+    // Place elements in the sorted array
     for (i = 0; i < n; i += 1):
         @mark<i, highlight, green> result[count[i]] = array[i]
     end for

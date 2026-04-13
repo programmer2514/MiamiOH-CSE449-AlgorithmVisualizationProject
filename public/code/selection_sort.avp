@@ -1,24 +1,25 @@
-// selection sort
+// Selection Sort
 
 a1 = arr[1, 10, 5, 6, 4, 7, 19]
 
+// Sorts an array of values in ascending order
 fun Selection_Sort(@init<table> array): 
     n = length(array)
 
-    // Outer loop: iterate thru all index positions except the last
+    // Outer loop: Iterate through all index positions except the last
     for (i = 0, i < n - 1, i += 1):
-        // assume the current index position holds min element
+        // Assume current index position holds minimum element
         @mark<i, outline, yellow> minIdx = i
 
-        // Inner loop: find actual minimum element in remaining
-        // unsorted portion of array
+        // Inner loop: Find actual minimum element in remaining
+        //   unsorted portion of array
         for (j = i + 1; j < n; j += 1):
             @mark<j, outline, yellow> if (array[j] < array[minIdx]):
-                @mark<j, text, fg> minIdx = j; // new minimum value index found
+                @mark<j, text, fg> minIdx = j; // New minimum value index found
             end if
         end for
 
-        // Swap Values when a smaller value is encountered
+        // Swap values when a smaller value is encountered
         @mark<minIdx, highlight, green> swap(array[i], array[minIdx])
 
     end for
