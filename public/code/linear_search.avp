@@ -5,12 +5,12 @@ key = 7
 
 // Finds the first occurence of an element in an array
 fun Linear_Search(@init<table> a, k):
-    index = 0
-    for @mark<outline, yellow> (n in a):
-        @mark<n, text, fg> if (n == k):
-            @mark<highlight, green> return index
+    n = length(a)
+
+    for @mark<i, outline, yellow> (i = 0; i < n; i += 1):
+        @mark<i, text, fg> if (a[i] == k):
+            @mark<highlight, green> return i
         end if
-        index = index + 1
     end for
 
     @log<"Not found: "> return -1
