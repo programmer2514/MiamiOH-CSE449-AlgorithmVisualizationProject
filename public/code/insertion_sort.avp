@@ -20,6 +20,7 @@ fun Insertion_Sort(@init<table> array):
         // place the key at the right position in sorted sub-array
         @mark<j, highlight, green> array[j + 1] = key
     end for
+    return array
 end fun
 
 result = Insertion_Sort(a1)

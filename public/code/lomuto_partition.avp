@@ -9,7 +9,7 @@ fun Lomuto_Partition(@init<table> array, low, high):
     // index of smaller element (boundary for elements < pivot)
     i = low - 1
 
-    for (j = low; j < high; j += 1):
+    for (j = low, j < high, j += 1):
         // check to see if current element is smaller than pivot
         @mark<j, outline, yellow> if (array[j] < pivot):
             i += 1

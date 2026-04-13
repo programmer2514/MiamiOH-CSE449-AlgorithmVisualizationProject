@@ -12,7 +12,7 @@ fun Selection_Sort(@init<table> array):
 
         // Inner loop: find actual minimum element in remaining
         // unsorted portion of array
-        for (j = i + 1; j < n; j += 1):
+        for (j = i + 1, j < n, j += 1):
             @mark<j, outline, yellow> if (array[j] < array[minIdx]):
                 @mark<j, text, fg> minIdx = j; // new minimum value index found
             end if
@@ -20,8 +20,9 @@ fun Selection_Sort(@init<table> array):
 
         // Swap Values when a smaller value is encountered
         @mark<minIdx, highlight, green> swap(array[i], array[minIdx])
-
     end for
+
+    return array
 end fun
 
 // +---------------------------------------------------------------+
