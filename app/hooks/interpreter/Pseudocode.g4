@@ -17,10 +17,6 @@ statement       : metadata* (
                   | breakStatement
                   ) (SEMI | NL)*;
 
-// FIX #1: Added metadata* directly to assignment and returnStatement
-// so that inline metadata like @mark<mid, highlight, yellow> val = collection[mid]
-// and @log<warn, "Not found"> return -1 are parsed correctly.
-
 // Supports standard '=' as well as '+=' and '-='
 assignment      : metadata* assignable (EQ | PLUS_EQ | MINUS_EQ) (expression | arrayInitialization) ;
 
@@ -64,37 +60,32 @@ ifStatement     : IF LPAREN? expression RPAREN? COLON NL+ block
 
 functionCallStmt: ID LPAREN expressionList? RPAREN;
 
-// FIX #1 (continued): metadata* added to returnStatement
 returnStatement : metadata* RETURN expression;
 breakStatement  : BREAK;
 
-// FIX (multiline arrays): Allow optional newlines between list items
 expressionList  : expression (COMMA NL* expression)*;
 
 // Order of operations for expressions
 expression               : logicalOrExpression ;
 
-logicalOrExpression      : left=logicalAndExpression (op=OR right=logicalAndExpression)* ;
-logicalAndExpression     : left=comparisonExpression (op=AND right=comparisonExpression)* ;
+logicalOrExpression      : left=logicalAndExpression (op+=OR right+=logicalAndExpression)* ;
 
-// Labeled alternative so ANTLR generates CompareExprContext
+logicalAndExpression     : left=comparisonExpression (op+=AND right+=comparisonExpression)* ;
+
 comparisonExpression
-    : left=additiveExpression (op=(EQEQ | LESS_EQ | GREATER_EQ | LT | GT) right=additiveExpression)*  # CompareExpr
+    : left=additiveExpression (op+=(EQEQ | LESS_EQ | GREATER_EQ | LT | GT) right+=additiveExpression)* # CompareExpr
     ;
 
-// Labeled alternative so ANTLR generates AddExprContext
 additiveExpression
-    : left=multiplicativeExpression (op=(PLUS | MINUS) right=multiplicativeExpression)*  # AddExpr
+    : left=multiplicativeExpression (op+=(PLUS | MINUS) right+=multiplicativeExpression)* # AddExpr
     ;
 
-// Labeled alternative so ANTLR generates MulExprContext
 multiplicativeExpression
-    : left=powerExpression (op=(STAR | SLASH) right=powerExpression)*  # MulExpr
+    : left=powerExpression (op+=(STAR | SLASH) right+=powerExpression)* # MulExpr
     ;
 
-powerExpression          : left=unaryExpression (op=POWER right=unaryExpression)* ;
+powerExpression          : left=unaryExpression (op+=POWER right+=unaryExpression)* ;
 
-// Labeled alternatives so ANTLR generates UnaryMinusExprContext / PrimaryExprContext
 unaryExpression
     : MINUS unaryExpression  # UnaryMinusExpr
     | primaryExpression      # PrimaryExpr
