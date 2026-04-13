@@ -13,6 +13,8 @@ fun Bubble_Sort(@init<table> array):
             end if
         end for
     end for
+
+    return array
 end fun
 
 // +---------------------------------------------------------------+
