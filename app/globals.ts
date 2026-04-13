@@ -138,18 +138,33 @@ const Globals = {
   AlgorithmCards: [
     {
       img: [
-        `${RouteBaseName}img/linear-search_light.png`,
-        `${RouteBaseName}img/linear-search_dark.png`,
+        `${RouteBaseName}img/binary-search_light.png`,
+        `${RouteBaseName}img/binary-search_dark.png`,
       ],
-      title: 'Linear Search',
+      title: 'Binary Search',
       tags: [
         'Easy',
         'Array',
-        'Brute Force',
+        'Divide and Conquer',
         'Search',
-        'O(n)',
+        'O(log n)',
       ],
-      href: `${RouteBaseName}run?algorithm=linear_search`,
+      href: `${RouteBaseName}run?algorithm=binary_search`,
+    },
+    {
+      img: [
+        `${RouteBaseName}img/bubble-sort_light.png`,
+        `${RouteBaseName}img/bubble-sort_dark.png`,
+      ],
+      title: 'Bubble Sort',
+      tags: [
+        'Easy',
+        'Array',
+        'Exchange',
+        'Sort',
+        'O(n\u00B2)',
+      ],
+      href: `${RouteBaseName}run?algorithm=bubble_sort`,
     },
     {
       img: [
@@ -165,6 +180,96 @@ const Globals = {
         'O(n\u00B2)',
       ],
       href: `${RouteBaseName}run?algorithm=check_unique`,
+    },
+    {
+      img: [
+        `${RouteBaseName}img/comparison-counting-sort_light.png`,
+        `${RouteBaseName}img/comparison-counting-sort_dark.png`,
+      ],
+      title: 'Comparison Counting Sort',
+      tags: [
+        'Easy',
+        'Array',
+        'Count',
+        'Sort',
+        'O(n\u00B2)',
+      ],
+      href: `${RouteBaseName}run?algorithm=comparison_counting_sort`,
+    },
+    {
+      img: [
+        `${RouteBaseName}img/hoare-partition_light.png`,
+        `${RouteBaseName}img/hoare-partition_dark.png`,
+      ],
+      title: 'Hoare Partition',
+      tags: [
+        'Intermediate',
+        'Array',
+        'Divide and Conquer',
+        'Partition',
+        'O(n)',
+      ],
+      href: `${RouteBaseName}run?algorithm=hoare_partition`,
+    },
+    {
+      img: [
+        `${RouteBaseName}img/insertion-sort_light.png`,
+        `${RouteBaseName}img/insertion-sort_dark.png`,
+      ],
+      title: 'Insertion Sort',
+      tags: [
+        'Easy',
+        'Array',
+        'Insert',
+        'Sort',
+        'O(n\u00B2)',
+      ],
+      href: `${RouteBaseName}run?algorithm=insertion_sort`,
+    },
+    {
+      img: [
+        `${RouteBaseName}img/linear-search_light.png`,
+        `${RouteBaseName}img/linear-search_dark.png`,
+      ],
+      title: 'Linear Search',
+      tags: [
+        'Easy',
+        'Array',
+        'Brute Force',
+        'Search',
+        'O(n)',
+      ],
+      href: `${RouteBaseName}run?algorithm=linear_search`,
+    },
+    {
+      img: [
+        `${RouteBaseName}img/lomuto-partition_light.png`,
+        `${RouteBaseName}img/lomuto-partition_dark.png`,
+      ],
+      title: 'Lomuto Partition',
+      tags: [
+        'Intermediate',
+        'Array',
+        'Divide and Conquer',
+        'Partition',
+        'O(n)',
+      ],
+      href: `${RouteBaseName}run?algorithm=lomuto_partition`,
+    },
+    {
+      img: [
+        `${RouteBaseName}img/selection-sort_light.png`,
+        `${RouteBaseName}img/selection-sort_dark.png`,
+      ],
+      title: 'Selection Sort',
+      tags: [
+        'Easy',
+        'Array',
+        'Selection',
+        'Sort',
+        'O(n\u00B2)',
+      ],
+      href: `${RouteBaseName}run?algorithm=selection_sort`,
     },
   ],
 } as const;
