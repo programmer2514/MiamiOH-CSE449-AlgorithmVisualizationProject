@@ -68,7 +68,8 @@ export default function VisBuilder(
             break;
 
           // ---------------------------------------------------------------- //
-          case 'vis_log': // TODO
+          case 'vis_log':
+            temp_data.logs.push(action.params);
             break;
 
           // ---------------------------------------------------------------- //
@@ -114,27 +115,38 @@ export default function VisBuilder(
             break;
 
           // ---------------------------------------------------------------- //
-          case 'vis_insert': // TODO
+          case 'vis_insert':
+            temp_data.data.splice(action.params.index, 0, action.params.value);
             break;
 
           // ---------------------------------------------------------------- //
-          case 'vis_delete': // TODO
+          case 'vis_delete':
+            temp_data.data.splice(action.params.index, 1);
             break;
 
           // ---------------------------------------------------------------- //
-          case 'vis_update': // TODO
+          case 'vis_update':
+            temp_data.data[action.params.index] = action.params.value;
             break;
 
           // ---------------------------------------------------------------- //
-          case 'vis_swap': // TODO
+          case 'vis_swap':
+            { // Scope so we can declare a temp variable
+              const temp = temp_data.data[action.params.index];
+              temp_data.data[action.params.index] =
+                temp_data.data[action.params.index2];
+              temp_data.data[action.params.index2] = temp;
+            }
             break;
 
           // ---------------------------------------------------------------- //
-          case 'vis_sort': // TODO
+          case 'vis_sort':
+            temp_data.data.sort();
             break;
 
           // ---------------------------------------------------------------- //
           default:
+            alert(JSON.stringify(action, null, 2));
             break;
         }
       }
