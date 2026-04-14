@@ -38,18 +38,4 @@ fun Hoare_Partition(@init<table> array, low, high):
     end while
 end fun
 
-// +---------------------------------------------------------------+
-// |         START OF DO NOT MODIFY THIS FUNCTION SECTION          |
-// +---------------------------------------------------------------+
-
-fun swap(itemA, itemB): 
-    temp = itemA
-    itemA = itemB
-    itemB = temp
-end fun
-
-// +---------------------------------------------------------------+
-// |        END OF DO NOT MODIFY THIS FUNCTION SECTION             |
-// +---------------------------------------------------------------+
-
 result = Hoare_Partition(a1, 0, length(a1) - 1)

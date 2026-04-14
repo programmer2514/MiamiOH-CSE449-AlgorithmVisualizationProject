@@ -25,19 +25,4 @@ fun Selection_Sort(@init<table> array):
     return array
 end fun
 
-// +---------------------------------------------------------------+
-// |         START OF DO NOT MODIFY THIS FUNCTION SECTION          |
-// +---------------------------------------------------------------+
-
-fun swap(itemA, itemB): 
-    temp = itemA
-    itemA = itemB
-    itemB = temp
-end fun
-
-// +---------------------------------------------------------------+
-// |        END OF DO NOT MODIFY THIS FUNCTION SECTION             |
-// +---------------------------------------------------------------+
-
-
 result = Selection_Sort(a1)
