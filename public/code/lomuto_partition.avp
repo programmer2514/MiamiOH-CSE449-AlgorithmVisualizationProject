@@ -1,6 +1,6 @@
 // lomuto partition
 
-a1 = arr[1, 10, 5, 6, 4, 7, 19]
+a1 = arr[1, 19, 5, 10, 4, 6, 7]
 
 fun Lomuto_Partition(@init<table> array, low, high): 
     // choose the pivot - last element of sub-array
@@ -22,19 +22,4 @@ fun Lomuto_Partition(@init<table> array, low, high):
     return i + 1  // return the high pivot index
 
 end fun
-
-// +---------------------------------------------------------------+
-// |         START OF DO NOT MODIFY THIS FUNCTION SECTION          |
-// +---------------------------------------------------------------+
-
-fun swap(itemA, itemB): 
-    temp = itemA
-    itemA = itemB
-    itemB = temp
-end fun
-
-// +---------------------------------------------------------------+
-// |        END OF DO NOT MODIFY THIS FUNCTION SECTION             |
-// +---------------------------------------------------------------+
-
 result = Lomuto_Partition(a1, 0, length(a1) - 1)
