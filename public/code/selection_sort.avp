@@ -1,43 +1,28 @@
-// Selection Sort
+// selection sort
 
 a1 = arr[1, 10, 5, 6, 4, 7, 19]
 
-// Sorts an array of values in ascending order
 fun Selection_Sort(@init<table> array): 
     n = length(array)
 
-    // Outer loop: Iterate through all index positions except the last
+    // Outer loop: iterate thru all index positions except the last
     for (i = 0, i < n - 1, i += 1):
-        // Assume current index position holds minimum element
+        // assume the current index position holds min element
         @mark<i, outline, yellow> minIdx = i
 
-        // Inner loop: Find actual minimum element in remaining
-        //   unsorted portion of array
-        for (j = i + 1; j < n; j += 1):
+        // Inner loop: find actual minimum element in remaining
+        // unsorted portion of array
+        for (j = i + 1, j < n, j += 1):
             @mark<j, outline, yellow> if (array[j] < array[minIdx]):
-                @mark<j, text, fg> minIdx = j; // New minimum value index found
+                @mark<j, text, fg> minIdx = j; // new minimum value index found
             end if
         end for
 
-        // Swap values when a smaller value is encountered
+        // Swap Values when a smaller value is encountered
         @mark<minIdx, highlight, green> swap(array[i], array[minIdx])
-
     end for
+
+    return array
 end fun
-
-// +---------------------------------------------------------------+
-// |         START OF DO NOT MODIFY THIS FUNCTION SECTION          |
-// +---------------------------------------------------------------+
-
-fun swap(itemA, itemB): 
-    temp = itemA
-    itemA = itemB
-    itemB = temp
-end fun
-
-// +---------------------------------------------------------------+
-// |        END OF DO NOT MODIFY THIS FUNCTION SECTION             |
-// +---------------------------------------------------------------+
-
 
 result = Selection_Sort(a1)

@@ -20,6 +20,7 @@ export default {
       'else',
       'end',
       'for',
+      'do',
       'while',
       'fun',
       'if',
@@ -29,6 +30,11 @@ export default {
       'or',
       'not',
       'return',
+      'break',
+      'continue',
+      'Null',
+      'True',
+      'False',
     ],
 
     operators: [
