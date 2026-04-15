@@ -62,6 +62,7 @@ functionCallStmt: ID LPAREN expressionList? RPAREN;
 
 returnStatement : metadata* RETURN expression;
 breakStatement  : BREAK;
+continueStatement : CONTINUE;
 
 expressionList  : expression (COMMA NL* expression)*;
 
@@ -125,6 +126,7 @@ DO      : 'do';
 BREAK   : 'break';
 AND     : 'and';
 OR      : 'or';
+CONTINUE : 'continue';
 
 // Literals
 TRUE    : 'True'  | 'true';
@@ -155,6 +157,8 @@ LESS_EQ : '<=';
 GREATER_EQ : '>=';
 LT      : '<';
 GT      : '>';
+MOD     : '%';
+MOD_EQ  : '%=';
 
 // Primitives
 ID      : [a-zA-Z_][a-zA-Z_0-9]*;
