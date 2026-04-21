@@ -7,6 +7,7 @@
 
 # Vitest
 /screenshots/
+/.vitest-attachments/
 
 # ANTLR
 .antlr/
