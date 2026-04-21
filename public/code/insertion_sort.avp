@@ -1,4 +1,4 @@
-// Insertion Sort
+// insertion sort
 
 a1 = arr[1, 10, 5, 6, 4, 7, 19]
 
@@ -19,7 +19,7 @@ fun Insertion_Sort(@init<table> array):
         end while
 
         // Place key at the right position in sorted sub-array
-        @mark<j, highlight, green> array[j + 1] = key
+        array[j + 1] = key
     end for
     return array
 end fun

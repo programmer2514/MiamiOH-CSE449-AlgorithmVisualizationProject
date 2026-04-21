@@ -9,7 +9,7 @@ fun Linear_Search(@init<table> a, k):
 
     for @mark<i, outline, yellow> (i = 0; i < n; i += 1):
         @mark<i, text, fg> if (a[i] == k):
-            @mark<highlight, green> return i
+            @mark<i, highlight, green> return i
         end if
     end for
 
