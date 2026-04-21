@@ -4,7 +4,7 @@
 export default function AIPane() {
   return (
     <>
-      <p className="p-3">AI Goes Here</p>
+      <p className="p-3">Coming Soon!</p>
     </>
   );
 }
