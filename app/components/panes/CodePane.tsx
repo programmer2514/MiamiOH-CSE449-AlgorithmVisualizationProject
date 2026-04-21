@@ -111,6 +111,7 @@ export default function CodePane(
           bindSrc={false}
         />
       </div>
+      <pre id="sourceCode" className="hidden">{src}</pre>
     </>
   );
 }

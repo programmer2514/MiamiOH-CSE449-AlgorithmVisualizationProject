@@ -5,7 +5,6 @@ import {
   Import,
   InfoCircle,
   PlusCircle,
-  Settings,
   ShareIos,
 } from 'iconoir-react';
 
@@ -58,13 +57,6 @@ const Globals = {
       separateNext: true,
     },
     {
-      icon: Settings,
-      text: 'Settings',
-      onClick: () => alert('TODO'),
-      disabled: true,
-      separateNext: false,
-    },
-    {
       icon: HelpCircle,
       text: 'Wiki',
       href: `${RouteBaseName}wiki`,
@@ -95,8 +87,28 @@ const Globals = {
     {
       icon: FloppyDisk,
       text: 'Save...',
-      onClick: () => alert('TODO'),
-      disabled: true,
+      onClick: () => {
+        const sourceHTML = `// ${document.getElementById('title')!.innerHTML}
+
+${document.getElementById('sourceCode')!.innerHTML}`;
+        const txt = document.createElement('textarea');
+        txt.innerHTML = sourceHTML;
+        const source = txt.value;
+        txt.remove();
+
+        const downloadelem = document.createElement('a');
+        const url = URL.createObjectURL(new Blob([source], { type: 'text/plain' }));
+
+        document.body.appendChild(downloadelem);
+
+        downloadelem.target = '_blank';
+        downloadelem.href = url;
+        downloadelem.download = `${document.getElementById('title')!.innerHTML}.avp`;
+        downloadelem.click();
+        downloadelem.remove();
+
+        window.URL.revokeObjectURL(url);
+      },
       separateNext: true,
     },
     {
@@ -112,13 +124,6 @@ const Globals = {
       onClick: () => alert('TODO'),
       disabled: true,
       separateNext: true,
-    },
-    {
-      icon: Settings,
-      text: 'Settings',
-      onClick: () => alert('TODO'),
-      disabled: true,
-      separateNext: false,
     },
     {
       icon: HelpCircle,

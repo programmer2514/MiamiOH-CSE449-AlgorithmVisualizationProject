@@ -142,6 +142,7 @@ export default function TopBar(
             <div className="flex items-center">
               <pre
                 ref={pre}
+                id="title"
                 className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none"
                 aria-hidden
               >
@@ -185,6 +186,7 @@ export default function TopBar(
           ) :
           (
             <Typography
+              id="title"
               type="h1"
               className="text-lg! font-medium ml-2"
             >
