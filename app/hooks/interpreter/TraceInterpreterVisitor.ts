@@ -131,7 +131,7 @@ export default class TraceInterpreterVisitor
     return action;
   }
 
-  private extractMetadataActions(ctx: any): TraceAction[] {
+private extractMetadataActions(ctx: any): TraceAction[] {
     const actions: TraceAction[] = [];
     if (typeof ctx.metadata === 'function') {
       const metadataList = ctx.metadata();
@@ -142,6 +142,20 @@ export default class TraceInterpreterVisitor
         }
       }
     }
+    if (
+      ctx.parent && 
+      typeof ctx.parent.metadata === 'function' && 
+      ctx.parent.constructor.name === 'StatementContext'
+    ) {
+      const parentMetadataList = ctx.parent.metadata();
+      if (parentMetadataList && Array.isArray(parentMetadataList)) {
+        for (const metaCtx of parentMetadataList) {
+          const action = this.processMetadata(metaCtx);
+          if (action) actions.push(action);
+        }
+      }
+    }
+
     return actions;
   }
 
@@ -222,8 +236,7 @@ export default class TraceInterpreterVisitor
     return { __type: 'break' };
   }
 
-  visitAssignment(ctx: AssignmentContext): any {
-    const metadataActions = this.extractMetadataActions(ctx);
+visitAssignment(ctx: AssignmentContext): any {
     const assignableCtx = ctx.assignable();
     const name = assignableCtx.ID().getText();
     const isArrayAccess = !!assignableCtx.LBRACK();
@@ -240,11 +253,16 @@ export default class TraceInterpreterVisitor
       this.isReferenceMode = false;
       const index = Math.floor(this.visit(assignableCtx.expression()!));
       this.isReferenceMode = prevRef;
+
       const arr = this.memory.get(name);
       if (Array.isArray(arr)) {
         if (ctx.PLUS_EQ()) value = arr[index] + value;
         else if (ctx.MINUS_EQ()) value = arr[index] - value;
         arr[index] = value;
+        
+        // FIX 1: Extract metadata AFTER updating memory!
+        const metadataActions = this.extractMetadataActions(ctx);
+        
         const actions: TraceAction[] = [...metadataActions,
           { cmd: 'vis_mark', params: { index, type: 'highlight', color: 'green' } },
           { cmd: 'vis_update', params: { index, value } },
@@ -257,6 +275,7 @@ export default class TraceInterpreterVisitor
 
     this.memory.set(name, value);
     const snapshotValue = Array.isArray(value) ? [...value] : value;
+    const metadataActions = this.extractMetadataActions(ctx);
 
     metadataActions.forEach(action => {
       if (action.cmd === 'vis_init') {
@@ -267,8 +286,14 @@ export default class TraceInterpreterVisitor
     if (typeof value === 'number' && this.recentArrayAccesses.length > 0) {
       const unmarkActions: TraceAction[] = [...metadataActions];
       const accessedIndices = new Set(this.recentArrayAccesses.map((a) => a.index));
+      const explicitMarks = new Set(
+        metadataActions.filter(a => a.cmd === 'vis_mark').map(a => a.params.index)
+      );
+
       for (const idx of accessedIndices) {
-        unmarkActions.push({ cmd: 'vis_unmark', params: { index: idx, type: 'all' } });
+        if (!explicitMarks.has(idx)) {
+          unmarkActions.push({ cmd: 'vis_unmark', params: { index: idx, type: 'all' } });
+        }
       }
       unmarkActions.push({ cmd: 'var_add', params: { name, value: snapshotValue } });
       this.addStep(ctx.start!.line, unmarkActions);
@@ -438,11 +463,9 @@ export default class TraceInterpreterVisitor
     let limit = 1000;
     while (true) {
       const condition = this.visit(ctx.expression()!);
+      if (!condition || limit-- <= 0) break;
       const metadataActions = this.extractMetadataActions(ctx);
       this.flushComparisons(ctx.start!.line, metadataActions);
-
-      if (!condition || limit-- <= 0) break;
-
       const stmts = ctx.block()?.statement();
       let broke = false;
       if (stmts) {
@@ -460,13 +483,14 @@ export default class TraceInterpreterVisitor
     }
   }
 
-  visitWhileLoop(ctx: WhileLoopContext): any {
+visitWhileLoop(ctx: WhileLoopContext): any {
     let limit = 1000;
+
     while (true) {
       const condition = this.visit(ctx.expression()!);
+      if (!condition || limit-- <= 0) break;
       const metadataActions = this.extractMetadataActions(ctx);
       this.flushComparisons(ctx.start!.line, metadataActions);
-      if (!condition || limit-- <= 0) break;
       const stmts = ctx.block()?.statement();
       let broke = false;
       if (stmts) {
@@ -482,7 +506,6 @@ export default class TraceInterpreterVisitor
       if (broke) break;
     }
   }
-
   visitDoWhileLoop(ctx: DoWhileLoopContext): any {
     let limit = 1000;
     do {
