@@ -74,7 +74,7 @@ logicalOrExpression      : left=logicalAndExpression (op+=OR right+=logicalAndEx
 logicalAndExpression     : left=comparisonExpression (op+=AND right+=comparisonExpression)* ;
 
 comparisonExpression
-    : left=additiveExpression (op+=(EQEQ | LESS_EQ | GREATER_EQ | LT | GT) right+=additiveExpression)* # CompareExpr
+    : left=additiveExpression (op+=(EQEQ | NOTEQ | LESS_EQ | GREATER_EQ | LT | GT) right+=additiveExpression)* # CompareExpr
     ;
 
 additiveExpression
@@ -82,7 +82,7 @@ additiveExpression
     ;
 
 multiplicativeExpression
-    : left=powerExpression (op+=(STAR | SLASH) right+=powerExpression)* # MulExpr
+    : left=powerExpression (op+=(STAR | SLASH | MOD) right+=powerExpression)* # MulExpr
     ;
 
 powerExpression          : left=unaryExpression (op+=POWER right+=unaryExpression)* ;
@@ -148,6 +148,7 @@ PLUS_EQ : '+=';
 MINUS_EQ: '-=';
 EQ      : '=';
 EQEQ    : '==';
+NOTEQ   : '!=';
 PLUS    : '+';
 MINUS   : '-';
 POWER   : '**';

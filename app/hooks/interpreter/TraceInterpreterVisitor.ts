@@ -650,6 +650,7 @@ visitWhileLoop(ctx: WhileLoopContext): any {
 
       switch (opText) {
         case '==': left = left === right; break;
+        case '!=': left = left !== right; break;
         case '<':  left = left < right; break;
         case '>':  left = left > right; break;
         case '<=': left = left <= right; break;
@@ -688,7 +689,9 @@ visitWhileLoop(ctx: WhileLoopContext): any {
     for (let i = 0; i < rightArray.length; i++) {
       const right = this.visit(rightArray[i]);
       const opText = opArray[i].text!;
-      left = opText === '*' ? left * right : left / right;
+      if (opText === '*') left = left * right;
+      else if (opText === '/') left = left / right;
+      else if (opText === '%') left = left % Math.floor(right); 
     }
     return left;
   }
