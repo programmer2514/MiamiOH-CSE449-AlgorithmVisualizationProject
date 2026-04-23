@@ -46,6 +46,45 @@ export default function AIPane(
         variant="outline"
         onClick={
           () => {
+            const txt = document.createElement('textarea');
+            txt.innerHTML = document.getElementById('sourceCode')!.innerHTML;
+            const source = txt.value;
+            txt.remove();
+
+            const message = `
+Arrays are initialized as var = arr[...], not var = [...].
+"arr" is thus a keyword and cannot be a variable name.
+Do while loops are not currently implemented.
+
+All function names must start with a capital letter.
+Do not assume implicit functions are available unless found in example code.
+Provide a sample call to the function at the end so it can be run without modification.
+Succinctly comment any potentially confusing sections. Do not comment obvious sections.
+Avoid using the words "demo", "sample", "test", etc. in function names.
+
+Make sure to use @-directives appropriately. Do not use the text mark except for on if/while statements.
+Prefer outlines for cursor-type/iterator marks and highlights for found/missing/swap/warning/etc type marks.
+Outlines can be more frequently utilized, while highlights should be more sparing.
+@-directives can be placed sequentially on one line but cannot be on a line by themselves.
+E.g. "@<...> @<...> var = ..." is valid, but "@<...>" by itself is not.
+@mark directives must be placed at the beginning of a line, not halfway through.
+
+If the user requests a change or a fix, here is your starter code:
+
+\`\`\`avp
+${source}
+\`\`\`
+
+Comment any changes you make.
+If they want something unrelated, ignore the above starter code and make new code.
+If no prompt is given, use this title as your prompt: ${document.getElementById('title')!.innerHTML}
+If the title is "<unnamed>", just output a short error message.
+
+User request:
+${(document.getElementById('aiInput') as HTMLTextAreaElement)!.value}
+`
+              .trim();
+
             buttonRef.current!.innerHTML = Globals.AIButtonStrings.Wait.Running;
             buttonRef.current!.disabled = true;
 
@@ -55,7 +94,7 @@ export default function AIPane(
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                message: (document.getElementById('aiInput') as HTMLTextAreaElement)!.value,
+                message: message,
               }),
             })
               .then(res => res.json())
