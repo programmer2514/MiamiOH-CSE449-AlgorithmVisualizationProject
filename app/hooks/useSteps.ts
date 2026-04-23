@@ -90,19 +90,23 @@ export default function useSteps(
           break;
 
         case 'var_delete':
-          delete temp_vars[action.params.name];
+          if (temp_vars[action.params.name])
+            delete temp_vars[action.params.name];
           break;
 
         case 'var_highlight':
-          temp_vars[action.params.name][1] = 1;
+          if (temp_vars[action.params.name])
+            temp_vars[action.params.name][1] = 1;
           break;
 
         case 'var_greyout':
-          temp_vars[action.params.name][1] = -1;
+          if (temp_vars[action.params.name])
+            temp_vars[action.params.name][1] = -1;
           break;
 
         case 'var_normal':
-          temp_vars[action.params.name][1] = 0;
+          if (temp_vars[action.params.name])
+            temp_vars[action.params.name][1] = 0;
           break;
 
         default:

@@ -158,7 +158,10 @@ export default function Visualizer(
           discard={discard}
         />
         <VarsPane vars={vars} />
-        <AIPane />
+        <AIPane
+          setSrc={setEditSrc}
+          setEditing={setEditing}
+        />
       </VisualizerLayout>
     </>
   );
