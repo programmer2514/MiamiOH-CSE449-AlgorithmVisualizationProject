@@ -7,6 +7,8 @@ import {
   Textarea,
 } from '@material-tailwind/react';
 
+import Globals from '../../globals';
+
 /**
  * Renders the AI pane for the visualizer.
  *
@@ -32,18 +34,19 @@ export default function AIPane(
   return (
     <>
       <Textarea
-        className="rounded-none border-none shadow-none h-[calc(100%-6.125rem)]"
+        className="rounded-none border-none shadow-none text-md text-primary/75! focus:text-primary! h-[calc(100%-6.125rem)]"
         id="aiInput"
-        placeholder="Input prompt here..."
+        placeholder="Enter your prompt..."
       >
       </Textarea>
       <Button
-        className="w-full rounded-none border-none shadow-none! hover:bg-primary/10! hover:text-primary! h-13.5"
+        className="w-full text-md h-13.5 rounded-none shadow-none! border-0 border-t border-[#d8d8dc] dark:border-[#38383c] hover:bg-primary/5! hover:text-primary! disabled:hover:bg-transparent!"
+        id="aiButton"
         ref={buttonRef}
         variant="outline"
         onClick={
           () => {
-            buttonRef.current!.innerHTML = 'Generating...';
+            buttonRef.current!.innerHTML = Globals.AIButtonStrings.Wait.Running;
             buttonRef.current!.disabled = true;
 
             fetch('https://beefstewbibi-avp-rag-system.hf.space/api/generate', {
@@ -62,14 +65,18 @@ export default function AIPane(
 
                 setSrc(code);
                 setEditing(true);
-
-                buttonRef.current!.innerHTML = 'Generate';
-                buttonRef.current!.disabled = false;
+              })
+              .catch(() => {
+                buttonRef.current!.innerHTML = Globals.AIButtonStrings.Error;
+                setTimeout(() => {
+                  buttonRef.current!.innerHTML = Globals.AIButtonStrings.Run;
+                  buttonRef.current!.disabled = false;
+                }, 1000);
               });
           }
         }
       >
-        Generate
+        {Globals.AIButtonStrings.Run}
       </Button>
     </>
   );

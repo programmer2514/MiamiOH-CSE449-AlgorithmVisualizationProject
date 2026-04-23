@@ -35,6 +35,15 @@ const Globals = {
   AppSourceURL: 'https://gitlab.csi.miamioh.edu/2026-senior-design-projects/algorithm-visualization-project/algorithm-visualization-project',
   RouteBaseName: RouteBaseName,
 
+  AIButtonStrings: {
+    Run: 'Generate',
+    Wait: {
+      Running: 'Generating...',
+      Editing: 'Save or Discard Code to Continue...',
+    },
+    Error: 'Failed to Process Request!',
+  },
+
   MenuLinksHome: [
     {
       icon: PlusCircle,

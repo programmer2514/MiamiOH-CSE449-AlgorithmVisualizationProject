@@ -99,7 +99,9 @@ export default function CodePane(
       }
       <div
         className="w-full h-full"
-        onDoubleClick={() => setEditing(true)}
+        onDoubleClick={() => {
+          if (!editing) setEditing(true);
+        }}
       >
         <Monaco
           name="code"
