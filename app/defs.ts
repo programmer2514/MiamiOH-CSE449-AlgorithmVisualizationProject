@@ -32,6 +32,7 @@ export default {
       'return',
       'break',
       'continue',
+      'step',
       'Null',
       'True',
       'False',
