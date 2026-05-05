@@ -1,8 +1,7 @@
 // Hoare Partition
 
-a1 = arr[1, 19, 15, 100, 20, 6, 4, 68, 7, 19]
+a1 = arr[43, 7, 82, 15, 61, 29, 74, 3, 50, 38]
 
-// Partitions an array for use in QuickSort
 fun Hoare_Partition(@init<table> array, low, high): 
     // Choose the pivot - First element of sub-array
     @mark<low, highlight, yellow> pivot = array[low]
@@ -15,7 +14,7 @@ fun Hoare_Partition(@init<table> array, low, high):
         // Move left pointer forward until element >= pivot is found
         while (true):
             i += 1
-            @mark<i, outline, yellow> if (array[i] >= pivot):
+            @mark<i, outline, yellow> if (array[i] >= pivot or i >= high):
                 break
             end if
         end while
@@ -23,7 +22,7 @@ fun Hoare_Partition(@init<table> array, low, high):
         // Move right pointer backward until element <= pivot is found
         while (true):
             j -= 1
-            @mark<j, outline, yellow> if (array[j] <= pivot):
+            @mark<j, outline, yellow> if (array[j] <= pivot or j <= low):
                 break
             end if
         end while
@@ -34,7 +33,7 @@ fun Hoare_Partition(@init<table> array, low, high):
         end if
 
         // Swap elements at i and j if in the wrong partition
-        @mark<i, highlight, green> swap (array[i], array[j]) 
+        @mark<i, highlight, green> swap (array[i], array[j])
 
     end while
 end fun
