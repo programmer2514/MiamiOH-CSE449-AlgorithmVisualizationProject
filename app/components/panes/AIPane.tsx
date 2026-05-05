@@ -88,7 +88,7 @@ ${(document.getElementById('aiInput') as HTMLTextAreaElement)!.value}
             buttonRef.current!.innerHTML = Globals.AIButtonStrings.Wait.Running;
             buttonRef.current!.disabled = true;
 
-            fetch('https://beefstewbibi-avp-rag-system.hf.space/api/generate', {
+            fetch('https://beefstewbibi-avp-rag-system.hf.space/api/generate', { // TODO: Replace with actual API link
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
