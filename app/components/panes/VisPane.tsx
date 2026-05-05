@@ -18,6 +18,8 @@ import VisBuilder from '../visualization/VisBuilder';
  *        A function to go to the previous step
  * @param {function} props.nextStep
  *        A function to go to the next step
+ * @param {function} props.setStepNum
+ *        A function to update the step number directly
  * @param {function} props.reset
  *        A function to reset the visualization
  */
@@ -28,6 +30,7 @@ export default function VisPane(
     stepDat,
     prevStep,
     nextStep,
+    setStepNum,
     reset,
   }:
   {
@@ -36,6 +39,7 @@ export default function VisPane(
     stepDat: Step
     prevStep: () => void
     nextStep: () => void
+    setStepNum: (num: number) => void
     reset: () => void
   },
 ) {
@@ -45,6 +49,7 @@ export default function VisPane(
       stepNum={stepNum}
       prevStep={prevStep}
       nextStep={nextStep}
+      setStepNum={setStepNum}
       reset={reset}
     >
       <VisBuilder

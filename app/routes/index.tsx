@@ -1,21 +1,9 @@
-import {
-  Folder,
-  HelpCircle,
-  Import,
-  InfoCircle,
-  PlusCircle,
-  Settings,
-} from 'iconoir-react';
-
 import Globals from '../globals';
 
 import AppFrame from '../components/frames/AppFrame';
 
 import PageMeta from '../components/PageMeta';
 import SearchProvider from '../components/SearchProvider';
-
-import LinearSearchDark from '../resources/img/linear-search_dark.png';
-import LinearSearchLight from '../resources/img/linear-search_light.png';
 
 /**
  * Renders the "Getting Started" page.
@@ -36,57 +24,10 @@ export default function Index() {
         mutable={false}
         sidebar={undefined}
         setSidebar={undefined}
-        menuLinks={
-          [
-            {
-              icon: PlusCircle,
-              text: 'Create...',
-              separateNext: false,
-            },
-            {
-              icon: Folder,
-              text: 'Open...',
-              separateNext: true,
-            },
-            {
-              icon: Import,
-              text: 'Import...',
-              separateNext: true,
-            },
-            {
-              icon: Settings,
-              text: 'Settings',
-              separateNext: false,
-            },
-            {
-              icon: HelpCircle,
-              text: 'Wiki',
-              separateNext: false,
-            },
-            {
-              icon: InfoCircle,
-              text: 'About',
-              separateNext: false,
-            },
-          ]
-        }
+        menuLinks={Globals.MenuLinksHome}
       >
         <SearchProvider
-          cards={
-            [
-              {
-                img: [LinearSearchLight, LinearSearchDark],
-                title: 'Linear Search',
-                tags: [
-                  'Easy',
-                  'Array',
-                  'Brute Force',
-                  'Search',
-                ],
-                href: '/run?algorithm=linear_search',
-              },
-            ]
-          }
+          cards={Globals.AlgorithmCards}
         />
       </AppFrame>
     </>

@@ -1,5 +1,6 @@
 import React, {
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -18,6 +19,8 @@ import {
   SidebarCollapse,
   SidebarExpand,
 } from 'iconoir-react';
+
+import Globals from '../../globals';
 
 import FlexSpacer from '../FlexSpacer';
 
@@ -69,9 +72,34 @@ export default function TopBar(
   const [modified, setModified] = useContext(ModifiedContext);
 
   const [width, setWidth] = useState(0);
+  const [titleInterval, setTitleInterval] = useState(
+    null as NodeJS.Timeout | null,
+  );
 
-  const span = useRef({ offsetWidth: 0 } as HTMLSpanElement);
-  const input = useRef({ value: '' } as HTMLInputElement);
+  const pre = useRef({ offsetWidth: 0 } as HTMLPreElement);
+  const input = useRef({
+    value: '',
+    setSelectionRange: () => {},
+    blur: () => {},
+  } as unknown as HTMLInputElement);
+
+  useEffect(() => {
+    document.body.addEventListener('click', (event) => {
+      if (event.target === input.current) return;
+      input.current?.blur();
+    });
+
+    // Ensure the title is the correct width after a page reload
+    setTitleInterval(
+      setInterval(() => {
+        if (setTitle && title !== input.current?.value) {
+          setTitle(input.current?.value ?? '');
+        } else if (titleInterval) {
+          clearInterval(titleInterval);
+        }
+      }, 250),
+    );
+  }, []);
 
   if (setTitle) {
     // Using a layout effect here to avoid jittery repaints while typing
@@ -80,10 +108,11 @@ export default function TopBar(
       if (title.length === 0) {
         setTitle('<unnamed>');
         input.current.value = '<unnamed>';
+        input.current.setSelectionRange(0, 9); // Length of '<unnamed>'
       }
 
-      setWidth(span.current?.offsetWidth ?? 0);
-    }, [title, span]);
+      setWidth(pre.current?.offsetWidth ?? 0);
+    }, [title, pre]);
   }
 
   return (
@@ -111,13 +140,14 @@ export default function TopBar(
         mutable && setTitle ?
           (
             <div className="flex items-center">
-              <span
-                ref={span}
+              <pre
+                ref={pre}
+                id="title"
                 className="text-lg font-medium font-body p-1 opacity-0 absolute pointer-events-none"
                 aria-hidden
               >
                 {title}
-              </span>
+              </pre>
               <Input
                 ref={input}
                 type="text"
@@ -129,6 +159,13 @@ export default function TopBar(
                   (event) => {
                     setTitle(event.target.value);
                     setModified(modified || 1);
+                  }
+                }
+                onKeyUp={
+                  (event) => {
+                    if (event.key === 'Enter') {
+                      input.current?.blur();
+                    }
                   }
                 }
                 aria-label="Algorithm name"
@@ -149,6 +186,7 @@ export default function TopBar(
           ) :
           (
             <Typography
+              id="title"
               type="h1"
               className="text-lg! font-medium ml-2"
             >
@@ -192,7 +230,7 @@ export default function TopBar(
         variant="ghost"
         aria-label="Get Help"
         title="Get Help"
-        href="/wiki"
+        href={`${Globals.RouteBaseName}wiki`}
         target="_blank"
       >
         <HelpCircle className="stroke-2 w-6 h-6" role="presentation" />

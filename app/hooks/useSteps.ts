@@ -5,6 +5,8 @@ import {
 
 import { type Step } from '../types';
 
+let stepNumJS = 0;
+
 /**
  * Provides a hook to load, read, and update step data.
  *
@@ -23,8 +25,12 @@ export default function useSteps(
 ) {
   const [vars, setVars] = useState({} as { [key: string]: [any, number] });
   const [lines, setLines] = useState(null as number | [number, number] | null);
+
   const [numSteps, setNumSteps] = useState(0);
-  const [stepNum, setStepNum] = useState(0);
+  const [stepNum, _setStepNum] = useState(0);
+
+  const [deltaNum, setDeltaNum] = useState(0);
+
   const [stepDat, setStepDat] = useState({} as Step);
   const [varHistory, setVarHistory] = useState(
     [] as { [key: string]: [any, number] }[],
@@ -34,15 +40,29 @@ export default function useSteps(
     setVars({} as { [key: string]: [any, number] });
     setLines(null);
     setNumSteps(Object.keys(comp).length);
-    setStepNum(0);
+    _setStepNum(0);
     setStepDat({} as Step);
   }, [comp]);
+
+  useEffect(() => {
+    if (deltaNum > 0) {
+      nextStep();
+      setDeltaNum(deltaNum - 1);
+    } else if (deltaNum < 0) {
+      prevStep();
+      setDeltaNum(deltaNum + 1);
+    }
+  }, [deltaNum]);
+
+  useEffect(() => {
+    stepNumJS = stepNum;
+  }, [stepNum]);
 
   function nextStep() {
     if (stepNum >= numSteps) return;
 
     const newStepNum = stepNum + 1;
-    setStepNum(newStepNum);
+    _setStepNum(newStepNum);
 
     if (newStepNum <= 0 || newStepNum > numSteps) {
       setStepDat({} as Step);
@@ -70,19 +90,23 @@ export default function useSteps(
           break;
 
         case 'var_delete':
-          delete temp_vars[action.params.name];
+          if (temp_vars[action.params.name])
+            delete temp_vars[action.params.name];
           break;
 
         case 'var_highlight':
-          temp_vars[action.params.name][1] = 1;
+          if (temp_vars[action.params.name])
+            temp_vars[action.params.name][1] = 1;
           break;
 
         case 'var_greyout':
-          temp_vars[action.params.name][1] = -1;
+          if (temp_vars[action.params.name])
+            temp_vars[action.params.name][1] = -1;
           break;
 
         case 'var_normal':
-          temp_vars[action.params.name][1] = 0;
+          if (temp_vars[action.params.name])
+            temp_vars[action.params.name][1] = 0;
           break;
 
         default:
@@ -98,7 +122,7 @@ export default function useSteps(
     if (stepNum <= 0) return;
 
     const newStepNum = stepNum - 1;
-    setStepNum(newStepNum);
+    _setStepNum(newStepNum);
 
     if (newStepNum <= 0 || newStepNum > numSteps) {
       setStepDat({} as Step);
@@ -115,8 +139,14 @@ export default function useSteps(
     setVarHistory(varHistory.slice(0, varHistory.length - 1));
   }
 
+  function setStepNum(num: number) {
+    if (num < 0 || num > numSteps || deltaNum !== 0) return;
+    setDeltaNum(num - stepNumJS);
+    stepNumJS = num;
+  }
+
   function reset() {
-    setStepNum(0);
+    _setStepNum(0);
     setStepDat({} as Step);
     setLines(null);
     setVars({} as { [key: string]: [any, number] });
@@ -131,6 +161,7 @@ export default function useSteps(
     prevStep,
     reset,
     stepNum,
+    setStepNum,
     stepDat,
   ] as const;
 }

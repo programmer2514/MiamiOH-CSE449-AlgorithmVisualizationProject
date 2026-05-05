@@ -1,5 +1,6 @@
 import {
   useContext,
+  useEffect,
   useState,
 } from 'react';
 
@@ -18,6 +19,8 @@ import useSteps from '../hooks/useSteps';
 import useEditSrc from '../hooks/useEditSrc';
 
 import ModifiedContext from '../contexts/ModifiedContext';
+
+import Globals from '../globals';
 
 /**
  * Renders a visualizer complete with collapsible sidebar. Includes animation,
@@ -64,6 +67,15 @@ export default function Visualizer(
     setTitle: ((value: string) => void)
   },
 ) {
+  function updateAIButton(disabled: boolean) {
+    (document.getElementById('aiButton') as HTMLButtonElement)!
+      .innerHTML = disabled ?
+        Globals.AIButtonStrings.Wait.Editing :
+        Globals.AIButtonStrings.Run;
+    (document.getElementById('aiButton') as HTMLButtonElement)!
+      .disabled = disabled;
+  }
+
   const [loaderHidden, setLoaderHidden] = useState(false);
   const [editing, setEditing] = useState(false);
 
@@ -83,6 +95,7 @@ export default function Visualizer(
     prevStep,
     reset,
     stepNum,
+    setStepNum,
     stepDat,
   ] = useSteps({ comp });
 
@@ -112,6 +125,8 @@ export default function Visualizer(
     },
     onDiscard: () => setEditing(false),
   });
+
+  useEffect(() => updateAIButton(editing), [editing]);
 
   return (
     <>
@@ -144,6 +159,7 @@ export default function Visualizer(
           stepDat={stepDat}
           prevStep={prevStep}
           nextStep={nextStep}
+          setStepNum={setStepNum}
           reset={reset}
         />
         <CodePane
@@ -151,9 +167,15 @@ export default function Visualizer(
           setSrc={setEditSrc}
           highlight={lines}
           editing={editing}
+          setEditing={setEditing}
+          save={save}
+          discard={discard}
         />
         <VarsPane vars={vars} />
-        <AIPane />
+        <AIPane
+          setSrc={setEditSrc}
+          setEditing={setEditing}
+        />
       </VisualizerLayout>
     </>
   );

@@ -51,9 +51,9 @@ export default function SearchCard(
     toggleTag,
   }:
   {
-    img: [string, string] | string
+    img: readonly [string, string] | string
     title: string
-    tags: string[]
+    tags: readonly string[]
     href: string
     favs: string[] | null
     toggleFav: (key: string) => void

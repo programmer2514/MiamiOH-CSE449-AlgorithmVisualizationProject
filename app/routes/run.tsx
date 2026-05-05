@@ -1,13 +1,4 @@
-import {
-  FloppyDisk,
-  Folder,
-  HelpCircle,
-  Import,
-  InfoCircle,
-  PlusCircle,
-  Settings,
-  ShareIos,
-} from 'iconoir-react';
+import Globals from '../globals';
 
 import AppFrame from '../components/frames/AppFrame';
 
@@ -47,50 +38,7 @@ export default function Run() {
         mutable={true}
         sidebar={sidebar}
         setSidebar={setSidebar}
-        menuLinks={
-          [
-            {
-              icon: PlusCircle,
-              text: 'Create...',
-              separateNext: false,
-            },
-            {
-              icon: Folder,
-              text: 'Open...',
-              separateNext: false,
-            },
-            {
-              icon: FloppyDisk,
-              text: 'Save...',
-              separateNext: true,
-            },
-            {
-              icon: Import,
-              text: 'Import...',
-              separateNext: false,
-            },
-            {
-              icon: ShareIos,
-              text: 'Export...',
-              separateNext: true,
-            },
-            {
-              icon: Settings,
-              text: 'Settings',
-              separateNext: false,
-            },
-            {
-              icon: HelpCircle,
-              text: 'Wiki',
-              separateNext: false,
-            },
-            {
-              icon: InfoCircle,
-              text: 'About',
-              separateNext: false,
-            },
-          ]
-        }
+        menuLinks={Globals.MenuLinksRun}
       >
         <Visualizer
           sidebar={sidebar}

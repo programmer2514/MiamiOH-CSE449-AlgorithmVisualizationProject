@@ -209,7 +209,7 @@ export default function Monaco(
         options={{
           minimap: { enabled: false },
           padding: { top: 10 },
-          fontSize: rem,
+          fontSize: rem * 0.9,
         }}
         onMount={
           (editor, monaco) => {

@@ -22,7 +22,7 @@ export default function VarsPane(
       src={
         Object.keys(vars)
           .map(key => `${key}: ${
-            JSON.stringify(vars[key][0])
+            (JSON.stringify(vars[key][0]) || `ERROR`)
               .replaceAll(',', ', ')
               .replaceAll('"<function>"', '<function>')
           }`)

@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 import {
   IconButton,
   Progress,
@@ -7,15 +5,22 @@ import {
 } from '@material-tailwind/react';
 
 import {
-  ArrowEmailForward,
+  UndoAction,
+  Forward,
   Minus,
   NavArrowLeft,
   NavArrowRight,
-  PauseSolid,
-  PlaySolid,
+  Pause,
+  Play,
   Plus,
   PrecisionTool,
+  Rewind,
 } from 'iconoir-react';
+
+import useVisAdjust from '../../hooks/useVisAdjust';
+import useVisPan from '../../hooks/useVisPan';
+import useVisProgressInter from '../../hooks/useVisProgressInter';
+import useStepTimer from '../../hooks/useStepTimer';
 
 /**
  * Renders the main visualization frame around the passed child elements.
@@ -31,17 +36,20 @@ import {
  *        A function to go to the previous step
  * @param {function} props.nextStep
  *        A function to go to the next step
+ * @param {function} props.setStepNum
+ *        A function to update the step number directly
  * @param {function} props.reset
  *        A function to reset the visualization
  * @param {React.ReactNode} props.children
  *        Child elements
  */
-export default function VisWindowFrame(
+export default function VisFrame(
   {
     numSteps,
     stepNum,
     prevStep,
     nextStep,
+    setStepNum,
     reset,
     children,
   }:
@@ -50,137 +58,83 @@ export default function VisWindowFrame(
     stepNum: number
     prevStep: () => void
     nextStep: () => void
+    setStepNum: (num: number) => void
     reset: () => void
     children: React.ReactNode
   },
 ) {
-  const [zoom, setZoom] = useState(1.0);
-  const [offsetX, setOffsetX] = useState(0.0);
-  const [offsetY, setOffsetY] = useState(0.0);
+  const [
+    zoom,
+    setZoom,
+    speed,
+    setSpeed,
+    setSpeedInt,
+    getNextSpeed,
+    SPEEDS,
+    DEFAULT_SPEED,
+    DEFAULT_ZOOM,
+    MIN_ZOOM,
+    MAX_ZOOM,
+  ] = useVisAdjust();
 
-  const [dragging, setDragging] = useState(false);
-  const [animating, setAnimating] = useState(null as NodeJS.Timeout | null);
+  const [
+    offsetX,
+    setOffsetX,
+    offsetY,
+    setOffsetY,
+    dragging,
+    mouseDown,
+  ] = useVisPan({ zoom, setZoom, MIN_ZOOM, MAX_ZOOM });
 
-  const [step, setStep] = useState(false);
-  const [move, setMove] = useState(null as MouseEvent | TouchEvent | null);
-  const [touch, setTouch] =
-    useState(null as React.TouchEvent | TouchEvent | null);
+  const [
+    time,
+    setTime,
+    TICK_SPEED,
+  ] = useStepTimer({ speed, numSteps, stepNum, nextStep });
 
-  useEffect(() => {
-    if (stepNum === numSteps && animating) {
-      clearInterval(animating);
-      setAnimating(null);
-      return;
-    }
-
-    if (step) {
-      nextStep();
-      setStep(false);
-    }
-  }, [step]);
-
-  useEffect(() => {
-    if (move && dragging) {
-      if (touch) {
-        if ((move as TouchEvent).touches.length === 2) {
-          if (touch.touches.length !== 2) return;
-
-          const oldTouch1 = (touch as TouchEvent).touches[0];
-          const oldTouch2 = (touch as TouchEvent).touches[1];
-          const newTouch1 = (move as TouchEvent).touches[0];
-          const newTouch2 = (move as TouchEvent).touches[1];
-
-          const oldDiff = Math.hypot(
-            oldTouch1.pageX - oldTouch2.pageX,
-            oldTouch1.pageY - oldTouch2.pageY,
-          );
-          const newDiff = Math.hypot(
-            newTouch1.pageX - newTouch2.pageX,
-            newTouch1.pageY - newTouch2.pageY,
-          );
-
-          if (newDiff === oldDiff) return;
-
-          if ((newDiff < oldDiff) && (zoom * 0.98 >= 0.1)) {
-            setZoom(zoom * 0.98);
-            setOffsetX(offsetX * 0.98);
-            setOffsetY(offsetY * 0.98);
-          } else if ((newDiff > oldDiff) && (zoom * 1.02 <= 40.0)) {
-            setZoom(zoom * 1.02);
-            setOffsetX(offsetX * 1.02);
-            setOffsetY(offsetY * 1.02);
-          }
-          setTouch(move as TouchEvent);
-
-          return;
-        }
-
-        if (
-          (move as TouchEvent).touches.length !== 1 ||
-          touch.touches.length !== 1
-        ) return;
-
-        const oldTouch = (touch as TouchEvent).touches[0];
-        const newTouch = (move as TouchEvent).touches[0];
-
-        setOffsetX(offsetX + newTouch.pageX - oldTouch.pageX);
-        setOffsetY(offsetY + newTouch.pageY - oldTouch.pageY);
-
-        setTouch(move as TouchEvent);
-      } else {
-        setOffsetX(offsetX + (move as MouseEvent).movementX);
-        setOffsetY(offsetY + (move as MouseEvent).movementY);
-      }
-
-      setMove(null);
-    }
-  }, [move, dragging]);
-
-  function mouseUp() {
-    setDragging(false);
-
-    removeEventListener('mouseup', mouseUp);
-    removeEventListener('mousemove', mouseMove);
-
-    removeEventListener('touchmove', mouseMove);
-    removeEventListener('touchend', mouseUp);
-
-    setTouch(null);
-  }
-
-  function mouseMove(e: MouseEvent | TouchEvent) {
-    setMove(e);
-  }
-
-  function mouseDown(e: React.MouseEvent | React.TouchEvent) {
-    const isTouch = Object.keys(e).includes('touches');
-
-    if (
-      (!isTouch) &&
-      (e as React.MouseEvent).button !== 0 &&
-      (e as React.MouseEvent).button !== 1
-    ) return;
-
-    if (isTouch) {
-      addEventListener('touchend', mouseUp);
-      addEventListener('touchmove', mouseMove);
-
-      setTouch(e as React.TouchEvent);
-    } else {
-      addEventListener('mouseup', mouseUp);
-      addEventListener('mousemove', mouseMove);
-    }
-
-    setDragging(true);
-    e.preventDefault();
-  }
+  const [
+    mouseDownProgress,
+    scrollLockProgress,
+  ] = useVisProgressInter({ TICK_SPEED });
 
   return (
     <section className="w-full h-full">
       <div className="flex gap-1 items-center relative w-full h-0 overflow-visible px-2 justify-end z-20 translate-y-7 portrait:justify-center">
-        <div className="w-64 max-w-full mx-1">
+        <IconButton
+          variant="ghost"
+          aria-label={`${time > 0 ? 'Pause' : 'Play'} Animation`}
+          title={`${time > 0 ? 'Pause' : 'Play'} Animation`}
+          onClick={() => {
+            setTime(time > 0 ? 0 : TICK_SPEED);
+          }}
+          className="cursor-pointer"
+        >
+          {
+            time > 0 ?
+              <Pause className="stroke-2 w-6 h-6" role="presentation" /> :
+              <Play className="stroke-2 w-6 h-6" role="presentation" />
+          }
+
+        </IconButton>
+        <div className="w-64 max-w-full mx-0.5">
           <Progress
             value={stepNum / numSteps * 100}
+            onWheel={
+              e => scrollLockProgress(e, (e) => {
+                if ((e.deltaY > 0)) {
+                  prevStep();
+                } else if ((e.deltaY < 0)) {
+                  nextStep();
+                }
+              }, (50 / numSteps))
+            }
+            onMouseDownCapture={
+              e => mouseDownProgress(e, 0, numSteps, 1, setStepNum)
+            }
+            onTouchStartCapture={
+              e => mouseDownProgress(e, 0, numSteps, 1, setStepNum)
+            }
+            data-parent
             className="rounded-lg h-8 w-full border border-[#d8d8dc] dark:border-[#38383c] bg-[#ffffff] dark:bg-[#18181c]"
           >
             <Progress.Bar className="bg-[dodgerblue]" />
@@ -196,7 +150,7 @@ export default function VisWindowFrame(
           onClick={prevStep}
           className="cursor-pointer"
         >
-          <NavArrowLeft className="stroke-2 w-6 h-6" role="presentation" />
+          <NavArrowLeft className="stroke-2 w-6.5 h-6.5" role="presentation" />
         </IconButton>
         <IconButton
           variant="ghost"
@@ -205,45 +159,19 @@ export default function VisWindowFrame(
           onClick={nextStep}
           className="cursor-pointer"
         >
-          <NavArrowRight className="stroke-2 w-6 h-6" role="presentation" />
-        </IconButton>
-        <IconButton
-          variant="ghost"
-          aria-label={`${animating ? 'Pause' : 'Play'} Animation`}
-          title={`${animating ? 'Pause' : 'Play'} Animation`}
-          onClick={() => {
-            if (animating) {
-              clearInterval(animating);
-              setAnimating(null);
-              return;
-            }
-
-            setStep(true);
-            setAnimating(
-              setInterval(() => setStep(true), 1000),
-            );
-          }}
-          className="cursor-pointer"
-        >
-          {
-            animating ?
-              <PauseSolid className="stroke-2 w-6 h-6" role="presentation" /> :
-              <PlaySolid className="stroke-2 w-6 h-6" role="presentation" />
-          }
-
+          <NavArrowRight className="stroke-2 w-6.5 h-6.5" role="presentation" />
         </IconButton>
         <IconButton
           variant="ghost"
           aria-label="Reset"
           title="Reset"
           onClick={() => {
-            if (animating) clearInterval(animating);
-            setAnimating(null);
+            setTime(0);
             reset();
           }}
           className="cursor-pointer"
         >
-          <ArrowEmailForward className="stroke-2 w-5 h-5 -scale-x-100" role="presentation" />
+          <UndoAction className="stroke-2 w-6 h-6" role="presentation" />
         </IconButton>
       </div>
 
@@ -251,14 +179,16 @@ export default function VisWindowFrame(
         <div
           onContextMenuCapture={e => e.preventDefault()}
           onWheel={(e) => {
-            if ((e.deltaY > 0) && (zoom * 0.9 >= 0.1)) {
-              setZoom(zoom * 0.9);
-              setOffsetX(offsetX * 0.9);
-              setOffsetY(offsetY * 0.9);
-            } else if ((e.deltaY < 0) && (zoom * 1.1 <= 40.0)) {
-              setZoom(zoom * 1.1);
-              setOffsetX(offsetX * 1.1);
-              setOffsetY(offsetY * 1.1);
+            if (zoom === null) return;
+
+            if ((e.deltaY > 0) && (zoom * 0.95 >= MIN_ZOOM)) {
+              setZoom(zoom * 0.95);
+              setOffsetX(offsetX * 0.95);
+              setOffsetY(offsetY * 0.95);
+            } else if ((e.deltaY < 0) && (zoom * 1.05 <= MAX_ZOOM)) {
+              setZoom(zoom * 1.05);
+              setOffsetX(offsetX * 1.05);
+              setOffsetY(offsetY * 1.05);
             }
           }}
           onMouseDownCapture={mouseDown}
@@ -274,7 +204,7 @@ export default function VisWindowFrame(
               '--offset-x': `${offsetX}px`,
               '--offset-y': `${offsetY}px`,
             } as React.CSSProperties}
-            className="relative z-10 pointer-events-none transition-none w-min h-min top-1/2 left-1/2 translate-x-[calc(-50%+var(--offset-x))] translate-y-[calc(-50%+var(--offset-y))] scale-(--zoom)"
+            className="relative z-10 pointer-events-none transition-none! w-min h-min top-1/2 left-1/2 translate-x-[calc(-50%+var(--offset-x))] translate-y-[calc(-50%+var(--offset-y))] scale-(--zoom)"
           >
             {children}
           </div>
@@ -282,7 +212,7 @@ export default function VisWindowFrame(
 
         {
           (offsetX !== 0.0 || offsetY !== 0.0) && (
-            <div className="flex items-center relative w-full h-0 overflow-visible px-2 justify-end z-20 -translate-y-7">
+            <div className="flex items-center w-full h-0 overflow-visible px-2 z-20 relative justify-start -translate-y-7 portrait:absolute portrait:justify-end portrait:-translate-y-7 portrait:-translate-x-10.5">
               <IconButton
                 variant="ghost"
                 aria-label="Re-center View"
@@ -299,23 +229,110 @@ export default function VisWindowFrame(
           )
         }
 
-        <div className="flex gap-1 items-center justify-end p-2 border-[#d8d8dc] dark:border-[#38383c] border-t bg-[#ffffff] dark:bg-[#18181c] portrait:justify-center">
-          <div className="w-64 max-w-full mx-1">
+        <div className="flex gap-1 items-center relative w-full h-0 overflow-visible px-2 justify-end z-20 -translate-y-7 portrait:justify-center">
+          <div className="w-64 max-w-full mx-0.5">
             <Progress
-              value={((zoom <= 1) ? zoom / 2 : (0.5 + ((zoom - 1) / 8))) * 100}
+              value={
+                (
+                  SPEEDS.findIndex(
+                    s => s == DEFAULT_SPEED / (speed || DEFAULT_SPEED),
+                  ) + 1
+                ) / 18 * 100
+              }
+              onWheel={
+                e => scrollLockProgress(e, (e) => {
+                  if (speed === null) return;
+
+                  if ((e.deltaY > 0)) {
+                    setSpeed(getNextSpeed(speed, -1));
+                  } else if ((e.deltaY < 0)) {
+                    setSpeed(getNextSpeed(speed, 1));
+                  }
+                }, 5)
+              }
+              onMouseDownCapture={
+                e => mouseDownProgress(e, 0, 17, 1, setSpeedInt)
+              }
+              onTouchStartCapture={
+                e => mouseDownProgress(e, 0, 17, 1, setSpeedInt)
+              }
+              data-parent
               className="rounded-lg h-8 w-full border border-[#d8d8dc] dark:border-[#38383c] bg-[#ffffff] dark:bg-[#18181c]"
             >
               <Progress.Bar className="bg-[dodgerblue]" />
             </Progress>
             <Typography className="text-base font-medium pointer-events-none relative text-center w-full h-0 overflow-visible z-30 -translate-y-7">
-              {`Zoom: ${Math.round(zoom * 100)}%`}
+              {`Speed: ${DEFAULT_SPEED / (speed || DEFAULT_SPEED)}x`}
+            </Typography>
+          </div>
+          <IconButton
+            variant="ghost"
+            aria-label="Decrease Speed"
+            title="Decrease Speed"
+            onClick={() => setSpeed(getNextSpeed((speed || DEFAULT_SPEED), -1))}
+            className="cursor-pointer"
+          >
+            <Rewind className="stroke-2 w-5.5 h-5.5" role="presentation" />
+          </IconButton>
+          <IconButton
+            variant="ghost"
+            aria-label="Increase Speed"
+            title="Increase Speed"
+            onClick={() => setSpeed(getNextSpeed((speed || DEFAULT_SPEED), 1))}
+            className="cursor-pointer"
+          >
+            <Forward className="stroke-2 w-5.5 h-5.5" role="presentation" />
+          </IconButton>
+          <IconButton
+            variant="ghost"
+            aria-label="Reset Speed"
+            title="Reset Speed"
+            onClick={() => setSpeed(DEFAULT_SPEED)}
+            className="cursor-pointer"
+          >
+            <UndoAction className="stroke-2 w-6 h-6" role="presentation" />
+          </IconButton>
+        </div>
+
+        <div className="flex gap-1 items-center justify-end p-2 border-[#d8d8dc] dark:border-[#38383c] border-t bg-[#ffffff] dark:bg-[#18181c] portrait:justify-center">
+          <div className="w-64 max-w-full mx-0.5">
+            <Progress
+              value={(zoom || DEFAULT_ZOOM) / 5 * 100}
+              onWheel={
+                e => scrollLockProgress(e, (e) => {
+                  if (zoom === null) return;
+
+                  if ((e.deltaY > 0) && (zoom - 0.1 >= MIN_ZOOM)) {
+                    setZoom(zoom - 0.1);
+                  } else if ((e.deltaY < 0) && (zoom + 0.1 <= 5.0)) {
+                    setZoom(zoom + 0.1);
+                  }
+                }, 4)
+              }
+              onMouseDownCapture={
+                e => mouseDownProgress(e, 0, 5, 0.1, setZoom)
+              }
+              onTouchStartCapture={
+                e => mouseDownProgress(e, 0, 5, 0.1, setZoom)
+              }
+              data-parent
+              className="rounded-lg h-8 w-full border border-[#d8d8dc] dark:border-[#38383c] bg-[#ffffff] dark:bg-[#18181c]"
+            >
+              <Progress.Bar className="bg-[dodgerblue]" />
+            </Progress>
+            <Typography className="text-base font-medium pointer-events-none relative text-center w-full h-0 overflow-visible z-30 -translate-y-7">
+              {`Zoom: ${Math.round((zoom || DEFAULT_ZOOM) * 100)}%`}
             </Typography>
           </div>
           <IconButton
             variant="ghost"
             aria-label="Zoom Out"
             title="Zoom Out"
-            onClick={() => setZoom((zoom - 0.1 >= 0.1) ? zoom - 0.1 : 0.1)}
+            onClick={() => setZoom(
+              ((zoom || DEFAULT_ZOOM) - 0.1 >= MIN_ZOOM) ?
+                (zoom || DEFAULT_ZOOM) - 0.1 :
+                MIN_ZOOM,
+            )}
             className="cursor-pointer"
           >
             <Minus className="stroke-2 w-6 h-6" role="presentation" />
@@ -324,7 +341,11 @@ export default function VisWindowFrame(
             variant="ghost"
             aria-label="Zoom In"
             title="Zoom In"
-            onClick={() => setZoom((zoom + 0.1 <= 40.0) ? zoom + 0.1 : 40.0)}
+            onClick={() => setZoom(
+              ((zoom || DEFAULT_ZOOM) + 0.1 <= MAX_ZOOM) ?
+                (zoom || DEFAULT_ZOOM) + 0.1 :
+                MAX_ZOOM,
+            )}
             className="cursor-pointer"
           >
             <Plus className="stroke-2 w-6 h-6" role="presentation" />
@@ -333,10 +354,10 @@ export default function VisWindowFrame(
             variant="ghost"
             aria-label="Reset Zoom"
             title="Reset Zoom"
-            onClick={() => setZoom(1.0)}
+            onClick={() => setZoom(DEFAULT_ZOOM)}
             className="cursor-pointer"
           >
-            <ArrowEmailForward className="stroke-2 w-5 h-5 -scale-x-100" role="presentation" />
+            <UndoAction className="stroke-2 w-6 h-6" role="presentation" />
           </IconButton>
         </div>
       </div>

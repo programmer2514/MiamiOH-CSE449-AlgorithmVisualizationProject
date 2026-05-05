@@ -61,80 +61,83 @@ export default function VisBuilder(
     if (filtered_dat) {
       for (const action of filtered_dat) {
         switch (action.cmd) {
-          // ---------------------------------------------------------------- //
           case 'vis_init':
             temp_data.data = action.params.data;
             temp_data.type = action.params.type;
             break;
 
-          // ---------------------------------------------------------------- //
-          case 'vis_log': // TODO
+          case 'vis_log':
+            temp_data.logs.push(action.params);
             break;
 
-          // ---------------------------------------------------------------- //
           case 'vis_mark':
-            if (!temp_data.marks[action.params.index])
-              temp_data.marks[action.params.index] = [];
+            {
+              const idx = action.params.index;
 
-            for (
-              let i = 0; i < temp_data.marks[action.params.index].length; i++
-            ) {
-              if (
-                temp_data.marks[action.params.index][i]
-                  .type === action.params.type
-              ) {
-                temp_data.marks[action.params.index].splice(i, 1);
+              if (!temp_data.marks[idx]) {
+                temp_data.marks[idx] = [];
               }
-            }
 
-            temp_data.marks[action.params.index].push({
-              type: action.params.type,
-              color: action.params.color,
-              value: action.params.value || '',
-            });
+              for (let i = 0; i < temp_data.marks[idx].length; i++) {
+                if (temp_data.marks[idx][i].type === action.params.type) {
+                  temp_data.marks[idx].splice(i, 1);
+                }
+              }
+
+              temp_data.marks[idx].push({
+                type: action.params.type,
+                color: action.params.color,
+                value: action.params.value || '',
+              });
+            }
             break;
 
-          // ---------------------------------------------------------------- //
           case 'vis_unmark':
-            if (action.params.type === 'all') {
-              temp_data.marks[action.params.index] = [];
-              break;
-            }
+            {
+              const idx = action.params.index;
 
-            for (
-              let i = 0; i < temp_data.marks[action.params.index].length; i++
-            ) {
-              if (
-                temp_data.marks[action.params.index][i]
-                  .type === action.params.type
-              ) {
-                temp_data.marks[action.params.index].splice(i, 1);
+              if (action.params.type === 'all') {
+                temp_data.marks[idx] = [];
+                break;
+              }
+
+              for (let i = 0; i < temp_data.marks[idx].length; i++) {
+                if (temp_data.marks[idx][i].type === action.params.type) {
+                  temp_data.marks[idx].splice(i, 1);
+                }
               }
             }
             break;
 
-          // ---------------------------------------------------------------- //
-          case 'vis_insert': // TODO
+          case 'vis_insert':
+            temp_data.data.splice(action.params.index, 0, action.params.value);
             break;
 
-          // ---------------------------------------------------------------- //
-          case 'vis_delete': // TODO
+          case 'vis_delete':
+            temp_data.data.splice(action.params.index, 1);
             break;
 
-          // ---------------------------------------------------------------- //
-          case 'vis_update': // TODO
+          case 'vis_update':
+            temp_data.data[action.params.index] = action.params.value;
             break;
 
-          // ---------------------------------------------------------------- //
-          case 'vis_swap': // TODO
+          case 'vis_swap':
+            {
+              const idx = action.params.index;
+              const idx2 = action.params.index2;
+
+              const temp = temp_data.data[idx];
+              temp_data.data[idx] = temp_data.data[idx2];
+              temp_data.data[idx2] = temp;
+            }
             break;
 
-          // ---------------------------------------------------------------- //
-          case 'vis_sort': // TODO
+          case 'vis_sort': // TODO: Make sure this works
+            temp_data.data.sort((a: any, b: any) => a - b);
             break;
 
-          // ---------------------------------------------------------------- //
-          default:
+          default: // This should never happen
+            alert(JSON.stringify(action, null, 2));
             break;
         }
       }
@@ -150,7 +153,7 @@ export default function VisBuilder(
     <>
       <VisRenderer data={data} />
       <pre className="hidden">
-        {JSON.stringify(data, null, 2)}
+        {JSON.stringify(data, null, 2) /* TODO: Remove this */}
       </pre>
     </>
   );

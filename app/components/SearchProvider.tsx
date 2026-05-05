@@ -30,10 +30,10 @@ export default function SearchProvider(
     cards,
   }:
   {
-    cards: {
-      img: [string, string] | string
+    cards: readonly {
+      img: readonly [string, string] | string
       title: string
-      tags: string[]
+      tags: readonly string[]
       href: string
     }[]
   },
@@ -63,6 +63,32 @@ export default function SearchProvider(
     } else {
       setActiveTags([...(activeTags || []), tag]);
     }
+  }
+
+  // Allow search queries to be modified to match special sequences
+  // (e.g. ^n for superscript n)
+  function formatSearch(search: string) {
+    if (typeof (formatSearch as any).regexes === 'undefined') {
+      (formatSearch as any).regexes = [
+        [new RegExp(`\\^0`, 'g'), '\u2070'], // Superscript 0
+        [new RegExp(`\\^1`, 'g'), '\u00B9'], // Superscript 1
+        [new RegExp(`\\^2`, 'g'), '\u00B2'], // Superscript 2
+        [new RegExp(`\\^3`, 'g'), '\u00B3'], // Superscript 3
+        [new RegExp(`\\^4`, 'g'), '\u2074'], // Superscript 4
+        [new RegExp(`\\^5`, 'g'), '\u2075'], // Superscript 5
+        [new RegExp(`\\^6`, 'g'), '\u2076'], // Superscript 6
+        [new RegExp(`\\^7`, 'g'), '\u2077'], // Superscript 7
+        [new RegExp(`\\^8`, 'g'), '\u2078'], // Superscript 8
+        [new RegExp(`\\^9`, 'g'), '\u2079'], // Superscript 9
+        [new RegExp(`\\^n`, 'g'), '\u207F'], // Superscript n
+      ];
+    }
+
+    for (const regex of (formatSearch as any).regexes) {
+      search = search.replace(regex[0], regex[1]);
+    }
+
+    return search;
   }
 
   return (
@@ -189,9 +215,9 @@ export default function SearchProvider(
               (card) => {
                 return !(search || '') ||
                   card.props.title.toLowerCase()
-                    .includes((search || '').toLowerCase()) ||
+                    .includes((formatSearch(search!) || '').toLowerCase()) ||
                     card.props.tags.some((tag: string) => tag.toLowerCase()
-                      .includes((search || '').toLowerCase()));
+                      .includes((formatSearch(search!) || '').toLowerCase()));
               },
             )
             .sort( // Sort by selected sort option
