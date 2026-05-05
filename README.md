@@ -2,6 +2,7 @@
 
 The Algorithms Visualization Project is a web-based educational tool that helps users understand the logic and behavior of classic algorithms through step-by-step visualizations, pseudocode synchronization, and a “Test Yourself” interactive mode. The platform is designed to promote active learning, reinforce key algorithmic concepts, and allow for user interaction at each stage.
 
+*This is a clone of an internal GitLab repository and is likely outdated*
 
 ## Technical Details
   - **Base:** Node.js
