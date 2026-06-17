@@ -14,10 +14,33 @@ export default function useResolveColor() {
       case 'fg':
         return 'rgb(var(--color-primary) / 1)';
 
+      case 'bg':
+        return isDark ? '#1d1d20' : '#fafafc';
+
+      case 'red':
+        switch (type) {
+          case 'outline':
+            return 'firebrick';
+          default:
+            return 'red';
+        }
+
+      case 'orange':
+        switch (type) {
+          case 'outline':
+            return 'darkorange';
+          case 'highlight':
+            return isDark ? 'darkorange' : 'orange';
+          default:
+            return 'orange';
+        }
+
       case 'yellow':
         switch (type) {
           case 'outline':
-            return isDark ? 'goldenrod' : 'darkgoldenrod';
+            return 'goldenrod';
+          case 'highlight':
+            return 'gold';
           default:
             return 'yellow';
         }
@@ -30,6 +53,26 @@ export default function useResolveColor() {
             return isDark ? 'lime' : 'limegreen';
           default:
             return 'green';
+        }
+
+      case 'blue':
+        switch (type) {
+          case 'outline':
+            return isDark ? 'royalblue' : 'blue';
+          case 'highlight':
+            return 'royalblue';
+          default:
+            return 'blue';
+        }
+
+      case 'purple':
+        switch (type) {
+          case 'outline':
+            return isDark ? 'mediumpurple' : 'purple';
+          case 'highlight':
+            return isDark ? 'mediumorchid' : 'mediumpurple';
+          default:
+            return 'purple';
         }
 
       // By default, assume color is already a valid CSS color string
