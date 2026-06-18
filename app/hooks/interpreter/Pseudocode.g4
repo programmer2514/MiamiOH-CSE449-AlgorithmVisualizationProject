@@ -16,6 +16,7 @@ statement       : metadata* (
                   | whileLoop
                   | returnStatement
                   | breakStatement
+                  | continueStatement
                   ) (SEMI | NL)*;
 
 // Supports standard '=' as well as '+=' and '-='
@@ -25,14 +26,15 @@ assignment      : assignable (EQ | PLUS_EQ | MINUS_EQ) (expression | arrayInitia
 assignable      : ID | ID LBRACK expression RBRACK ;
 
 arrayInitialization
-    : ARR LBRACK NL* from=expression TO NL* to=expression NL* RBRACK               # RangeArray
+    : ARR LBRACK NL* from=expression TO NL* to=expression NL* (STEP step=expression NL*)? RBRACK               # RangeArray
     | ARR LPAREN NL* size=expression (COMMA NL* defaultVal=expression)? NL* RPAREN # SizeArray
     | ARR LBRACK NL* expressionList NL* RBRACK                                      # ValueArray
     ;
 
 // Metadata integration for variables, functions, and loops
+// The warning thrown here can be safely ignored
 metadata        : AT ID LT metadataParams? GT;
-metadataParams  : metadataParam (COMMA metadataParam)*;
+metadataParams  : metadataParam? (COMMA metadataParam)*;
 metadataParam   : ID | expression;
 
 // Shared block rule — used by all compound statements
@@ -52,7 +54,7 @@ forLoop         : FOR LPAREN assignment (COMMA | SEMI) expression (COMMA | SEMI)
 whileLoop       : WHILE LPAREN? expression RPAREN? COLON NL+ block END WHILE;
 
 // Do-while loop to support the Hoare Partition script
-doWhileLoop     : DO COLON? NL+ block WHILE LPAREN expression RPAREN;
+doWhileLoop     : DO COLON? NL+ block WHILE LPAREN? expression RPAREN?;
 
 ifStatement     : IF LPAREN? expression RPAREN? COLON NL+ block
                   (ELSEIF LPAREN? expression RPAREN? COLON NL+ block)*
@@ -90,6 +92,7 @@ powerExpression          : left=unaryExpression (op+=POWER right+=unaryExpressio
 
 unaryExpression
     : MINUS unaryExpression  # UnaryMinusExpr
+    | NOT unaryExpression    # UnaryNotExpr
     | primaryExpression      # PrimaryExpr
     ;
 
@@ -127,6 +130,8 @@ DO      : 'do';
 BREAK   : 'break';
 AND     : 'and';
 OR      : 'or';
+NOT     : 'not';
+STEP    : 'step';
 CONTINUE : 'continue';
 
 // Literals
