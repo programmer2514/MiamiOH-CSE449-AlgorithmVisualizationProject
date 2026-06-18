@@ -94,12 +94,17 @@ export default class TraceInterpreterVisitor
     if (!paramsCtx) return null;
 
     const params = paramsCtx.metadataParam().map((p) => {
-      const text = p.getText();
-      if (text.startsWith('"') && text.endsWith('"')) return text.slice(1, -1);
-      if (!isNaN(Number(text))) return Number(text);
+      const text = p.ID()?.getText();
 
-      const memVal = this.memory.get(text);
-      if (memVal !== undefined && typeof memVal === 'number') return memVal;
+      if (!text) {
+        return this.visit(p.expression()!);
+      } else {
+        if (text.startsWith('"') && text.endsWith('"')) return text.slice(1, -1);
+        if (!isNaN(Number(text))) return Number(text);
+
+        const memVal = this.memory.get(text);
+        if (memVal !== undefined) return memVal;
+      }
 
       return text;
     });

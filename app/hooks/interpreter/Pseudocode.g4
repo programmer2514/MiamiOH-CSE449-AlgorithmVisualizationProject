@@ -5,7 +5,8 @@ program         : (statement | NL)* EOF;
 
 // Statements can end with newlines or optional semicolons
 statement       : metadata* (
-                    assignment
+                    metadata
+                  | assignment
                   | functionDecl
                   | functionCallStmt
                   | forEachLoop
@@ -18,7 +19,7 @@ statement       : metadata* (
                   ) (SEMI | NL)*;
 
 // Supports standard '=' as well as '+=' and '-='
-assignment      : metadata* assignable (EQ | PLUS_EQ | MINUS_EQ) (expression | arrayInitialization) ;
+assignment      : assignable (EQ | PLUS_EQ | MINUS_EQ) (expression | arrayInitialization) ;
 
 // Supports variable assignment and array index assignment (e.g., arr[j+1] = key)
 assignable      : ID | ID LBRACK expression RBRACK ;
@@ -32,7 +33,7 @@ arrayInitialization
 // Metadata integration for variables, functions, and loops
 metadata        : AT ID LT metadataParams? GT;
 metadataParams  : metadataParam (COMMA metadataParam)*;
-metadataParam   : ID | INT | FLOAT | STRING;
+metadataParam   : ID | expression;
 
 // Shared block rule — used by all compound statements
 block           : statement* ;
@@ -43,10 +44,10 @@ paramList       : param (COMMA param)*;
 param           : metadata* ID;
 
 // Optional parentheses for 'for-each' loops
-forEachLoop     : FOR metadata* LPAREN? ID IN ID RPAREN? COLON NL+ block END FOR;
+forEachLoop     : FOR LPAREN? ID IN ID RPAREN? COLON NL+ block END FOR;
 
 // Traditional for-loop (supports both commas and semicolons as separators)
-forLoop         : FOR metadata* LPAREN assignment (COMMA | SEMI) expression (COMMA | SEMI) assignment RPAREN COLON NL+ block END FOR;
+forLoop         : FOR LPAREN assignment (COMMA | SEMI) expression (COMMA | SEMI) assignment RPAREN COLON NL+ block END FOR;
 
 whileLoop       : WHILE LPAREN? expression RPAREN? COLON NL+ block END WHILE;
 
@@ -60,7 +61,7 @@ ifStatement     : IF LPAREN? expression RPAREN? COLON NL+ block
 
 functionCallStmt: ID LPAREN expressionList? RPAREN;
 
-returnStatement : metadata* RETURN expression;
+returnStatement : RETURN expression;
 breakStatement  : BREAK;
 continueStatement : CONTINUE;
 
