@@ -29,7 +29,7 @@ import {
   LogicalOrExpressionContext,
   ForLoopContext,
   DoWhileLoopContext,
-  BreakStatementContext
+  BreakStatementContext,
 } from './.antlr/PseudocodeParser';
 import { TraceStep, TraceAction } from './TraceType';
 
@@ -48,12 +48,14 @@ export default class TraceInterpreterVisitor
   private lastComparisonLeft: any = null;
   private lastComparisonRight: any = null;
   private lastComparisonOp: string = '';
-  private recentArrayAccesses: Array<{ index: number; arrayName: string }> = [];
+  private recentArrayAccesses: Array<{ index: number, arrayName: string }> = [];
   private isReferenceMode: boolean = false;
 
   private lastFlushedMarkedIndices: number[] = [];
 
-  protected defaultResult(): any { return null; }
+  protected defaultResult(): any {
+    return null;
+  }
 
   protected aggregateResult(aggregate: any, nextResult: any): any {
     if (aggregate !== null && aggregate !== undefined) return aggregate;
@@ -61,7 +63,9 @@ export default class TraceInterpreterVisitor
   }
 
   private get memory(): Scope {
-    return this.callStack.length > 0 ? this.callStack[this.callStack.length - 1] : this.globalScope;
+    return this.callStack.length > 0 ?
+      this.callStack[this.callStack.length - 1] :
+      this.globalScope;
   }
 
   private addStep(line: number | number[], actions: TraceAction[]) {
@@ -72,10 +76,10 @@ export default class TraceInterpreterVisitor
         action.params.value = 'undefined';
         safeActions.push({
           cmd: 'vis_log',
-          params: { 
-            level: 'error', 
-            text: `Evaluation Error: '${action.params.name}' resulted in undefined. Check your syntax.` 
-          }
+          params: {
+            level: 'error',
+            text: `Evaluation Error: '${action.params.name}' resulted in undefined. Check your syntax.`,
+          },
         });
       }
       safeActions.push(action);
@@ -131,7 +135,7 @@ export default class TraceInterpreterVisitor
     return action;
   }
 
-private extractMetadataActions(ctx: any): TraceAction[] {
+  private extractMetadataActions(ctx: any): TraceAction[] {
     const actions: TraceAction[] = [];
     if (typeof ctx.metadata === 'function') {
       const metadataList = ctx.metadata();
@@ -143,8 +147,8 @@ private extractMetadataActions(ctx: any): TraceAction[] {
       }
     }
     if (
-      ctx.parent && 
-      typeof ctx.parent.metadata === 'function' && 
+      ctx.parent &&
+      typeof ctx.parent.metadata === 'function' &&
       ctx.parent.constructor.name === 'StatementContext'
     ) {
       const parentMetadataList = ctx.parent.metadata();
@@ -171,7 +175,7 @@ private extractMetadataActions(ctx: any): TraceAction[] {
     const annotatedOutlineIndices = new Set(
       extraActions
         .filter(a => a.cmd === 'vis_mark' && a.params.type === 'outline')
-        .map(a => a.params.index as number)
+        .map(a => a.params.index as number),
     );
 
     if (this.recentArrayAccesses.length > 0) {
@@ -181,7 +185,9 @@ private extractMetadataActions(ctx: any): TraceAction[] {
         }
         this.lastFlushedMarkedIndices.push(access.index);
       }
-      targetIndex = this.recentArrayAccesses[this.recentArrayAccesses.length - 1].index;
+      targetIndex = this.recentArrayAccesses[
+        this.recentArrayAccesses.length - 1
+      ].index;
     } else if (this.activeLoopIndices.length > 0) {
       targetIndex = this.activeLoopIndices[this.activeLoopIndices.length - 1];
       if (!annotatedOutlineIndices.has(targetIndex)) {
@@ -190,7 +196,10 @@ private extractMetadataActions(ctx: any): TraceAction[] {
       this.lastFlushedMarkedIndices.push(targetIndex);
     }
 
-    if (targetIndex !== null && this.lastComparisonLeft !== null && this.lastComparisonRight !== null && this.lastComparisonOp) {
+    if (
+      targetIndex !== null && this.lastComparisonLeft !== null &&
+      this.lastComparisonRight !== null && this.lastComparisonOp
+    ) {
       actions.push({
         cmd: 'vis_mark',
         params: { index: targetIndex, type: 'text', color: 'fg', value: `${this.lastComparisonLeft} ${this.lastComparisonOp} ${this.lastComparisonRight}?` },
@@ -207,8 +216,9 @@ private extractMetadataActions(ctx: any): TraceAction[] {
     this.lastComparisonOp = '';
   }
 
-  // Called whenever the visualizer marks are fully resolved (swap or scope exit),
-  // so that lastFlushedMarkedIndices doesn't carry stale indices into the next scope.
+  // Called whenever the visualizer marks are fully resolved (swap or scope
+  // exit), so that lastFlushedMarkedIndices doesn't carry stale indices into
+  // the next scope.
   private clearFlushedMarks() {
     this.lastFlushedMarkedIndices = [];
   }
@@ -232,16 +242,18 @@ private extractMetadataActions(ctx: any): TraceAction[] {
     return null;
   }
 
-  visitBreakStatement(ctx: BreakStatementContext): any {
+  visitBreakStatement(_: BreakStatementContext): any {
     return { __type: 'break' };
   }
 
-visitAssignment(ctx: AssignmentContext): any {
+  visitAssignment(ctx: AssignmentContext): any {
     const assignableCtx = ctx.assignable();
     const name = assignableCtx.ID().getText();
     const isArrayAccess = !!assignableCtx.LBRACK();
 
-    let value = ctx.arrayInitialization() ? this.visit(ctx.arrayInitialization()!) : this.visit(ctx.expression()!);
+    let value = ctx.arrayInitialization() ?
+      this.visit(ctx.arrayInitialization()!) :
+      this.visit(ctx.expression()!);
 
     if (!isArrayAccess) {
       if (ctx.PLUS_EQ()) value = (this.memory.get(name) || 0) + value;
@@ -259,14 +271,14 @@ visitAssignment(ctx: AssignmentContext): any {
         if (ctx.PLUS_EQ()) value = arr[index] + value;
         else if (ctx.MINUS_EQ()) value = arr[index] - value;
         arr[index] = value;
-        
+
         // FIX 1: Extract metadata AFTER updating memory!
         const metadataActions = this.extractMetadataActions(ctx);
-        
+
         const actions: TraceAction[] = [...metadataActions,
           { cmd: 'vis_mark', params: { index, type: 'highlight', color: 'green' } },
           { cmd: 'vis_update', params: { index, value } },
-          { cmd: 'var_add', params: { name, value: [...arr] } }
+          { cmd: 'var_add', params: { name, value: [...arr] } },
         ];
         this.addStep(ctx.start!.line, actions);
       }
@@ -277,7 +289,7 @@ visitAssignment(ctx: AssignmentContext): any {
     const snapshotValue = Array.isArray(value) ? [...value] : value;
     const metadataActions = this.extractMetadataActions(ctx);
 
-    metadataActions.forEach(action => {
+    metadataActions.forEach((action) => {
       if (action.cmd === 'vis_init') {
         action.params.data = snapshotValue;
       }
@@ -285,9 +297,11 @@ visitAssignment(ctx: AssignmentContext): any {
 
     if (typeof value === 'number' && this.recentArrayAccesses.length > 0) {
       const unmarkActions: TraceAction[] = [...metadataActions];
-      const accessedIndices = new Set(this.recentArrayAccesses.map((a) => a.index));
+      const accessedIndices = new Set(
+        this.recentArrayAccesses.map(a => a.index),
+      );
       const explicitMarks = new Set(
-        metadataActions.filter(a => a.cmd === 'vis_mark').map(a => a.params.index)
+        metadataActions.filter(a => a.cmd === 'vis_mark').map(a => a.params.index),
       );
 
       for (const idx of accessedIndices) {
@@ -308,7 +322,7 @@ visitAssignment(ctx: AssignmentContext): any {
   visitValueArray(ctx: ValueArrayContext): any[] {
     return ctx.expressionList().expression().map((e) => {
       const val = this.visit(e);
-      return typeof val === 'number' ? val : parseInt(String(val), 10);
+      return val;
     });
   }
 
@@ -322,7 +336,9 @@ visitAssignment(ctx: AssignmentContext): any {
 
   visitSizeArray(ctx: SizeArrayContext): any[] {
     const size = Math.floor(this.visit(ctx._size!));
-    const defaultVal = ctx._defaultVal != null ? this.visit(ctx._defaultVal) : 0;
+    const defaultVal = ctx._defaultVal != null ?
+      this.visit(ctx._defaultVal) :
+      0;
     return new Array(size).fill(defaultVal);
   }
 
@@ -341,7 +357,8 @@ visitAssignment(ctx: AssignmentContext): any {
 
   visitFunctionCallStmt(ctx: FunctionCallStmtContext): any {
     const metadataActions = this.extractMetadataActions(ctx);
-    if (metadataActions.length > 0) this.addStep(ctx.start!.line, metadataActions);
+    if (metadataActions.length > 0)
+      this.addStep(ctx.start!.line, metadataActions);
 
     const funcName = ctx.ID().getText();
     const exprList = ctx.expressionList();
@@ -393,7 +410,17 @@ visitAssignment(ctx: AssignmentContext): any {
 
   executeFunction(name: string, args: any[], callLine: number) {
     const funcCtx = this.functions.get(name);
-    if (!funcCtx) return;
+    if (!funcCtx) {
+      try {
+        return eval(`Math.${name}(${args.map(a => JSON.stringify(a)).join(',')})`);
+      } catch {
+        try {
+          return eval(`${name}(${args.map(a => JSON.stringify(a)).join(',')})`);
+        } catch {
+          return undefined;
+        }
+      }
+    }
     const paramCtxs = funcCtx.paramList()?.param() || [];
     const newScope: Scope = new Map();
     const initActions: TraceAction[] = [];
@@ -424,7 +451,8 @@ visitAssignment(ctx: AssignmentContext): any {
 
     const funcBlock: BlockContext | null = funcCtx.block();
     let entryLine = funcCtx.start!.line;
-    if (funcBlock && funcBlock.statement(0)) entryLine = funcBlock.statement(0)!.start!.line;
+    if (funcBlock && funcBlock.statement(0))
+      entryLine = funcBlock.statement(0)!.start!.line;
     this.addStep(entryLine, initActions);
     this.clearFlushedMarks();
 
@@ -483,7 +511,7 @@ visitAssignment(ctx: AssignmentContext): any {
     }
   }
 
-visitWhileLoop(ctx: WhileLoopContext): any {
+  visitWhileLoop(ctx: WhileLoopContext): any {
     let limit = 1000;
 
     while (true) {
@@ -506,6 +534,7 @@ visitWhileLoop(ctx: WhileLoopContext): any {
       if (broke) break;
     }
   }
+
   visitDoWhileLoop(ctx: DoWhileLoopContext): any {
     let limit = 1000;
     do {
@@ -582,20 +611,25 @@ visitWhileLoop(ctx: WhileLoopContext): any {
         break;
       }
     }
-    if (matchedBlockIndex === -1 && blocks.length > expressions.length) matchedBlockIndex = blocks.length - 1;
+    if (matchedBlockIndex === -1 && blocks.length > expressions.length)
+      matchedBlockIndex = blocks.length - 1;
     if (matchedBlockIndex !== -1) {
       const stmts = blocks[matchedBlockIndex].statement();
       if (stmts) {
         for (const stmt of stmts) {
           if (stmt.returnStatement()) {
             let idx = null;
-            if (this.recentArrayAccesses.length > 0) idx = this.recentArrayAccesses[this.recentArrayAccesses.length - 1].index;
-            else if (this.activeLoopIndices.length > 0) idx = this.activeLoopIndices[this.activeLoopIndices.length - 1];
+            if (this.recentArrayAccesses.length > 0)
+              idx = this.recentArrayAccesses[
+                this.recentArrayAccesses.length - 1
+              ].index;
+            else if (this.activeLoopIndices.length > 0)
+              idx = this.activeLoopIndices[this.activeLoopIndices.length - 1];
 
             if (idx !== null) {
               this.addStep(stmt.start!.line, [
                 { cmd: 'vis_mark', params: { index: idx, type: 'outline', color: 'green' } },
-                { cmd: 'vis_mark', params: { index: idx, type: 'highlight', color: 'green' } }
+                { cmd: 'vis_mark', params: { index: idx, type: 'highlight', color: 'green' } },
               ]);
             }
           }
@@ -617,7 +651,8 @@ visitWhileLoop(ctx: WhileLoopContext): any {
     const rights = ctx._right;
     if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
     const rightArray = Array.isArray(rights) ? rights : [rights];
-    for (let i = 0; i < rightArray.length; i++) left = left || this.visit(rightArray[i]);
+    for (let i = 0; i < rightArray.length; i++)
+      left = left || this.visit(rightArray[i]);
     return left;
   }
 
@@ -626,7 +661,8 @@ visitWhileLoop(ctx: WhileLoopContext): any {
     const rights = ctx._right;
     if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
     const rightArray = Array.isArray(rights) ? rights : [rights];
-    for (let i = 0; i < rightArray.length; i++) left = left && this.visit(rightArray[i]);
+    for (let i = 0; i < rightArray.length; i++)
+      left = left && this.visit(rightArray[i]);
     return left;
   }
 
@@ -649,12 +685,24 @@ visitWhileLoop(ctx: WhileLoopContext): any {
       this.lastComparisonOp = opText;
 
       switch (opText) {
-        case '==': left = left === right; break;
-        case '!=': left = left !== right; break;
-        case '<':  left = left < right; break;
-        case '>':  left = left > right; break;
-        case '<=': left = left <= right; break;
-        case '>=': left = left >= right; break;
+        case '==':
+          left = left === right;
+          break;
+        case '!=':
+          left = left !== right;
+          break;
+        case '<':
+          left = left < right;
+          break;
+        case '>':
+          left = left > right;
+          break;
+        case '<=':
+          left = left <= right;
+          break;
+        case '>=':
+          left = left >= right;
+          break;
       }
     }
     return left;
@@ -691,7 +739,7 @@ visitWhileLoop(ctx: WhileLoopContext): any {
       const opText = opArray[i].text!;
       if (opText === '*') left = left * right;
       else if (opText === '/') left = left / right;
-      else if (opText === '%') left = left % Math.floor(right); 
+      else if (opText === '%') left = left % Math.floor(right);
     }
     return left;
   }
@@ -701,12 +749,18 @@ visitWhileLoop(ctx: WhileLoopContext): any {
     const rights = ctx._right;
     if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
     const rightArray = Array.isArray(rights) ? rights : [rights];
-    for (let i = 0; i < rightArray.length; i++) left = Math.pow(left, this.visit(rightArray[i]));
+    for (let i = 0; i < rightArray.length; i++)
+      left = Math.pow(left, this.visit(rightArray[i]));
     return left;
   }
 
-  visitParenExpression(ctx: ParenExpressionContext): any { return this.visit(ctx.expression()!); }
-  visitUnaryMinusExpr(ctx: UnaryMinusExprContext): any { return -this.visit(ctx.unaryExpression()!); }
+  visitParenExpression(ctx: ParenExpressionContext): any {
+    return this.visit(ctx.expression()!);
+  }
+
+  visitUnaryMinusExpr(ctx: UnaryMinusExprContext): any {
+    return -this.visit(ctx.unaryExpression()!);
+  }
 
   visitArrayAccessExpression(ctx: ArrayAccessExpressionContext): any {
     const arrayName = ctx.ID().getText();
@@ -750,12 +804,13 @@ visitWhileLoop(ctx: WhileLoopContext): any {
   }
 
   visitExpressionList(ctx: ExpressionListContext): any[] {
-    return ctx.expression().map((e) => this.visit(e));
+    return ctx.expression().map(e => this.visit(e));
   }
 
   visitReturnStatement(ctx: ReturnStatementContext): any {
     const metadataActions = this.extractMetadataActions(ctx);
-    if (metadataActions.length > 0) this.addStep(ctx.start!.line, metadataActions);
+    if (metadataActions.length > 0)
+      this.addStep(ctx.start!.line, metadataActions);
     return this.visit(ctx.expression()!);
   }
 }

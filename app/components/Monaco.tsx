@@ -10,6 +10,8 @@ import Defs from '../defs';
 
 import DarkModeContext from '../contexts/DarkModeContext';
 
+const errorParser = /Error: \[line (\d+):\d+\] (.*)/;
+
 /**
  * Renders the Monaco code editor. Allows highlighting and editing through the
  * passed-in props.
@@ -26,6 +28,8 @@ import DarkModeContext from '../contexts/DarkModeContext';
  *        The line ranges to highlight
  * @param {(number | [number, number] | null)[]} props.greyouts
  *        The line ranges to grey out
+ * @param {string[]} props.errors
+ *        The errors to display
  * @param {boolean} props.editing
  *        Whether the editor is in editing mode
  * @param {boolean} props.bindSrc
@@ -38,6 +42,7 @@ export default function Monaco(
     setSrc,
     highlights,
     greyouts,
+    errors,
     editing,
     bindSrc,
   }:
@@ -47,6 +52,7 @@ export default function Monaco(
     setSrc: (src: string) => void
     highlights: (number | [number, number] | null)[]
     greyouts: (number | [number, number] | null)[]
+    errors: string[]
     editing: boolean
     bindSrc: boolean
   },
@@ -74,7 +80,7 @@ export default function Monaco(
 
     monaco[0].setValue(
       (!editing) ?
-        src?.replaceAll(/@[\w]+<.*> ?/g, '') :
+        src?.replaceAll(/@[\w]+<.*?> ?/g, '') :
         src,
     );
 
@@ -93,14 +99,25 @@ export default function Monaco(
       monaco[0].createDecorationsCollection([
         ...highlights.map((highlight) => {
           if (highlight === null) return null;
-          if (typeof highlight === 'number') return { range: new monaco[1].Range(highlight, 1, highlight, 1), options: { className: 'avp-highlight' } };
-          return { range: new monaco[1].Range(highlight[0], 1, highlight[1], 1), options: { className: 'avp-highlight' } };
+          if (typeof highlight === 'number') return { range: new monaco[1].Range(highlight, 1, highlight, 99999), options: { className: 'avp-highlight', marginClassName: 'avp-highlight', isWholeLine: true } };
+          return { range: new monaco[1].Range(highlight[0], 1, highlight[1], 99999), options: { className: 'avp-highlight' } };
         }).filter(highlight => highlight !== null),
         ...greyouts.map((greyout) => {
           if (greyout === null) return null;
-          if (typeof greyout === 'number') return { range: new monaco[1].Range(greyout, 1, greyout, 1), options: { className: 'avp-greyout' } };
-          return { range: new monaco[1].Range(greyout[0], 1, greyout[1], 1), options: { className: 'avp-greyout' } };
+          if (typeof greyout === 'number') return { range: new monaco[1].Range(greyout, 1, greyout, 99999), options: { className: 'avp-greyout', marginClassName: 'avp-greyout', isWholeLine: true } };
+          return { range: new monaco[1].Range(greyout[0], 1, greyout[1], 99999), options: { className: 'avp-greyout' } };
         }).filter(greyout => greyout !== null),
+        ...errors.map((error) => {
+          if (error === null) return null;
+          const preParsedError = error.match(errorParser)!;
+          const parsedError = [preParsedError[1], (
+            preParsedError[2].substring(0, 1).toUpperCase() +
+            preParsedError[2].substring(1)
+              .replaceAll(/[{}]/g, '')
+              .replaceAll(' expecting', ' —— Expected one of')
+          )];
+          return { range: new monaco[1].Range(parseInt(parsedError[0]), 1, parseInt(parsedError[0]), 99999), options: { className: 'avp-error', marginClassName: 'avp-error', isWholeLine: true, after: { content: `  ┃ ${parsedError[1]}`, inlineClassName: 'avp-error-message' } } };
+        }).filter(error => error !== null),
       ]),
     );
 
@@ -113,7 +130,7 @@ export default function Monaco(
           highlights[0][0],
       );
     }
-  }, [highlights, greyouts, monaco, isDark]);
+  }, [highlights, greyouts, errors, monaco, isDark]);
 
   useEffect(() => {
     if (monaco === null) return;
@@ -140,7 +157,7 @@ export default function Monaco(
 
       monaco[0].setValue(
         (!editing) ?
-          src?.replaceAll(/@[\w]+<.*> ?/g, '') :
+          src?.replaceAll(/@[\w]+<.*?> ?/g, '') :
           src,
       );
 
@@ -148,14 +165,19 @@ export default function Monaco(
         monaco[0].createDecorationsCollection([
           ...highlights.map((highlight) => {
             if (highlight === null) return null;
-            if (typeof highlight === 'number') return { range: new monaco[1].Range(highlight, 1, highlight, 1), options: { className: 'avp-highlight' } };
-            return { range: new monaco[1].Range(highlight[0], 1, highlight[1], 1), options: { className: 'avp-highlight' } };
+            if (typeof highlight === 'number') return { range: new monaco[1].Range(highlight, 1, highlight, 99999), options: { className: 'avp-highlight', marginClassName: 'avp-highlight', isWholeLine: true } };
+            return { range: new monaco[1].Range(highlight[0], 1, highlight[1], 99999), options: { className: 'avp-highlight' } };
           }).filter(highlight => highlight !== null),
           ...greyouts.map((greyout) => {
             if (greyout === null) return null;
-            if (typeof greyout === 'number') return { range: new monaco[1].Range(greyout, 1, greyout, 1), options: { className: 'avp-greyout' } };
-            return { range: new monaco[1].Range(greyout[0], 1, greyout[1], 1), options: { className: 'avp-greyout' } };
+            if (typeof greyout === 'number') return { range: new monaco[1].Range(greyout, 1, greyout, 99999), options: { className: 'avp-greyout', marginClassName: 'avp-greyout', isWholeLine: true } };
+            return { range: new monaco[1].Range(greyout[0], 1, greyout[1], 99999), options: { className: 'avp-greyout' } };
           }).filter(greyout => greyout !== null),
+          ...errors.map((error) => {
+            if (error === null) return null;
+            const parsedError = error.match(errorParser)!;
+            return { range: new monaco[1].Range(parseInt(parsedError[1]), 1, parseInt(parsedError[1]), 99999), options: { className: 'avp-error', marginClassName: 'avp-error', isWholeLine: true, after: { content: parsedError[2], inlineClassName: 'avp-error-message' } } };
+          }).filter(error => error !== null),
         ]),
       );
     }

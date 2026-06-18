@@ -11,6 +11,7 @@ function Test() {
       setSrc={() => {}}
       highlights={[1]}
       greyouts={[1]}
+      errors={[[1, 'error']]}
       editing={false}
       bindSrc={false}
     />

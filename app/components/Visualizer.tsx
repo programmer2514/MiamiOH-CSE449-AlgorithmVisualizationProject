@@ -85,6 +85,7 @@ export default function Visualizer(
     src,
     setSrc,
     comp,
+    error,
   ] = useAlgo({ setTitle, setLoaderHidden });
 
   const [
@@ -166,6 +167,7 @@ export default function Visualizer(
           src={editSrc}
           setSrc={setEditSrc}
           highlight={lines}
+          error={error}
           editing={editing}
           setEditing={setEditing}
           save={save}

@@ -13,6 +13,7 @@ function Test() {
     src,
     setSrc,
     comp,
+    _,
   ] = useAlgo({ setTitle, setLoaderHidden });
 
   return (

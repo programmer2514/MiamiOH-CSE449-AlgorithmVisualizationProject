@@ -41,6 +41,7 @@ export default function VarsPane(
           .filter(key => key[1] < 0)
           .map(key => key[0] + 1)
       }
+      errors={[]}
       editing={false}
       bindSrc={true}
     />

@@ -93,13 +93,13 @@ export default {
         [/[[\]]/, 'delimiter.square'],
         [/[()]/, 'delimiter.parenthesis'],
 
-        [/@[\w]+<.*>/, 'annotation'],
+        [/@[\w]+<.*?>/, 'annotation'],
 
         [/\d+\.\d+/, 'number.float'],
         [/\d+/, 'number'],
         [/[:,.]/, 'delimiter'],
 
-        [/".*"/, 'string'],
+        [/".*?"/, 'string'],
         [/".*!?.*"/, 'string.invalid'],
       ],
     },
