@@ -78,9 +78,33 @@ export default function VisBuilder(
                 temp_data.marks[idx] = [];
               }
 
+              // Remove all marks of the same type from the same index
               for (let i = 0; i < temp_data.marks[idx].length; i++) {
-                if (temp_data.marks[idx][i].type === action.params.type) {
+                if (
+                  temp_data.marks[idx][i].type === action.params.type || (
+                    temp_data.marks[idx][i].type === 'greyout' &&
+                    action.params.type === 'highlight'
+                  ) || (
+                    temp_data.marks[idx][i].type === 'highlight' &&
+                    action.params.type === 'greyout'
+                  )
+                ) {
                   temp_data.marks[idx].splice(i, 1);
+                }
+              }
+
+              // Remove all marks of the same type and color from other indexes
+              for (const key in temp_data.marks) {
+                if (key !== idx) {
+                  for (let i = 0; i < temp_data.marks[key].length; i++) {
+                    if (
+                      temp_data.marks[key][i].type === action.params.type &&
+                      temp_data.marks[key][i].color === action.params.color &&
+                      temp_data.marks[key][i].type !== 'greyout'
+                    ) {
+                      temp_data.marks[key].splice(i, 1);
+                    }
+                  }
                 }
               }
 
