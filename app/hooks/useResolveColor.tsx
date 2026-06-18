@@ -12,14 +12,17 @@ export default function useResolveColor() {
   function resolveColor(color: string, type: string) {
     switch (color) {
       case 'fg':
+      case 'info':
         return 'rgb(var(--color-primary) / 1)';
 
       case 'bg':
         return isDark ? '#1d1d20' : '#fafafc';
 
       case 'red':
+      case 'error':
         switch (type) {
           case 'outline':
+          case 'log':
             return 'firebrick';
           default:
             return 'red';
@@ -28,6 +31,7 @@ export default function useResolveColor() {
       case 'orange':
         switch (type) {
           case 'outline':
+          case 'log':
             return 'darkorange';
           case 'highlight':
             return isDark ? 'darkorange' : 'orange';
@@ -36,8 +40,10 @@ export default function useResolveColor() {
         }
 
       case 'yellow':
+      case 'warn':
         switch (type) {
           case 'outline':
+          case 'log':
             return 'goldenrod';
           case 'highlight':
             return 'gold';
@@ -48,6 +54,7 @@ export default function useResolveColor() {
       case 'green':
         switch (type) {
           case 'outline':
+          case 'log':
             return isDark ? 'limegreen' : 'green';
           case 'highlight':
             return isDark ? 'lime' : 'limegreen';
@@ -58,6 +65,7 @@ export default function useResolveColor() {
       case 'blue':
         switch (type) {
           case 'outline':
+          case 'log':
             return isDark ? 'royalblue' : 'blue';
           case 'highlight':
             return 'royalblue';
@@ -68,6 +76,7 @@ export default function useResolveColor() {
       case 'purple':
         switch (type) {
           case 'outline':
+          case 'log':
             return isDark ? 'mediumpurple' : 'purple';
           case 'highlight':
             return isDark ? 'mediumorchid' : 'mediumpurple';

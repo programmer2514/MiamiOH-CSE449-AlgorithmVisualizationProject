@@ -7,7 +7,10 @@ import {
   type Step,
   type VisData,
 } from '../../types';
+
 import VisRenderer from './VisRenderer';
+
+import useResolveColor from '../../hooks/useResolveColor';
 
 /**
  * Builds each step of the visualizer animation as a finite frame. Keeps track
@@ -15,6 +18,12 @@ import VisRenderer from './VisRenderer';
  *
  * @param {Object} props
  *        React props
+ * @param {number} props.zoom
+ *        The current zoom level of the visualization
+ * @param {number} props.offsetX
+ *        The current x offset of the visualization
+ * @param {number} props.offsetY
+ *        The current y offset of the visualization
  * @param {Step} props.stepDat
  *        The current step data
  * @param {number} props.stepNum
@@ -22,10 +31,16 @@ import VisRenderer from './VisRenderer';
  */
 export default function VisBuilder(
   {
+    zoom,
+    offsetX,
+    offsetY,
     stepDat,
     stepNum,
   }:
   {
+    zoom: number | null
+    offsetX: number
+    offsetY: number
     stepDat: Step
     stepNum: number
   },
@@ -40,6 +55,8 @@ export default function VisBuilder(
   );
   const [prevData, setPrevData] = useState([] as VisData[]);
   const [prevNum, setPrevNum] = useState(stepNum);
+
+  const [resolveColor] = useResolveColor();
 
   useEffect(() => {
     const temp_data = JSON.parse(JSON.stringify(data));
@@ -175,10 +192,34 @@ export default function VisBuilder(
 
   return (
     <>
-      <VisRenderer data={data} />
-      <pre className="hidden">
-        {JSON.stringify(data, null, 2) /* TODO: Remove this */}
-      </pre>
+      <div className="flex flex-col justify-end items-end h-full w-full px-4 py-16 text-lg">
+        {
+          data.logs.map((val, idx) => {
+            return (
+              <p
+                className="text-right font-bold"
+                style={{
+                  color: resolveColor(val.level, 'log'),
+                  opacity: 1 / (data.logs.length - idx),
+                }}
+                key={idx}
+              >
+                {val.text}
+              </p>
+            );
+          })
+        }
+      </div>
+      <div
+        style={{
+          '--zoom': `${zoom}`,
+          '--offset-x': `${offsetX}px`,
+          '--offset-y': `${offsetY}px`,
+        } as React.CSSProperties}
+        className="relative z-10 pointer-events-none transition-none! w-min h-min -top-1/2 left-1/2 translate-x-[calc(-50%+var(--offset-x))] translate-y-[calc(-50%+var(--offset-y))] scale-(--zoom)"
+      >
+        <VisRenderer data={data} />
+      </div>
     </>
   );
 }

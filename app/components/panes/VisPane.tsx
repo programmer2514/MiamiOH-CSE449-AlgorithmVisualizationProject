@@ -1,7 +1,6 @@
 import { type Step } from '../../types';
 
 import VisFrame from '../visualization/VisFrame';
-import VisBuilder from '../visualization/VisBuilder';
 
 /**
  * Renders the visualization pane for the visualizer.
@@ -46,16 +45,12 @@ export default function VisPane(
   return (
     <VisFrame
       numSteps={numSteps}
+      stepDat={stepDat}
       stepNum={stepNum}
       prevStep={prevStep}
       nextStep={nextStep}
       setStepNum={setStepNum}
       reset={reset}
-    >
-      <VisBuilder
-        stepDat={stepDat}
-        stepNum={stepNum}
-      />
-    </VisFrame>
+    />
   );
 }

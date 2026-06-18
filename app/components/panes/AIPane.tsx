@@ -54,7 +54,6 @@ export default function AIPane(
             const message = `
 Arrays are initialized as var = arr[...], not var = [...].
 "arr" is thus a keyword and cannot be a variable name.
-Do while loops are not currently implemented.
 
 All function names must start with a capital letter.
 Do not assume implicit functions are available unless found in example code.
@@ -67,7 +66,7 @@ Prefer outlines for cursor-type/iterator marks and highlights for found/missing/
 Outlines can be more frequently utilized, while highlights should be more sparing.
 @-directives can be placed sequentially on one line but cannot be on a line by themselves.
 E.g. "@<...> @<...> var = ..." is valid, but "@<...>" by itself is not.
-@mark directives must be placed at the beginning of a line, not halfway through.
+@mark, @text, and @log directives must be placed at the beginning of a line, not halfway through.
 
 If the user requests a change or a fix, here is your starter code:
 
