@@ -6,7 +6,6 @@ import {
 import { CharStream, CommonTokenStream } from 'antlr4ng';
 import { PseudocodeLexer } from './interpreter/.antlr/PseudocodeLexer';
 import { PseudocodeParser } from './interpreter/.antlr/PseudocodeParser';
-import TsInterpreterVisitor from './interpreter/TsInterpreterVisitor';
 import TraceInterpreterVisitor from './interpreter/TraceInterpreterVisitor';
 import TraceErrorHandler from './interpreter/TraceErrorHandler';
 
@@ -34,10 +33,6 @@ export default function useInterpreter(
       parser.addErrorListener(new TraceErrorHandler());
 
       const tree = parser.program();
-
-      // JS Compiler
-      const jsVisitor = new TsInterpreterVisitor();
-      setJs(jsVisitor.visit(tree)!);
 
       // Raw Parse Tree
       setTree(formatParseTree(tree.toStringTree(parser)));

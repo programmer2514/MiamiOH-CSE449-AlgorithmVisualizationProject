@@ -52,7 +52,7 @@ export default function Monaco(
     setSrc: (src: string) => void
     highlights: (number | [number, number] | null)[]
     greyouts: (number | [number, number] | null)[]
-    errors: string[]
+    errors: (string | null)[]
     editing: boolean
     bindSrc: boolean
   },

@@ -21,7 +21,7 @@ import usePortrait from '../../hooks/usePortrait';
  *        A function to update the source code
  * @param {number | [number, number] | null} props.highlight
  *        The line range to highlight
- * @param {string} props.error
+ * @param {string | null} props.error
  *        The error to display
  * @param {boolean} props.editing
  *        Whether the code pane is in editing mode
@@ -47,7 +47,7 @@ export default function CodePane(
     src: string
     setSrc: (src: string) => void
     highlight: number | [number, number] | null
-    error: string
+    error: string | null
     editing: boolean
     setEditing: (editing: boolean) => void
     save: () => void
