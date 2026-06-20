@@ -8,7 +8,7 @@ fun Binary_Search(@init<table> collection, target, size):
     @mark<low, outline, orange> low = 0
     @mark<high, outline, blue> high = size - 1
 
-    @mark<-1, text> @log<> while (low <= high):
+    @mark<-999, text> @log<> while (low <= high):
         // Calculate middle index
         @mark<mid, highlight, yellow> mid = floor((low + high) / 2)
         
@@ -20,11 +20,11 @@ fun Binary_Search(@init<table> collection, target, size):
         else if (val > target):
             @mark<mid, greyout> @mark<high, outline, blue> high = mid - 1
         else:
-            @mark<-1, outline, orange> @mark<-1, outline, blue> @mark<-1, text> @mark<mid, highlight, green> @log<green, "The key was found at index " + mid> return mid
+            @mark<-999, outline, orange> @mark<-999, outline, blue> @mark<-999, text> @mark<mid, highlight, green> @log<green, "The key was found at index " + mid> return mid
         end if
     end while
 
-    @log<error, "The key was not found in the array"> @mark<-1, text> @mark<-1, outline, orange> @mark<-1, outline, blue> @mark<mid, highlight, red> return -1
+    @log<error, "The key was not found in the array"> @mark<-999, text> @mark<-999, outline, orange> @mark<-999, outline, blue> @mark<mid, highlight, red> return -1
 end fun
 
 result = Binary_Search(a1, key, length(a1))

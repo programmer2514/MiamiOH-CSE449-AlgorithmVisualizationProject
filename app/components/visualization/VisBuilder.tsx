@@ -108,13 +108,11 @@ export default function VisBuilder(
                 }
               }
 
-              if (idx >= 0) {
-                temp_data.marks[idx].push({
-                  type: action.params.type,
-                  color: action.params.color,
-                  value: action.params.value || '',
-                });
-              }
+              temp_data.marks[idx].push({
+                type: action.params.type,
+                color: action.params.color,
+                value: action.params.value || '',
+              });
             }
             break;
 

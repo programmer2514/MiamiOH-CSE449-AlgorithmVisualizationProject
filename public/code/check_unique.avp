@@ -14,7 +14,7 @@ fun check_unique(@init<table> array):
         end for
     end for
 
-    @mark<-1, outline, orange> @mark<-1, outline, blue> @log<green, "Duplicate not found!"> return "Duplicate not found!"
+    @mark<-999, outline, orange> @mark<-999, outline, blue> @log<green, "Duplicate not found!"> return "Duplicate not found!"
 end fun
 
 result = check_unique(a1)
