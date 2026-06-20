@@ -95,41 +95,26 @@ export default function VisBuilder(
                 temp_data.marks[idx] = [];
               }
 
-              // Remove all marks of the same type from the same index
-              for (let i = 0; i < temp_data.marks[idx].length; i++) {
-                if (
-                  temp_data.marks[idx][i].type === action.params.type || (
-                    temp_data.marks[idx][i].type === 'greyout' &&
-                    action.params.type === 'highlight'
-                  ) || (
-                    temp_data.marks[idx][i].type === 'highlight' &&
-                    action.params.type === 'greyout'
-                  )
-                ) {
-                  temp_data.marks[idx].splice(i, 1);
-                }
-              }
-
-              // Remove all marks of the same type and color from other indexes
+              // Remove all marks of the same type and color from all indexes
               for (const key in temp_data.marks) {
-                if (key !== idx) {
-                  for (let i = 0; i < temp_data.marks[key].length; i++) {
-                    if (
-                      temp_data.marks[key][i].type === action.params.type &&
-                      temp_data.marks[key][i].color === action.params.color &&
-                      temp_data.marks[key][i].type !== 'greyout'
-                    ) {
-                      temp_data.marks[key].splice(i, 1);
-                    }
+                for (let i = 0; i < temp_data.marks[key].length; i++) {
+                  if (
+                    temp_data.marks[key][i].type === action.params.type &&
+                    temp_data.marks[key][i].color === action.params.color &&
+                    temp_data.marks[key][i].type !== 'greyout'
+                  ) {
+                    temp_data.marks[key].splice(i, 1);
                   }
                 }
               }
 
-              temp_data.marks[idx].push({
-                type: action.params.type,
-                color: action.params.color,
-                value: action.params.value || '',
-              });
+              if (idx >= 0) {
+                temp_data.marks[idx].push({
+                  type: action.params.type,
+                  color: action.params.color,
+                  value: action.params.value || '',
+                });
+              }
             }
             break;
 
@@ -192,12 +177,12 @@ export default function VisBuilder(
 
   return (
     <>
-      <div className="flex flex-col justify-end items-end h-full w-full px-4 py-16 text-lg">
+      <div className="flex flex-col justify-end items-end w-full h-full px-2 py-13 text-2xl">
         {
           data.logs.map((val, idx) => {
             return (
               <p
-                className="text-right font-bold"
+                className="position-relative text-right z-1000 bg-[#fafafc] dark:bg-[#1d1d20] px-2 py-1 rounded-lg font-bold"
                 style={{
                   color: resolveColor(val.level, 'log'),
                   opacity: 1 / (data.logs.length - idx),
@@ -216,7 +201,7 @@ export default function VisBuilder(
           '--offset-x': `${offsetX}px`,
           '--offset-y': `${offsetY}px`,
         } as React.CSSProperties}
-        className="relative z-10 pointer-events-none transition-none! w-min h-min -top-1/2 left-1/2 translate-x-[calc(-50%+var(--offset-x))] translate-y-[calc(-50%+var(--offset-y))] scale-(--zoom)"
+        className="relative z-10 pointer-events-none transition-none! **:transition-none! w-min h-min -top-1/2 left-1/2 translate-x-[calc(-50%+var(--offset-x))] translate-y-[calc(-50%+var(--offset-y))] scale-(--zoom)"
       >
         <VisRenderer data={data} />
       </div>

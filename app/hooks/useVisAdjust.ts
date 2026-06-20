@@ -53,7 +53,7 @@ export default function useVisAdjust() {
 
   useEffect(() => {
     setZoom(parseFloat(localStorage.getItem('zoom') || `${DEFAULT_ZOOM}`));
-    setSpeed(parseInt(localStorage.getItem('speed') || `${DEFAULT_SPEED}`));
+    setSpeed(parseFloat(localStorage.getItem('speed') || `${DEFAULT_SPEED}`));
   }, []);
 
   function getNextSpeed(speed: number, dir: number) {

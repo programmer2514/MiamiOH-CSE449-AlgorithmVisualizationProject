@@ -20,7 +20,7 @@ statement       : metadata* (
                   ) (SEMI | NL)*;
 
 // Supports standard '=' as well as '+=' and '-='
-assignment      : assignable (EQ | PLUS_EQ | MINUS_EQ) (expression | arrayInitialization) ;
+assignment      : assignable (EQ | PLUS_EQ | MINUS_EQ | STAR_EQ | SLASH_EQ | MOD_EQ) expression ;
 
 // Supports variable assignment and array index assignment (e.g., arr[j+1] = key)
 assignable      : ID | ID LBRACK expression RBRACK ;
@@ -49,12 +49,12 @@ param           : metadata* ID;
 forEachLoop     : FOR LPAREN? ID IN ID RPAREN? COLON NL+ block END FOR;
 
 // Traditional for-loop (supports both commas and semicolons as separators)
-forLoop         : FOR LPAREN assignment (COMMA | SEMI) expression (COMMA | SEMI) assignment RPAREN COLON NL+ block END FOR;
+forLoop         : FOR LPAREN? assignment (COMMA | SEMI) expression (COMMA | SEMI) assignment RPAREN? COLON NL+ block END FOR;
 
 whileLoop       : WHILE LPAREN? expression RPAREN? COLON NL+ block END WHILE;
 
 // Do-while loop to support the Hoare Partition script
-doWhileLoop     : DO COLON? NL+ block WHILE LPAREN? expression RPAREN?;
+doWhileLoop     : DO COLON NL+ block WHILE LPAREN? expression RPAREN?;
 
 ifStatement     : IF LPAREN? expression RPAREN? COLON NL+ block
                   (ELSEIF LPAREN? expression RPAREN? COLON NL+ block)*
@@ -70,14 +70,14 @@ continueStatement : CONTINUE;
 expressionList  : expression (COMMA NL* expression)*;
 
 // Order of operations for expressions
-expression               : logicalOrExpression ;
+expression               : (logicalOrExpression | arrayInitialization) ;
 
 logicalOrExpression      : left=logicalAndExpression (op+=OR right+=logicalAndExpression)* ;
 
 logicalAndExpression     : left=comparisonExpression (op+=AND right+=comparisonExpression)* ;
 
 comparisonExpression
-    : left=additiveExpression (op+=(EQEQ | NOTEQ | LESS_EQ | GREATER_EQ | LT | GT) right+=additiveExpression)* # CompareExpr
+    : left=additiveExpression (op+=(EQEQ | NOTEQ | LT_EQ | GT_EQ | LT | GT) right+=additiveExpression)* # CompareExpr
     ;
 
 additiveExpression
@@ -91,13 +91,13 @@ multiplicativeExpression
 powerExpression          : left=unaryExpression (op+=POWER right+=unaryExpression)* ;
 
 unaryExpression
-    : MINUS unaryExpression  # UnaryMinusExpr
-    | NOT unaryExpression    # UnaryNotExpr
-    | primaryExpression      # PrimaryExpr
+    : op=MINUS right=unaryExpression  # UnaryMinusExpr
+    | op=NOT right=unaryExpression    # UnaryNotExpr
+    | right=primaryExpression      # PrimaryExpr
     ;
 
 primaryExpression
-    : LPAREN expression RPAREN             # ParenExpression
+    : LPAREN inner=expression RPAREN             # ParenExpression
     | ID LPAREN expressionList? RPAREN     # FunctionCallExpression
     | ID LBRACK expression RBRACK          # ArrayAccessExpression
     | atom                                 # AtomExpression
@@ -152,6 +152,8 @@ AT      : '@';
 // Operators
 PLUS_EQ : '+=';
 MINUS_EQ: '-=';
+STAR_EQ : '*=';
+SLASH_EQ: '/=';
 EQ      : '=';
 EQEQ    : '==';
 NOTEQ   : '!=';
@@ -160,8 +162,8 @@ MINUS   : '-';
 POWER   : '**';
 STAR    : '*';
 SLASH   : '/';
-LESS_EQ : '<=';
-GREATER_EQ : '>=';
+LT_EQ   : '<=';
+GT_EQ   : '>=';
 LT      : '<';
 GT      : '>';
 MOD     : '%';

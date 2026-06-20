@@ -21,10 +21,15 @@ export default function VarsPane(
       name="vars"
       src={
         Object.keys(vars)
-          .map(key => `${key}: ${
+          .map(key => `${
+            key.replaceAll(/__\$.*?__\./g, '')
+          }: ${
             (JSON.stringify(vars[key][0]) || `ERROR`)
               .replaceAll(',', ', ')
               .replaceAll('"<function>"', '<function>')
+              .replaceAll('null', 'Null')
+              .replaceAll('true', 'True')
+              .replaceAll('false', 'False')
           }`)
           .join('\n')
       }

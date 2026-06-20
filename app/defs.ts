@@ -79,7 +79,16 @@ export default {
             },
           },
         ],
-        [/[A-Z][\w]*/, 'type.identifier'],
+
+        [
+          /[A-Z][\w]*/,
+          {
+            cases: {
+              '@keywords': 'keyword',
+              '@default': 'type.identifier',
+            },
+          },
+        ],
 
         [/[ \t\r\n]+/, 'white'],
         [/\/\/.*$/, 'comment'],
