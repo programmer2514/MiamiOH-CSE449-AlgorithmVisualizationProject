@@ -77,7 +77,7 @@ export default class TraceInterpreterVisitor
         this.callStack[this.callStack.length - 1] :
         undefined;
 
-      if (lScope && lScope.has(key)) lScope.set(key, value);
+      if (lScope) lScope.set(key, value);
       else gScope.set(key, value);
     },
     globalOrLocal: (key: string) => {
