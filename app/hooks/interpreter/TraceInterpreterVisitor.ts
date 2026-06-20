@@ -710,6 +710,8 @@ export default class TraceInterpreterVisitor
       if (stmts) {
         for (const stmt of stmts) {
           const res = this.visit(stmt);
+          if (res && res.__type === 'break') return res;
+          if (res && res.__type === 'continue') return res;
           if (res && res.__type === 'return') return res;
         }
       }
