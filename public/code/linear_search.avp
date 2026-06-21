@@ -7,13 +7,13 @@ key = 7
 fun Linear_Search(@init<table> a, k):
     n = length(a)
 
-    for @mark<i, outline, yellow> (i = 0; i < n; i += 1):
+    @mark<outline, orange> for (i = 0, i < n, i += 1):
         @mark<i, text, fg> if (a[i] == k):
-            @mark<i, highlight, green> return i
+            @mark<-999, text> @mark<-999, outline, orange> @mark<i, highlight, green> @log<green, "The key was found at index " + i> return i
         end if
     end for
 
-    @log<"Not found: "> return -1
+    @mark<-999, text> @mark<-999, outline, orange> @log<error, "The key was not found in the array"> return -1
 end fun
 
 result = Linear_Search(a1, key)
