@@ -2,33 +2,29 @@
 
 a1 = arr[1, 10, 5, 6, 4, 7, 19]
 
+// Sorts an array of values in ascending order
 fun Comparison_Counting_Sort(@init<table> array): 
     n = length(array)
-
     count = arr(n)  // Create array to store counts
 
-    // Initialize the count array
-    for (i = 0, i < n, i += 1):
-        count[i] = 0
-    end for
-
-    // Count comparisons
-    for (i = 0, i < n - 1, i += 1):
-        for (j = i + 1, j < n, j += 1):
-            @mark<j, outline, yellow> if (array[i] < array[j]):
-                @mark<j, text, fg> count[j] += 1
+    // Compare each number to every other number and count up the comparisons
+    @mark<outline, orange> for (i = 0, i < n, i += 1):
+        @mark<-999, text, green> @mark<-999, text, red> @mark<outline, blue> for (j = i + 1, j < n, j += 1):
+            @mark<j, text> if (array[i] < array[j]):
+                @mark<-999, text> @mark<j, text, green, "+1"> count[j] += 1
             else:
-                @mark<i, text, fg> count[i] += 1
+                @mark<-999, text> @mark<i, text, red, "+1"> count[i] += 1
             end if
         end for
     end for
 
-    // Place elements in sorted order back into array
+    // Place elements back into array
+    oldArray = copy(array)
     for (i = 0, i < n, i += 1):
-        @mark<i, highlight, green> array[count[i]] = array[i]
+        @mark<count[i], highlight, green> array[count[i]] = oldArray[i]
     end for
 
-    return array
+    @log<green, "The array is in order!"> return array
 
 end fun
 

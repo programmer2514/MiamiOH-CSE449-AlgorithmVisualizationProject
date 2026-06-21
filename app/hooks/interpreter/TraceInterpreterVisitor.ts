@@ -303,18 +303,21 @@ export default class TraceInterpreterVisitor
     const name = assignableCtx.ID().getText();
     let value = this.visit(ctx.expression()!);
 
-    if (Array.isArray(this.memory.get(name)) && !ctx.EQ())
+    if (
+      Array.isArray(this.memory.get(name)) &&
+      !ctx.EQ() && !assignableCtx.LBRACK()
+    )
       throw new Error(`[line ${ctx.start!.line}:${ctx.start!.column}] Arrays cannot use special assignment operators`);
-
-    if (ctx.PLUS_EQ()) value = this.memory.get(name) + value;
-    else if (ctx.MINUS_EQ()) value = this.memory.get(name) - value;
-    else if (ctx.STAR_EQ()) value = this.memory.get(name) * value;
-    else if (ctx.SLASH_EQ()) value = this.memory.get(name) / value;
-    else if (ctx.MOD_EQ()) value = this.memory.get(name) % value;
 
     if (assignableCtx.LBRACK()) {
       const array = this.memory.get(name);
       const index = this.visit(assignableCtx.expression()!);
+
+      if (ctx.PLUS_EQ()) value = array[index] + value;
+      else if (ctx.MINUS_EQ()) value = array[index] - value;
+      else if (ctx.STAR_EQ()) value = array[index] * value;
+      else if (ctx.SLASH_EQ()) value = array[index] / value;
+      else if (ctx.MOD_EQ()) value = array[index] % value;
 
       array[index] = value;
       if (`${this.memory.globalOrLocal(name)}.${name}` === this.initArray)
@@ -326,6 +329,12 @@ export default class TraceInterpreterVisitor
         this.extractMetadataActions(ctx, index, name, value);
       for (const action of metadataActions) actions.push(action);
     } else {
+      if (ctx.PLUS_EQ()) value = this.memory.get(name) + value;
+      else if (ctx.MINUS_EQ()) value = this.memory.get(name) - value;
+      else if (ctx.STAR_EQ()) value = this.memory.get(name) * value;
+      else if (ctx.SLASH_EQ()) value = this.memory.get(name) / value;
+      else if (ctx.MOD_EQ()) value = this.memory.get(name) % value;
+
       this.memory.set(name, value);
 
       if (`${this.memory.globalOrLocal(name)}.${name}` === this.initArray) {
@@ -455,6 +464,17 @@ export default class TraceInterpreterVisitor
             { cmd: 'vis_log', params: { level: 'error', text: args[0].toString() } },
           ]);
           return undefined;
+
+        case 'copy':
+          if (args.length !== 1)
+            throw new Error(`[line ${callLine}:0] Function '${name}' expects 1 arguments, but got ${args.length}`);
+
+          if (!Array.isArray(args[0]))
+            throw new Error(`[line ${callLine}:0] Function '${name}' can only act on arrays`);
+
+          if (shouldStep)
+            this.addStep(callLine, metadataActions);
+          return [...args[0]];
 
         case 'sort':
           if (args.length !== 1)

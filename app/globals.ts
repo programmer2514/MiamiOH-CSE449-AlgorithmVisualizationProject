@@ -194,7 +194,7 @@ ${document.getElementById('sourceCode')!.innerHTML}`;
         'O(n\u00B2)',
       ],
       href: `${RouteBaseName}run?algorithm=check_unique`,
-    }, /* TODO: Fix this
+    },
     {
       img: [
         `${RouteBaseName}img/comparison-counting-sort_light.png`,
@@ -209,7 +209,7 @@ ${document.getElementById('sourceCode')!.innerHTML}`;
         'O(n\u00B2)',
       ],
       href: `${RouteBaseName}run?algorithm=comparison_counting_sort`,
-    },*/
+    },
     {
       img: [
         `${RouteBaseName}img/hoare-partition_light.png`,
