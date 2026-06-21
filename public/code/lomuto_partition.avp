@@ -1,25 +1,26 @@
 // Lomuto Partition
 
-a1 = arr[1, 19, 5, 10, 4, 6, 7]
+a1 = arr[50, 19, 5, 10, 11, 4, 6, 7]
 
 fun Lomuto_Partition(@init<table> array, low, high): 
     // Choose the pivot - last element of sub-array
-    @mark<high, highlight, yellow> pivot = array[high]
+    @mark<high, outline, warn> @log<warn, "pivot = " + array[high]> pivot = array[high]
 
     // Index of smaller element (boundary for elements < pivot)
-    i = low - 1
+    @mark<outline, red> i = low
 
-    for (j = low, j < high, j += 1):
+    @mark<outline, blue> for (j = low, j < high, j += 1):
         // Check to see if current element is smaller than pivot
-        @mark<j, outline, yellow> if (array[j] < pivot):
-            i += 1
-            @mark<i, highlight, green> swap (array[i], array[j]) 
+        @mark<j, text> @mark<-999, highlight, green> if (array[j] < pivot):
+            @mark<i, greyout> @mark<j, highlight, green> @mark<j, text, fg, "Swapped!"> swap(array[i], array[j])
+            @mark<outline, red> i += 1
         end if
     end for
 
-    @mark<i, highlight, green> swap (array[i + 1], array[high]) 
+    @mark<-999, outline, red> @mark<i, greyout> @mark<i, outline, warn> @mark<high, highlight, green> @mark<high, text, fg, "Pivot swapped!"> swap(array[i], array[high]) 
 
-    return i + 1  // Return the high pivot index
+    @mark<-999, outline, blue> @mark<-999, highlight, green> @mark<-999, text> return i  // Return the high pivot index
 
 end fun
-result = Lomuto_Partition(a1, 0, length(a1) - 1)
+
+@log<info, "All elements on the left are now smaller than those on the right"> result = Lomuto_Partition(a1, 0, length(a1) - 1)
