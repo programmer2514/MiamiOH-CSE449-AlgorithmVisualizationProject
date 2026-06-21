@@ -27,9 +27,11 @@ export default function VarsPane(
             (JSON.stringify(vars[key][0]) || `ERROR`)
               .replaceAll(',', ', ')
               .replaceAll('"<function>"', '<function>')
+              .replaceAll(/\\(.)/g, '$1')
               .replaceAll('null', 'Null')
               .replaceAll('true', 'True')
               .replaceAll('false', 'False')
+              .replace(/^"(.*".*)"$/, '\'$1\'')
           }`)
           .join('\n')
       }

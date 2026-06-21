@@ -121,7 +121,7 @@ export default class TraceInterpreterVisitor
       if (!text) {
         return this.visit(p.expression()!);
       } else {
-        if (text.startsWith('"') && text.endsWith('"')) return text.slice(1, -1);
+        if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith('\'') && text.endsWith('\''))) return text.slice(1, -1);
         if (!isNaN(Number(text))) return Number(text);
 
         const memVal = this.memory.get(text);
@@ -215,10 +215,13 @@ export default class TraceInterpreterVisitor
       } else if (expr._right) {
         return this.splitExpression(expr._right!);
       } else if (expr._inner) {
-        alert('inner');
         return ` (${this.splitExpression(expr.expression()!)})`;
       } else {
-        return this.visit(expr).toString();
+        try {
+          return this.visit(expr).toString();
+        } catch {
+          return expr.text;
+        }
       }
     }
 
@@ -556,13 +559,13 @@ export default class TraceInterpreterVisitor
   }
 
   visitForLoop(ctx: ForLoopContext): any {
-    const init = this.visit(ctx.assignment(0)!);
+    const initVarName = ctx.assignment(0)!.assignable().getText();
+    this.visit(ctx.assignment(0)!);
 
     let limit = MAX_ITERATIONS;
-    let iter = init;
     while (true) {
       const metadataActions = this.extractMetadataActions(
-        ctx, iter++, this.prettyPrint(ctx.expression()!),
+        ctx, this.memory.get(initVarName), this.prettyPrint(ctx.expression()!),
       );
       this.addStep(ctx.start!.line, metadataActions);
 
@@ -720,6 +723,8 @@ export default class TraceInterpreterVisitor
 
   visitLogicalOrExpression(ctx: LogicalOrExpressionContext): any {
     let left = this.visit(ctx._left!);
+    if (left) return left;
+
     const rights = ctx._right;
     if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
     const rightArray = Array.isArray(rights) ? rights : [rights];
@@ -730,6 +735,8 @@ export default class TraceInterpreterVisitor
 
   visitLogicalAndExpression(ctx: LogicalAndExpressionContext): any {
     let left = this.visit(ctx._left!);
+    if (!left) return left;
+
     const rights = ctx._right;
     if (!rights || (Array.isArray(rights) && rights.length === 0)) return left;
     const rightArray = Array.isArray(rights) ? rights : [rights];
@@ -842,7 +849,7 @@ export default class TraceInterpreterVisitor
     this.isReferenceMode = false;
     const index = this.visit(ctx.expression()!);
     if (isNaN(Number(index)) || index !== Math.floor(index) || index < 0) {
-      throw new Error(`[line ${ctx.start!.line}:${ctx.start!.column}] Array index must be an integer >= 0`);
+      throw new Error(`[line ${ctx.start!.line}:${ctx.start!.column}] Array index must be an integer >= 0; got ${index}`);
     }
     this.isReferenceMode = prevRefMode;
 
@@ -869,7 +876,8 @@ export default class TraceInterpreterVisitor
     if (text === 'false' || text === 'False') return false;
     if (text === 'null' || text === 'Null') return null;
     if (!isNaN(Number(text))) return Number(text);
-    if (text.startsWith('"') && text.endsWith('"')) return text.slice(1, -1);
+    if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith('\'') && text.endsWith('\'')))
+      return text.slice(1, -1);
     return this.memory.get(text);
   }
 

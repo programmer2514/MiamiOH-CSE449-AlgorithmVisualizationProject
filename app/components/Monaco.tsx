@@ -80,7 +80,7 @@ export default function Monaco(
 
     monaco[0].setValue(
       (!editing) ?
-        src?.replaceAll(/@[\w]+<.*?> ?/g, '') :
+        src?.replaceAll(Defs.REGEX_ANNOTATION, '') :
         src,
     );
 
@@ -157,7 +157,7 @@ export default function Monaco(
 
       monaco[0].setValue(
         (!editing) ?
-          src?.replaceAll(/@[\w]+<.*?> ?/g, '') :
+          src?.replaceAll(Defs.REGEX_ANNOTATION, '') :
           src,
       );
 

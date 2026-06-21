@@ -32,9 +32,8 @@ arrayInitialization
     ;
 
 // Metadata integration for variables, functions, and loops
-// The warning thrown here can be safely ignored
 metadata        : AT ID LT metadataParams? GT;
-metadataParams  : metadataParam? (COMMA metadataParam)*;
+metadataParams  : metadataParam (COMMA metadataParam)*;
 metadataParam   : ID | expression;
 
 // Shared block rule — used by all compound statements
@@ -173,7 +172,7 @@ MOD_EQ  : '%=';
 ID      : [a-zA-Z_][a-zA-Z_0-9]*;
 FLOAT   : [0-9]+ '.' [0-9]+;
 INT     : [0-9]+;
-STRING  : '"' (~["\r\n])* '"';
+STRING  : ('"' (~["\r\n])* '"') | ('\'' (~['\r\n])* '\'');
 
 // Whitespace & Comments
 NL      : '\r'? '\n' ; 
