@@ -128,8 +128,11 @@ export default function useEditSrc({
               percentDifferent(currStripped, finalValue) <= 0.5
             ) {
               finalValue =
-                finalValue.substring(0, countLeadingSpaces(finalValue)) +
-                curr.value.match(Defs.REGEX_ANNOTATION)![0] +
+                finalValue.substring(0, countLeadingSpaces(finalValue)) + (
+                  [...curr.value.match(Defs.REGEX_ANNOTATION)!]
+                    .filter(v => !v.startsWith('@init<'))
+                    .join('')
+                ) +
                 finalValue.trimStart();
             }
 
