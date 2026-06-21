@@ -115,6 +115,8 @@ export default function Visualizer(
   const [
     editSrc,
     setEditSrc,
+    expertMode,
+    setExpertMode,
     save,
     discard,
   ] = useEditSrc({
@@ -135,6 +137,8 @@ export default function Visualizer(
       <VisualizerLayout
         editing={editing}
         setEditing={setEditing}
+        expertMode={expertMode}
+        setExpertMode={setExpertMode}
         save={save}
         discard={discard}
         sidebar={sidebar}
@@ -170,6 +174,8 @@ export default function Visualizer(
           error={error}
           editing={editing}
           setEditing={setEditing}
+          expertMode={expertMode}
+          setExpertMode={setExpertMode}
           save={save}
           discard={discard}
         />

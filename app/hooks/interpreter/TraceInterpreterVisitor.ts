@@ -139,6 +139,7 @@ export default class TraceInterpreterVisitor
       else action = { cmd: 'vis_log', params: { level: params.length > 1 ? String(params[0]) : 'info', text: String(params.length > 1 ? params[1] : params[0]) } };
     } else if (directive === 'init') {
       if (exprCtx === undefined || snapCtx === undefined) throw new Error(`[line ${ctx.start!.line}:${ctx.start!.column}] Invalid init expression`);
+      if (!snapCtx.length) throw new Error(`[line ${ctx.start!.line}:${ctx.start!.column}] Init parameter must be an array`);
       action = { cmd: 'vis_init', params: { type: String(params[0]), data: [...snapCtx] } };
       this.initArray = `${this.memory.globalOrLocal(exprCtx)}.${exprCtx}`;
     } else if (directive === 'mark') {
@@ -202,6 +203,18 @@ export default class TraceInterpreterVisitor
     return actions;
   }
 
+  private resolveOpText(op: any): string {
+    if (!op?.text) return '';
+    switch (op.text) {
+      case 'not': return 'not ';
+      case '==': return '=';
+      case '!=': return '\u2260';
+      case '>=': return '\u2265';
+      case '<=': return '\u2264';
+      default: return op.text;
+    }
+  }
+
   private splitExpression(expr: any): string {
     if (expr.arrayInitialization && expr.arrayInitialization())
       throw new Error(`[line ${expr.start!.line}:${expr.start!.column}] Arrays cannot be used as logical expressions`);
@@ -211,11 +224,11 @@ export default class TraceInterpreterVisitor
 
     if (!expr._left) {
       if (expr._op) {
-        return ` ${expr._op.text}${this.splitExpression(expr._right!)}`;
+        return ` ${this.resolveOpText(expr._op)}${this.splitExpression(expr._right!)}`;
       } else if (expr._right) {
         return this.splitExpression(expr._right!);
       } else if (expr._inner) {
-        return ` (${this.splitExpression(expr.expression()!)})`;
+        return ` (${this.splitExpression(expr.expression()!).trim()})`;
       } else {
         try {
           return this.visit(expr).toString();
@@ -233,7 +246,7 @@ export default class TraceInterpreterVisitor
 
     const rightArray = Array.isArray(rights) ? rights : [rights];
     for (let i = 0; i < rightArray.length; i++)
-      result += ` ${expr._op[i].text} ${this.splitExpression(rightArray[i])}`;
+      result += ` ${this.resolveOpText(expr._op[i])} ${this.splitExpression(rightArray[i])}`;
 
     return result;
   }

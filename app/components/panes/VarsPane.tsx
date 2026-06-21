@@ -50,6 +50,7 @@ export default function VarsPane(
       }
       errors={[]}
       editing={false}
+      expertMode={false}
       bindSrc={true}
     />
   );

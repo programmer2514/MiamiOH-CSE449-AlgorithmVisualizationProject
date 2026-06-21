@@ -23,7 +23,7 @@ export default function useResolveColor() {
         switch (type) {
           case 'outline':
           case 'log':
-            return 'firebrick';
+            return 'crimson';
           default:
             return 'red';
         }

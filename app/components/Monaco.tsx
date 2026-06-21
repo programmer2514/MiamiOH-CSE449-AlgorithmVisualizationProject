@@ -32,6 +32,8 @@ const errorParser = /Error: \[line (\d+):\d+\] (.*)/;
  *        The errors to display
  * @param {boolean} props.editing
  *        Whether the editor is in editing mode
+ * @param {boolean} props.expertMode
+ *        Whether the editor is in expert mode
  * @param {boolean} props.bindSrc
  *        Whether the editor's value should be bound to the source state
  */
@@ -44,6 +46,7 @@ export default function Monaco(
     greyouts,
     errors,
     editing,
+    expertMode,
     bindSrc,
   }:
   {
@@ -54,6 +57,7 @@ export default function Monaco(
     greyouts: (number | [number, number] | null)[]
     errors: (string | null)[]
     editing: boolean
+    expertMode: boolean
     bindSrc: boolean
   },
 ) {
@@ -69,6 +73,16 @@ export default function Monaco(
   useEffect(() => {
     if (!monaco) return;
 
+    monaco[0].setValue(
+      (!expertMode || !editing) ?
+        src?.replaceAll(Defs.REGEX_ANNOTATION, '') :
+        src,
+    );
+  }, [expertMode]);
+
+  useEffect(() => {
+    if (!monaco) return;
+
     monaco[1].editor.setTheme(isDark ? 'avp-dark' : 'avp');
 
     monaco[0].updateOptions({
@@ -79,7 +93,7 @@ export default function Monaco(
     const oldCursorPos = cursorPos;
 
     monaco[0].setValue(
-      (!editing) ?
+      (!expertMode || !editing) ?
         src?.replaceAll(Defs.REGEX_ANNOTATION, '') :
         src,
     );
@@ -156,7 +170,7 @@ export default function Monaco(
       decoration?.clear();
 
       monaco[0].setValue(
-        (!editing) ?
+        (!expertMode || !editing) ?
           src?.replaceAll(Defs.REGEX_ANNOTATION, '') :
           src,
       );
