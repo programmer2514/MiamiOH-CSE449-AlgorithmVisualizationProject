@@ -77,7 +77,7 @@ export default function SearchCard(
             (isDark ? img[1] : img[0])
         }
         alt={`${title} - Preview Image`}
-        className="m-0 w-full rounded-lg border border-[#d8d8dc]/50 dark:border-[#38383c]/50"
+        className="m-0 w-full h-auto rounded-lg border border-[#d8d8dc]/50 dark:border-[#38383c]/50"
       />
       <Card.Body className="flex justify-between items-center p-0 my-2">
         <Typography

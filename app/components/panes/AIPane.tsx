@@ -34,7 +34,7 @@ export default function AIPane(
   return (
     <>
       <Textarea
-        className="rounded-none border-none shadow-none text-md text-primary/75! focus:text-primary! h-[calc(100%-6.125rem)]"
+        className="rounded-none border-none shadow-none text-md text-primary/75! focus:text-primary! h-[calc(100%-6.125rem)] portrait:h-[calc(100%-3.375rem)]"
         id="aiInput"
         placeholder="Enter your prompt..."
       >
