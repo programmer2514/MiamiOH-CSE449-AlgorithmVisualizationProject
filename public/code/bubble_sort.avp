@@ -1,27 +1,27 @@
 // Bubble Sort
 
-a1 = arr[1, 10, 5, 6, 4, 7, 19]
+a1 = arr[30, 10, 5, 6, 4, 7, 19]
 
 // Sorts an array of values in ascending order
 fun Bubble_Sort(@init<table> array): 
     n = length(array)
 
-    for (i = 0, i < n, i += 1):
+    @mark<n - i - 1, outline, blue> @mark<-999, outline, orange> @mark<-999, text> for (i = 0, i < n, i += 1):
         swapped = False
 
-        for (j = 0, j < n - i - 1, j += 1):
-            @mark<j, outline, yellow> if (array[j] > array[j + 1]):
-                @mark<j, highlight, green> swap (array[j], array[j+1])
-                swapped = True
+        @mark<outline, orange> for (j = 0, j < n - i - 1, j += 1):
+            @mark<j, text> @mark<-999, highlight, red> @mark<-999, highlight, green> if (array[j] > array[j + 1]):
+                @mark<j, highlight, green> @mark<j + 1, highlight, red> swapped = True
+                @mark<j, highlight, red> @mark<j + 1, highlight, green> @mark<j + 1, text, fg, "Swapped!"> swap(array[j], array[j + 1])
             end if
         end for
 
-        if (swapped == False):
-            break
+        @mark<n - i - 1, greyout> @mark<-999, highlight, red> @mark<-999, highlight, green> if not swapped:
+            @log<warn, "No swaps in the last iteration; exiting..."> @mark<-999, text> @mark<-999, outline, orange> @mark<-999, outline, blue> break
         end if
     end for
 
-    return array
+    @log<green, "The array is in order!"> return array
 end fun
 
 result = Bubble_Sort(a1)

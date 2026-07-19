@@ -33,9 +33,8 @@ export default function useAlgo(
 ) {
   const [src, setSrc] = useState('');
   const [comp, setComp] = useState([] as Step[]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null as string | null);
   const [didLoad, setDidLoad] = useState(false);
-  const [didCompile, setDidCompile] = useState(false);
 
   const [
     _,
@@ -56,60 +55,47 @@ export default function useAlgo(
           if (title !== null) {
             setSrc(text.replace(/\/\/.*\r?\n\r?\n/, ''));
             setTitle(title[1]);
-            setDidLoad(true);
           } else if (!error) {
-            setError(`Failed to load algorithm '${algo}': Incorrect file format`);
+            setError(`Error: [line 1:0] Failed to load algorithm '${algo}': Incorrect file format`);
           }
         })
         .catch(() => {
           if (error) return;
-          setError(`Failed to load algorithm '${algo}': File not found`);
+          setError(`Error: [line 1:0] Failed to load algorithm '${algo}': File not found`);
         });
     } else {
       setTitle('<unnamed>');
-      setDidLoad(true);
-      setDidCompile(true);
     }
   }, []);
 
   useEffect(() => {
     if (!error) return;
 
-    setComp([{
-      line: -1,
-      actions: [],
-    }]);
-    setTitle(error);
-    setSrc(error);
-
-    setLoaderHidden(true);
+    setComp([]);
+    setDidLoad(true);
   }, [error]);
 
   useEffect(() => {
-    setLoaderHidden(didLoad && didCompile);
-  }, [didLoad, didCompile]);
+    setLoaderHidden(didLoad);
+  }, [didLoad]);
 
   useEffect(() => {
-    if (!interpreterTrace) return;
-    setDidCompile(false);
+    setDidLoad(false);
 
     if (interpreterError) {
-      alert('Failed to compile algorithm!');
-      setComp([{
-        line: -1,
-        actions: [],
-      }]);
-      setLoaderHidden(true);
+      setError(interpreterError);
       return;
     }
 
-    setComp(JSON.parse(interpreterTrace));
-    setDidCompile(true);
-  }, [interpreterTrace]);
+    setComp(JSON.parse(interpreterTrace || '[]'));
+    setError(null);
+    setDidLoad(true);
+  }, [interpreterTrace, interpreterError]);
 
   return [
     src,
     setSrc,
     comp,
+    error,
   ] as const;
 }

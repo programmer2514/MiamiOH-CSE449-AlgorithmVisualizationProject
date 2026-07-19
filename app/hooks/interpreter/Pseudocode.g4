@@ -5,7 +5,8 @@ program         : (statement | NL)* EOF;
 
 // Statements can end with newlines or optional semicolons
 statement       : metadata* (
-                    assignment
+                    metadata
+                  | assignment
                   | functionDecl
                   | functionCallStmt
                   | forEachLoop
@@ -15,16 +16,17 @@ statement       : metadata* (
                   | whileLoop
                   | returnStatement
                   | breakStatement
+                  | continueStatement
                   ) (SEMI | NL)*;
 
 // Supports standard '=' as well as '+=' and '-='
-assignment      : metadata* assignable (EQ | PLUS_EQ | MINUS_EQ) (expression | arrayInitialization) ;
+assignment      : assignable (EQ | PLUS_EQ | MINUS_EQ | STAR_EQ | SLASH_EQ | MOD_EQ) expression ;
 
 // Supports variable assignment and array index assignment (e.g., arr[j+1] = key)
 assignable      : ID | ID LBRACK expression RBRACK ;
 
 arrayInitialization
-    : ARR LBRACK NL* from=expression TO NL* to=expression NL* RBRACK               # RangeArray
+    : ARR LBRACK NL* from=expression TO NL* to=expression NL* (STEP step=expression NL*)? RBRACK               # RangeArray
     | ARR LPAREN NL* size=expression (COMMA NL* defaultVal=expression)? NL* RPAREN # SizeArray
     | ARR LBRACK NL* expressionList NL* RBRACK                                      # ValueArray
     ;
@@ -32,7 +34,7 @@ arrayInitialization
 // Metadata integration for variables, functions, and loops
 metadata        : AT ID LT metadataParams? GT;
 metadataParams  : metadataParam (COMMA metadataParam)*;
-metadataParam   : ID | INT | FLOAT | STRING;
+metadataParam   : ID | expression;
 
 // Shared block rule — used by all compound statements
 block           : statement* ;
@@ -43,15 +45,15 @@ paramList       : param (COMMA param)*;
 param           : metadata* ID;
 
 // Optional parentheses for 'for-each' loops
-forEachLoop     : FOR metadata* LPAREN? ID IN ID RPAREN? COLON NL+ block END FOR;
+forEachLoop     : FOR LPAREN? ID IN ID RPAREN? COLON NL+ block END FOR;
 
 // Traditional for-loop (supports both commas and semicolons as separators)
-forLoop         : FOR metadata* LPAREN assignment (COMMA | SEMI) expression (COMMA | SEMI) assignment RPAREN COLON NL+ block END FOR;
+forLoop         : FOR LPAREN? assignment (COMMA | SEMI) expression (COMMA | SEMI) assignment RPAREN? COLON NL+ block END FOR;
 
 whileLoop       : WHILE LPAREN? expression RPAREN? COLON NL+ block END WHILE;
 
 // Do-while loop to support the Hoare Partition script
-doWhileLoop     : DO COLON? NL+ block WHILE LPAREN expression RPAREN;
+doWhileLoop     : DO COLON NL+ block WHILE LPAREN? expression RPAREN?;
 
 ifStatement     : IF LPAREN? expression RPAREN? COLON NL+ block
                   (ELSEIF LPAREN? expression RPAREN? COLON NL+ block)*
@@ -60,21 +62,21 @@ ifStatement     : IF LPAREN? expression RPAREN? COLON NL+ block
 
 functionCallStmt: ID LPAREN expressionList? RPAREN;
 
-returnStatement : metadata* RETURN expression;
+returnStatement : RETURN expression;
 breakStatement  : BREAK;
 continueStatement : CONTINUE;
 
 expressionList  : expression (COMMA NL* expression)*;
 
 // Order of operations for expressions
-expression               : logicalOrExpression ;
+expression               : (logicalOrExpression | arrayInitialization) ;
 
 logicalOrExpression      : left=logicalAndExpression (op+=OR right+=logicalAndExpression)* ;
 
 logicalAndExpression     : left=comparisonExpression (op+=AND right+=comparisonExpression)* ;
 
 comparisonExpression
-    : left=additiveExpression (op+=(EQEQ | NOTEQ | LESS_EQ | GREATER_EQ | LT | GT) right+=additiveExpression)* # CompareExpr
+    : left=additiveExpression (op+=(EQEQ | NOTEQ | LT_EQ | GT_EQ | LT | GT) right+=additiveExpression)* # CompareExpr
     ;
 
 additiveExpression
@@ -88,12 +90,13 @@ multiplicativeExpression
 powerExpression          : left=unaryExpression (op+=POWER right+=unaryExpression)* ;
 
 unaryExpression
-    : MINUS unaryExpression  # UnaryMinusExpr
-    | primaryExpression      # PrimaryExpr
+    : op=MINUS right=unaryExpression  # UnaryMinusExpr
+    | op=NOT right=unaryExpression    # UnaryNotExpr
+    | right=primaryExpression      # PrimaryExpr
     ;
 
 primaryExpression
-    : LPAREN expression RPAREN             # ParenExpression
+    : LPAREN inner=expression RPAREN             # ParenExpression
     | ID LPAREN expressionList? RPAREN     # FunctionCallExpression
     | ID LBRACK expression RBRACK          # ArrayAccessExpression
     | atom                                 # AtomExpression
@@ -126,6 +129,8 @@ DO      : 'do';
 BREAK   : 'break';
 AND     : 'and';
 OR      : 'or';
+NOT     : 'not';
+STEP    : 'step';
 CONTINUE : 'continue';
 
 // Literals
@@ -146,6 +151,8 @@ AT      : '@';
 // Operators
 PLUS_EQ : '+=';
 MINUS_EQ: '-=';
+STAR_EQ : '*=';
+SLASH_EQ: '/=';
 EQ      : '=';
 EQEQ    : '==';
 NOTEQ   : '!=';
@@ -154,8 +161,8 @@ MINUS   : '-';
 POWER   : '**';
 STAR    : '*';
 SLASH   : '/';
-LESS_EQ : '<=';
-GREATER_EQ : '>=';
+LT_EQ   : '<=';
+GT_EQ   : '>=';
 LT      : '<';
 GT      : '>';
 MOD     : '%';
@@ -165,7 +172,7 @@ MOD_EQ  : '%=';
 ID      : [a-zA-Z_][a-zA-Z_0-9]*;
 FLOAT   : [0-9]+ '.' [0-9]+;
 INT     : [0-9]+;
-STRING  : '"' (~["\r\n])* '"';
+STRING  : ('"' (~["\r\n])* '"') | ('\'' (~['\r\n])* '\'');
 
 // Whitespace & Comments
 NL      : '\r'? '\n' ; 

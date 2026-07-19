@@ -1,28 +1,30 @@
 // Selection Sort
 
-a1 = arr[1, 10, 5, 6, 4, 7, 19]
+a1 = arr[19, 10, 5, 4, 7, 6, 11]
 
+// Sorts an array of values in ascending order
 fun Selection_Sort(@init<table> array): 
     n = length(array)
 
-    // Outer loop: iterate thru all index positions except the last
-    for (i = 0, i < n - 1, i += 1):
-        // assume the current index position holds min element
-        @mark<i, outline, yellow> minIdx = i
+    // Iterate through all elements except the last
+    @mark<-999, text> @mark<outline, orange> @mark<-999, highlight> @mark<-999, highlight, red> @mark<-999, highlight, green> for (i = 0, i < n - 1, i += 1):
+        // Assume the current index holds the smallest value
+        @mark<highlight> @log<info, "min = " + array[min]> min = i
 
-        // Inner loop: find actual minimum element in remaining
-        // unsorted portion of array
-        for (j = i + 1, j < n, j += 1):
-            @mark<j, outline, yellow> if (array[j] < array[minIdx]):
-                @mark<j, text, fg> minIdx = j; // new minimum value index found
+        // Find the actual smallest value in the rest of the array
+        @mark<outline, blue> for (j = i + 1, j < n, j += 1):
+            @mark<j, text> if (array[j] < array[min]):
+                @log<warn, "new min = " + array[min]> min = j; // New smallest value found
             end if
         end for
 
-        // Swap Values when a smaller value is encountered
-        @mark<minIdx, highlight, green> swap(array[i], array[minIdx])
+        // Swap smallest value with current index
+        @mark<-999, text> @mark<-999, outline, blue> if (i != min):
+            @mark<min, text, fg, "Swapped!"> @mark<-999, highlight> @mark<i, highlight, red> @mark<min, highlight, green> swap(array[i], array[min])
+        end if
     end for
 
-    return array
+    @mark<-999, outline, orange> @log<green, "The array is in order!"> return array
 end fun
 
 result = Selection_Sort(a1)

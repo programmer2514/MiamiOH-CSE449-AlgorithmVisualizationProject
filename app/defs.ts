@@ -1,5 +1,8 @@
 import monaco from 'monaco-editor';
 
+const REGEX_STRING = '(".*?")|(\'.*?\')';
+const REGEX_ANNOTATION = `@[\\w]+<.*?(${REGEX_STRING})? ?>`;
+
 /**
  * Monaco editor definitions.
  *
@@ -17,25 +20,29 @@ export default {
 
     keywords: [
       'arr',
-      'else',
-      'end',
-      'for',
-      'do',
-      'while',
-      'fun',
-      'if',
-      'in',
       'to',
+      'fun',
+      'for',
+      'in',
+      'if',
+      'else',
+      'elseif',
+      'return',
+      'end',
+      'while',
+      'do',
+      'break',
       'and',
       'or',
-      'not',
-      'return',
-      'break',
       'continue',
+      'not',
       'step',
-      'Null',
       'True',
+      'true',
       'False',
+      'false',
+      'Null',
+      'null',
     ],
 
     operators: [
@@ -75,7 +82,16 @@ export default {
             },
           },
         ],
-        [/[A-Z][\w]*/, 'type.identifier'],
+
+        [
+          /[A-Z][\w]*/,
+          {
+            cases: {
+              '@keywords': 'keyword',
+              '@default': 'type.identifier',
+            },
+          },
+        ],
 
         [/[ \t\r\n]+/, 'white'],
         [/\/\/.*$/, 'comment'],
@@ -93,14 +109,14 @@ export default {
         [/[[\]]/, 'delimiter.square'],
         [/[()]/, 'delimiter.parenthesis'],
 
-        [/@[\w]+<.*>/, 'annotation'],
+        [REGEX_ANNOTATION, 'annotation'],
 
         [/\d+\.\d+/, 'number.float'],
         [/\d+/, 'number'],
         [/[:,.]/, 'delimiter'],
 
-        [/".*"/, 'string'],
-        [/".*!?.*"/, 'string.invalid'],
+        [REGEX_STRING, 'string'],
+        [/(".*!?.*")|('.*!?.*')/, 'string.invalid'],
       ],
     },
   } as monaco.languages.IMonarchLanguage,
@@ -124,4 +140,6 @@ export default {
       'editor.lineHighlightBorder': '#d8d8dc',
     },
   } as monaco.editor.IStandaloneThemeData,
+
+  REGEX_ANNOTATION: RegExp(`${REGEX_ANNOTATION} ?`, 'g'),
 } as const;

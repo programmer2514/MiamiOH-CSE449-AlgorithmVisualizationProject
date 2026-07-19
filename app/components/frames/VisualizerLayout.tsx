@@ -25,6 +25,10 @@ import usePortrait from '../../hooks/usePortrait';
  *        Whether the code pane is in editing mode
  * @param {function} props.setEditing
  *        A function to update the editing state
+ * @param {boolean} props.expertMode
+ *        Whether the code pane is in expert mode
+ * @param {function} props.setExpertMode
+ *        A function to update the expert mode state
  * @param {function} props.save
  *        A function to save the changes
  * @param {function} props.discard
@@ -68,6 +72,8 @@ export default function VisualizerLayout(
   {
     editing,
     setEditing,
+    expertMode,
+    setExpertMode,
     save,
     discard,
     sidebar,
@@ -91,6 +97,8 @@ export default function VisualizerLayout(
   {
     editing: boolean
     setEditing: (editing: boolean) => void
+    expertMode: boolean
+    setExpertMode: (expertMode: boolean) => void
     save: () => void
     discard: () => void
     sidebar: boolean | null | undefined
@@ -214,6 +222,8 @@ export default function VisualizerLayout(
                   title="Source Code"
                   editing={editing}
                   setEditing={setEditing}
+                  expertMode={expertMode}
+                  setExpertMode={setExpertMode}
                   save={save}
                   discard={discard}
                   paneHeight={codePaneHeight}
@@ -240,6 +250,8 @@ export default function VisualizerLayout(
                   title="Variables"
                   editing={undefined}
                   setEditing={undefined}
+                  expertMode={undefined}
+                  setExpertMode={undefined}
                   save={undefined}
                   discard={undefined}
                   paneHeight={varsPaneHeight}
@@ -266,6 +278,8 @@ export default function VisualizerLayout(
                   title="AlgoAI"
                   editing={undefined}
                   setEditing={undefined}
+                  expertMode={undefined}
+                  setExpertMode={undefined}
                   save={undefined}
                   discard={undefined}
                   paneHeight={AIPaneHeight}

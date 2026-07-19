@@ -14,7 +14,10 @@ export type Step = {
 export type VisData = {
   data: any[]
   type: string
-  logs: string[]
+  logs: {
+    level: string
+    text: string
+  }[]
   marks: {
     [key: string]: {
       type: string

@@ -6,15 +6,15 @@ a1 = arr[1, 2, 3, 4, 5, 3]
 fun check_unique(@init<table> array):
     n = length(array)
 
-    for @mark<i, outline, yellow> (i = 0; i < n; i += 1):
-        for @mark<j, outline, yellow> (j = i + 1; j < n; j += 1):
-            if (array[i] == array[j]):
-                @mark<i, highlight, green> return 0  // Duplicate found
+    @mark<outline, orange> for (i = 0, i < n, i += 1):
+        @mark<-999, text> @mark<outline, blue> for (j = i + 1, j < n, j += 1):
+            @mark<j, text> if (array[i] == array[j]):
+                @mark<-999, text> @mark<i, greyout> @mark<j, greyout> @log<error, "Duplicate found!"> return "Duplicate found!"
             end if
         end for
     end for
 
-    return 1  // No duplicates found
+    @mark<-999, outline, orange> @mark<-999, outline, blue> @log<green, "Duplicate not found!"> return "Duplicate not found!"
 end fun
 
 result = check_unique(a1)

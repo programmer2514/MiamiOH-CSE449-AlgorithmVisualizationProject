@@ -15,10 +15,16 @@ body {
 
 .avp-highlight {
   @apply bg-[dodgerblue]/15 dark:bg-[yellow]/15;
-  @apply w-full!;
 }
 
 .avp-greyout {
   @apply bg-[#ffffff]/70 dark:bg-[#18181c]/70 z-50 pointer-events-none;
-  @apply w-full!;
+}
+
+.avp-error {
+  @apply bg-[red]/15;
+}
+
+.avp-error-message {
+  @apply text-[firebrick]/75! dark:text-[red]/75! font-bold;
 }

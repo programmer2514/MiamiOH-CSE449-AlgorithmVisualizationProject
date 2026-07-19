@@ -4,38 +4,38 @@ a1 = arr[43, 7, 82, 15, 61, 29, 74, 3, 50, 38]
 
 fun Hoare_Partition(@init<table> array, low, high): 
     // Choose the pivot - First element of sub-array
-    @mark<low, highlight, yellow> pivot = array[low]
+    @mark<low, highlight, warn> @log<warn, "pivot = " + pivot> pivot = array[low]
 
     // Initialize pointers i and j outside bounds of loop
-    i = low - 1
-    j = high + 1
+    @mark<outline, orange> i = low - 1
+    @mark<outline, blue> j = high + 1
 
-    while (true):
+    @mark<-999, highlight, warn> @mark<-999, highlight, red> @mark<-999, highlight, green> while (true):
         // Move left pointer forward until element >= pivot is found
         while (true):
-            i += 1
-            @mark<i, outline, yellow> if (array[i] >= pivot or i >= high):
-                break
+            @mark<outline, orange> i += 1
+            @mark<i, text> if (array[i] >= pivot or i >= high):
+                @mark<-999, text> @mark<i, highlight, red> break
             end if
         end while
 
         // Move right pointer backward until element <= pivot is found
         while (true):
-            j -= 1
-            @mark<j, outline, yellow> if (array[j] <= pivot or j <= low):
-                break
+            @mark<outline, blue> j -= 1
+            @mark<j, text> if (array[j] <= pivot or j <= low):
+                @mark<-999, text> @mark<j, highlight, green> break
             end if
         end while
 
-        // If pointers cross/meet, then the partition op is completed.
-        if (i >= j):
-            @log<info, "Partition complete"> return j
+        // If pointers cross/meet, then the array is partitioned
+        @mark<j, text> if (i >= j):
+            @log<green, "Partition complete!"> @mark<-999, text> @mark<-999, highlight, red> @mark<-999, highlight, green> return j
         end if
 
-        // Swap elements at i and j if in the wrong partition
-        @mark<i, highlight, green> swap (array[i], array[j])
+        // Otherwise, swap elements at i and j
+        @mark<i, highlight, green> @mark<j, highlight, red> @mark<j, text, fg, "Swapped!"> swap(array[i], array[j])
 
     end while
 end fun
 
-result = Hoare_Partition(a1, 0, length(a1) - 1)
+@log<info, "All elements on the left are now smaller than those on the right"> result = Hoare_Partition(a1, 0, length(a1) - 1)

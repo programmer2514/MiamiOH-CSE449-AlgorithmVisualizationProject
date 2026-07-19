@@ -1,3 +1,5 @@
+import { type Step } from '../../types';
+
 import {
   IconButton,
   Progress,
@@ -17,6 +19,8 @@ import {
   Rewind,
 } from 'iconoir-react';
 
+import VisBuilder from './VisBuilder';
+
 import useVisAdjust from '../../hooks/useVisAdjust';
 import useVisPan from '../../hooks/useVisPan';
 import useVisProgressInter from '../../hooks/useVisProgressInter';
@@ -30,6 +34,8 @@ import useStepTimer from '../../hooks/useStepTimer';
  *        React props
  * @param {number} props.numSteps
  *        The number of steps in the visualization
+ * @param {number} props.stepDat
+ *        The current step data
  * @param {number} props.stepNum
  *        The current step number
  * @param {function} props.prevStep
@@ -40,27 +46,25 @@ import useStepTimer from '../../hooks/useStepTimer';
  *        A function to update the step number directly
  * @param {function} props.reset
  *        A function to reset the visualization
- * @param {React.ReactNode} props.children
- *        Child elements
  */
 export default function VisFrame(
   {
     numSteps,
+    stepDat,
     stepNum,
     prevStep,
     nextStep,
     setStepNum,
     reset,
-    children,
   }:
   {
     numSteps: number
+    stepDat: Step
     stepNum: number
     prevStep: () => void
     nextStep: () => void
     setStepNum: (num: number) => void
     reset: () => void
-    children: React.ReactNode
   },
 ) {
   const [
@@ -198,16 +202,13 @@ export default function VisFrame(
           }}
           className="w-full grow overflow-hidden"
         >
-          <div
-            style={{
-              '--zoom': `${zoom}`,
-              '--offset-x': `${offsetX}px`,
-              '--offset-y': `${offsetY}px`,
-            } as React.CSSProperties}
-            className="relative z-10 pointer-events-none transition-none! w-min h-min top-1/2 left-1/2 translate-x-[calc(-50%+var(--offset-x))] translate-y-[calc(-50%+var(--offset-y))] scale-(--zoom)"
-          >
-            {children}
-          </div>
+          <VisBuilder
+            zoom={zoom}
+            offsetX={offsetX}
+            offsetY={offsetY}
+            stepDat={stepDat}
+            stepNum={stepNum}
+          />
         </div>
 
         {

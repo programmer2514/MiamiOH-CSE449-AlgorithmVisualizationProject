@@ -5,6 +5,7 @@ import {
 
 import {
   Check,
+  Code,
   Xmark,
   EditPencil,
   NavArrowDown,
@@ -24,6 +25,7 @@ import FlexSpacer from '../FlexSpacer';
  *        Whether the pane is in editing mode
  * @param {function | undefined} props.setEditing
  *        A function to update the editing state
+ *
  * @param {function | undefined} props.save
  *        A function to save the changes
  * @param {function | undefined} props.discard
@@ -42,6 +44,8 @@ export default function PaneHeader(
     title,
     editing,
     setEditing,
+    expertMode,
+    setExpertMode,
     save,
     discard,
     paneHeight,
@@ -53,6 +57,8 @@ export default function PaneHeader(
     title: string
     editing: boolean | undefined
     setEditing: ((editing: boolean) => void) | undefined
+    expertMode: boolean | undefined
+    setExpertMode: ((expertMode: boolean) => void) | undefined
     save: (() => void) | undefined
     discard: (() => void) | undefined
     paneHeight: number | null
@@ -94,6 +100,15 @@ export default function PaneHeader(
                   className="cursor-pointer"
                 >
                   <Xmark className="stroke-2 w-5 h-5" role="presentation" />
+                </IconButton>
+                <IconButton
+                  variant={expertMode ? 'solid' : 'ghost'}
+                  aria-label={`${expertMode ? 'Disable' : 'Enable'} Expert Mode`}
+                  title={`${expertMode ? 'Disable' : 'Enable'} Expert Mode`}
+                  onClick={() => setExpertMode!(!expertMode)}
+                  className={`${expertMode ? 'bg-[dodgerblue] border-none ' : ''}cursor-pointer`}
+                >
+                  <Code className="stroke-2 w-5 h-5" role="presentation" />
                 </IconButton>
               </>
             ) :

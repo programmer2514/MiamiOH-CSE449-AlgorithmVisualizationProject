@@ -9,6 +9,7 @@ function Test() {
       src="test"
       setSrc={() => {}}
       highlight={1}
+      error={[1, 'error']}
       editing={false}
       setEditing={(_: boolean) => {}}
       save={() => {}}

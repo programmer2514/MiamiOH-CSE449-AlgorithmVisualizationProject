@@ -4,6 +4,7 @@ import { IconButton } from '@material-tailwind/react';
 
 import {
   Check,
+  Code,
   EditPencil,
   Xmark,
 } from 'iconoir-react';
@@ -21,10 +22,16 @@ import usePortrait from '../../hooks/usePortrait';
  *        A function to update the source code
  * @param {number | [number, number] | null} props.highlight
  *        The line range to highlight
+ * @param {string | null} props.error
+ *        The error to display
  * @param {boolean} props.editing
  *        Whether the code pane is in editing mode
  * @param {function} props.setEditing
  *        A function to update the editing state
+ * @param {boolean} props.expertMode
+ *        Whether the code pane is in expert mode
+ * @param {function} props.setExpertMode
+ *        A function to update the expert mode state
  * @param {function} props.save
  *        A function to save the changes
  * @param {function} props.discard
@@ -35,8 +42,11 @@ export default function CodePane(
     src,
     setSrc,
     highlight,
+    error,
     editing,
     setEditing,
+    expertMode,
+    setExpertMode,
     save,
     discard,
   }:
@@ -44,8 +54,11 @@ export default function CodePane(
     src: string
     setSrc: (src: string) => void
     highlight: number | [number, number] | null
+    error: string | null
     editing: boolean
     setEditing: (editing: boolean) => void
+    expertMode: boolean
+    setExpertMode: (expertMode: boolean) => void
     save: () => void
     discard: () => void
   },
@@ -66,7 +79,7 @@ export default function CodePane(
                     title="Save changes to Code Pane"
                     size="lg"
                     onClick={save}
-                    className="cursor-pointer rounded-xl bg-[green] dark:bg-[limegreen] border-none drop-shadow-lg fixed! bottom-20 right-18 z-50"
+                    className="cursor-pointer text-primary bg-[green] dark:bg-[limegreen] rounded-xl border-none drop-shadow-lg fixed! bottom-20 right-32 z-50"
                   >
                     <Check className="stroke-2 w-5 h-5" role="presentation" />
                   </IconButton>
@@ -76,9 +89,19 @@ export default function CodePane(
                     title="Discard changes to Code Pane"
                     size="lg"
                     onClick={discard}
-                    className="cursor-pointer rounded-xl bg-[crimson] border-none drop-shadow-lg fixed! bottom-20 right-4 z-50"
+                    className="cursor-pointer text-primary bg-[crimson] rounded-xl border-none drop-shadow-lg fixed! bottom-20 right-18 z-50"
                   >
                     <Xmark className="stroke-2 w-5 h-5" role="presentation" />
+                  </IconButton>
+                  <IconButton
+                    variant={expertMode ? 'solid' : 'outline'}
+                    aria-label={`${expertMode ? 'Disable' : 'Enable'} Expert Mode`}
+                    title={`${expertMode ? 'Disable' : 'Enable'} Expert Mode`}
+                    size="lg"
+                    onClick={() => setExpertMode(!expertMode)}
+                    className={`${expertMode ? 'bg-[dodgerblue] border-none ' : 'bg-secondary border-[dodgerblue] '}cursor-pointer text-primary rounded-xl drop-shadow-lg fixed! bottom-20 right-4 z-50`}
+                  >
+                    <Code className="stroke-2 w-5 h-5" role="presentation" />
                   </IconButton>
                 </>
               ) :
@@ -89,7 +112,7 @@ export default function CodePane(
                   title="Edit Code Pane"
                   size="lg"
                   onClick={() => setEditing(true)}
-                  className="cursor-pointer rounded-xl bg-[dodgerblue] border-none drop-shadow-lg fixed! bottom-20 right-4 z-50"
+                  className="cursor-pointer text-primary rounded-xl bg-[dodgerblue] border-none drop-shadow-lg fixed! bottom-20 right-4 z-50"
                 >
                   <EditPencil className="stroke-2 w-5 h-5" role="presentation" />
                 </IconButton>
@@ -109,7 +132,9 @@ export default function CodePane(
           setSrc={setSrc}
           highlights={editing ? [] : [highlight]}
           greyouts={[]}
+          errors={editing ? [] : [error]}
           editing={editing}
+          expertMode={expertMode}
           bindSrc={false}
         />
       </div>

@@ -85,6 +85,7 @@ export default function Visualizer(
     src,
     setSrc,
     comp,
+    error,
   ] = useAlgo({ setTitle, setLoaderHidden });
 
   const [
@@ -114,6 +115,8 @@ export default function Visualizer(
   const [
     editSrc,
     setEditSrc,
+    expertMode,
+    setExpertMode,
     save,
     discard,
   ] = useEditSrc({
@@ -134,6 +137,8 @@ export default function Visualizer(
       <VisualizerLayout
         editing={editing}
         setEditing={setEditing}
+        expertMode={expertMode}
+        setExpertMode={setExpertMode}
         save={save}
         discard={discard}
         sidebar={sidebar}
@@ -166,8 +171,11 @@ export default function Visualizer(
           src={editSrc}
           setSrc={setEditSrc}
           highlight={lines}
+          error={error}
           editing={editing}
           setEditing={setEditing}
+          expertMode={expertMode}
+          setExpertMode={setExpertMode}
           save={save}
           discard={discard}
         />

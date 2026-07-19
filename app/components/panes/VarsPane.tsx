@@ -21,10 +21,17 @@ export default function VarsPane(
       name="vars"
       src={
         Object.keys(vars)
-          .map(key => `${key}: ${
+          .map(key => `${
+            key.replaceAll(/__\$.*?__\./g, '')
+          }: ${
             (JSON.stringify(vars[key][0]) || `ERROR`)
               .replaceAll(',', ', ')
               .replaceAll('"<function>"', '<function>')
+              .replaceAll(/\\(.)/g, '$1')
+              .replaceAll('null', 'Null')
+              .replaceAll('true', 'True')
+              .replaceAll('false', 'False')
+              .replace(/^"(.*".*)"$/, '\'$1\'')
           }`)
           .join('\n')
       }
@@ -41,7 +48,9 @@ export default function VarsPane(
           .filter(key => key[1] < 0)
           .map(key => key[0] + 1)
       }
+      errors={[]}
       editing={false}
+      expertMode={false}
       bindSrc={true}
     />
   );
